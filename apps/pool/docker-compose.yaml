@@ -1,0 +1,19 @@
+version: '3.1'
+
+services:
+  postgres:
+    image: postgres:12.18-bullseye
+    container_name: postgres-container
+    environment:
+      POSTGRES_PASSWORD: password # Change this to your preferred password
+    ports:
+      - "5432:5432"
+
+  mongo:
+    image: mongo
+    container_name: mongodb-container
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: kade  # Replace with your desired username
+      MONGO_INITDB_ROOT_PASSWORD: password 

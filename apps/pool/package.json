@@ -1,0 +1,44 @@
+{
+  "name": "pool",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf && tsup",
+    "db:init": "ts-node --esm ./src/db/init.ts",
+    "read": "node ./reader.js",
+    "write": "node ./writer.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/elliptic": "^6.4.18",
+    "@types/koa": "^2.14.0",
+    "@types/koa-logger": "^3.1.5",
+    "@types/koa__cors": "^5.0.0",
+    "@types/koa__router": "^12.0.4",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^20.11.17",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.0.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@koa/cors": "^5.0.0",
+    "@koa/router": "^12.0.1",
+    "aptos": "^1.21.0",
+    "dayjs": "^1.11.10",
+    "dotenv": "^16.4.3",
+    "elliptic": "^6.5.4",
+    "koa": "^2.15.0",
+    "koa-body": "^6.0.1",
+    "koa-logger": "^3.2.1",
+    "lodash": "^4.17.21",
+    "mongodb": "^6.3.0",
+    "oracle": "workspace:*",
+    "zod": "^3.22.4"
+  }
+}
