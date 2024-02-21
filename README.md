@@ -1,0 +1,1 @@
+- This is a typescript implementation of the docks standard as described here [Docks Standard](https://docs.kade.network/architecture/docks)
