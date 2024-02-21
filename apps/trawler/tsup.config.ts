@@ -1,8 +1,8 @@
 import { defineConfig } from 'tsup'
 
-export default defineConfig((opts)=>{
+export default defineConfig((opts) => {
     return {
-        entry: ["./src/**/*.ts"],
+        entry: ["./index.ts"],
         splitting: false,
         sourcemap: true,
         clean: !opts.watch,
@@ -10,7 +10,7 @@ export default defineConfig((opts)=>{
         ignoreWatch: [
             "**/node_modules/**",
             "**/.git/**",
-            "**/dist/**",   
+            "**/dist/**",
         ]
     }
 })

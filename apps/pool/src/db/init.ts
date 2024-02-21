@@ -1,7 +1,13 @@
+import 'dotenv/config'
 import { parserConfig } from "."
 
 
 try {
+    const currentConfig = await parserConfig.findOne()
+    if (currentConfig) {
+        console.log("PARSER CONFIG ALREADY INITIALIZED")
+        process.exit(0)
+    }
     await parserConfig.insertOne({
         account_create_last_sequence_number: 0,
         delegate_create_last_sequence_number: 0,

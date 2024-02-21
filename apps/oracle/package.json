@@ -7,7 +7,7 @@
   "scripts": {
     "build": "rm -rf ./dist && tsup",
     "generate": "drizzle-kit generate:pg",
-    "migrate": "ts-node --esm ./db/migrate.ts"
+    "migrate": "node ./db/migrate.js"
   },
   "keywords": [],
   "author": "",

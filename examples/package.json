@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "aed": "ts-node --esm ./test.ts"
   },
   "keywords": [],
   "author": "",

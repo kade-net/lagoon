@@ -7,7 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf && tsup",
-    "db:init": "ts-node --esm ./src/db/init.ts",
+    "db:init": "node ./dist/db/init.js",
     "read": "node ./reader.js",
     "write": "node ./writer.js"
   },

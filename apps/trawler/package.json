@@ -5,7 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "ts-node --esm index.ts"
+    "dev": "ts-node --esm index.ts",
+    "build": "tsup",
+    "start": "node ./dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +30,7 @@
     "@types/lodash": "^4.14.202",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.11.17",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "tsup": "^8.0.2"
   }
 }

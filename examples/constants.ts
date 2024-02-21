@@ -29,16 +29,27 @@ export const REMOVE_REACTION = `${PUBLICATION_CONTRACT}::remove_reaction`
 
 export const CREATE_COMMENT = `${PUBLICATION_CONTRACT}::create_comment`
 
+// @ts-ignore
+export const USER_2 = process.env.USER_2! // alice
+// @ts-ignore
+export const DELEGATE_1 = process.env.DELEGATE_1! // alices delegate
+// @ts-ignore
+export const USER_1 = process.env.USER_1! // bob
+// @ts-ignore
+export const DELEGATE_2 = process.env.DELEGATE_2! // bobs delegate
 
-export const USER_2 = process.env.USER_2 // alice
-export const DELEGATE_1 = process.env.DELEGATE_1 // alices delegate
-export const USER_1 = process.env.USER_1 // bob
-export const DELEGATE_2 = process.env.DELEGATE_2 // bobs delegate
-
-export const user_1 = new AptosAccount(new HexString(USER_1).toUint8Array())
-export const delegate_1 = new AptosAccount(new HexString(DELEGATE_1).toUint8Array())
-export const user_2 = new AptosAccount(new HexString(USER_2).toUint8Array())
-export const delegate_2 = new AptosAccount(new HexString(DELEGATE_2).toUint8Array())
+export const user_1 = new AptosAccount(
+  new HexString(USER_1 as any).toUint8Array()
+);
+export const delegate_1 = new AptosAccount(
+  new HexString(DELEGATE_1 as any).toUint8Array()
+);
+export const user_2 = new AptosAccount(
+  new HexString(USER_2 as any).toUint8Array()
+);
+export const delegate_2 = new AptosAccount(
+  new HexString(DELEGATE_2 as any).toUint8Array()
+);
 
 
 
