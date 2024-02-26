@@ -3,7 +3,7 @@ import schema from "./schema"
 
 export namespace KADE_EVENTS {
 
-    export type EVENT_TYPE  = 'ACCOUNT_CREATE' | 'DELEGATE_CREATE' | 'DELEGATE_REMOVE' | 'REACTION_CREATE' | 'REACTION_REMOVE' | 'QUOTE_CREATE' | 'QUOTE_REMOVE' | 'REPOST_CREATE' | 'REPOST_REMOVE' | 'COMMENT_CREATE' | 'COMMENT_REMOVE' | 'PUBLICATION_CREATE' | 'PUBLICATION_REMOVE' | 'ACCOUNT_FOLLOW' | 'ACCOUNT_UNFOLLOW'
+    export type EVENT_TYPE = 'ACCOUNT_CREATE' | 'DELEGATE_CREATE' | 'DELEGATE_REMOVE' | 'REACTION_CREATE' | 'REACTION_REMOVE' | 'QUOTE_CREATE' | 'QUOTE_REMOVE' | 'REPOST_CREATE' | 'REPOST_REMOVE' | 'COMMENT_CREATE' | 'COMMENT_REMOVE' | 'PUBLICATION_CREATE' | 'PUBLICATION_REMOVE' | 'ACCOUNT_FOLLOW' | 'ACCOUNT_UNFOLLOW' | 'USERNAME_REGISTREATION' | 'PROFILE_UPDATE'
 
     export interface EVENT_PARSER_CONFIG {
         account_create_last_sequence_number: number,
@@ -21,6 +21,8 @@ export namespace KADE_EVENTS {
         comment_remove_last_sequence_number: number,
         publication_create_last_sequence_number: number,
         publication_remove_last_sequence_number: number,
+        profile_update_last_sequence_number: number,
+        username_registration_last_sequence_number: number,
     }
 
     export interface EVENT<T = any> {
@@ -61,5 +63,9 @@ export namespace KADE_EVENTS {
     export type PUBLICATION_CREATE_EVENT = z.infer<typeof schema.publication_create_event_schema>
 
     export type PUBLICATION_REMOVE_EVENT = z.infer<typeof schema.publication_remove_event_schema>
+
+    export type USERNAME_REGISTRATION_EVENT = z.infer<typeof schema.username_registration_event_schema>
+
+    export type PROFILE_UPDATE_EVENT = z.infer<typeof schema.profile_update_event_schema>
 
 }

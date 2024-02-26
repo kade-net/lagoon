@@ -2,12 +2,11 @@ import { relations } from "drizzle-orm";
 import { pgTable, integer, text, timestamp } from "drizzle-orm/pg-core";
 import { follow } from "./follow";
 import { delegate } from "./delegate";
+import { profile } from "./profile";
 
 
 export const account = pgTable("account", {
-    id: integer("id").notNull().primaryKey(), // resolution of the account can happen at render time 
-    bio: text("bio").notNull(),
-    username: text("username").notNull(),
+    id: integer("id").notNull().primaryKey(),
     address: text("address").notNull(),
     object_address: text("object_address").notNull(),
     timestamp: timestamp("timestamp").notNull().defaultNow(),
@@ -28,6 +27,11 @@ export const account_relations = relations(account, ({one, many})=> {
         }),
         delegates: many(delegate, {
             relationName: "delegates"
+        }),
+        profile: one(profile, {
+            fields: [account.id],
+            references: [profile.creator],
+            relationName: "profile"
         })
     }
 })

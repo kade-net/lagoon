@@ -17,7 +17,9 @@ interface ResolverMap {
         quotes: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
         comments: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
         reactions: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
-        stats: Resolver<ACCOUNT, any, Context>
+        stats: Resolver<ACCOUNT, any, Context>,
+        profile: Resolver<ACCOUNT, any, Context>,
+        username: Resolver<ACCOUNT, any, Context>
     }
 }
 
@@ -169,6 +171,16 @@ export const AccountsResolver: ResolverMap = {
                 comments: comments_count.at(0)?.value ?? 0,
                 reactions: reactions_count.at(0)?.value ?? 0
             }
+        },
+        profile: async (parent, _, context) => {
+            return await context.oracle.query.profile.findFirst({
+                where: (fields, { eq }) => eq(fields.creator, parent.id)
+            })
+        },
+        username: async (parent, _, context) => {
+            return await context.oracle.query.username.findFirst({
+                where: (fields, { eq }) => eq(fields.owner_address, parent.address)
+            })
         }
     }
 }

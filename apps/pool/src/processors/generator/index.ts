@@ -2,7 +2,7 @@ import { Collection, WithId } from "mongodb";
 import { z } from "zod";
 import { parserConfig } from "../../db";
 import { provider } from "../../contract";
-import { ACCOUNT_CONTRACT, ACCOUNT_RESOURCE_ADDRESS, PUBLICATIONS_CONTRACT, PUBLICATION_RESOURCE_ADDRESS } from "../../contract/constants";
+import { ACCOUNT_CONTRACT, ACCOUNT_RESOURCE_ADDRESS, PUBLICATIONS_CONTRACT, PUBLICATION_RESOURCE_ADDRESS, USERNAME_CONTRACT, USERNAME_RESOURCE_ADDRESS } from "../../contract/constants";
 import _ from "lodash"
 const { isNumber } = _
 import { KADE_EVENTS } from "../../actions";
@@ -15,7 +15,7 @@ interface ReaderDependancies {
     schema: z.ZodSchema<any>,
     collection: Collection<any>
     type: KADE_EVENTS.EVENT_TYPE,
-    contract: 'accounts' | 'publications'
+    contract: 'accounts' | 'publications' | "usernames"
 }
 
 function read_builder(deps: ReaderDependancies) {
@@ -30,7 +30,11 @@ function read_builder(deps: ReaderDependancies) {
 
         console.log(`LAST SEQUENCE NUMBER: ${lastFollowSequenceNumber}`)
 
-        const events = await provider.getEventsByEventHandle(deps.contract == 'accounts' ? ACCOUNT_RESOURCE_ADDRESS : PUBLICATION_RESOURCE_ADDRESS, `${deps.contract == 'accounts' ? ACCOUNT_CONTRACT : PUBLICATIONS_CONTRACT}::State`, deps.event_name, {
+        const events = await provider.getEventsByEventHandle(
+            deps.contract == 'accounts' ? ACCOUNT_RESOURCE_ADDRESS : deps.contract == "publications" ? PUBLICATION_RESOURCE_ADDRESS : USERNAME_RESOURCE_ADDRESS,
+            deps.contract == 'usernames' ? `${USERNAME_CONTRACT}::UsernameRegistry` : `${deps.contract == 'accounts' ? ACCOUNT_CONTRACT : PUBLICATIONS_CONTRACT}::State`,
+            deps.event_name,
+            {
             limit: 10,
             start: lastFollowSequenceNumber == 0 ? 0 : lastFollowSequenceNumber + 1
         })

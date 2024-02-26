@@ -15,22 +15,37 @@ type AccountStats {
     
 }
 
+type Profile {
+  creator: Int!
+  pfp: String
+  bio: String
+  display_name: String
+}
+
+type Username {
+  username: String!
+  owner_address: String!
+  token_address: String!
+  timestamp: Date!
+}
+
 type Account {
-    id: Int!
-    bio: String
-    username: String!
-    address: String!
-    object_address: String!
-    followers: [Follow!]
-    following: [Follow!]
-    publications: [Publication!]
-    delegates: [Delegate!]
-    reposts: [RePost!]
-    quotes: [Quote!]
-    comments: [Comment!]
-    reactions: [Reaction!]
-    stats: AccountStats!
-    timestamp: Date!
+  id: Int!
+  bio: String
+  address: String!
+  object_address: String!
+  followers: [Follow!]
+  following: [Follow!]
+  publications: [Publication!]
+  delegates: [Delegate!]
+  reposts: [RePost!]
+  quotes: [Quote!]
+  comments: [Comment!]
+  reactions: [Reaction!]
+  stats: AccountStats!
+  timestamp: Date!
+  profile: Profile
+  username: Username
 }
 
 type Delegate {

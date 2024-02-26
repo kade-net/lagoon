@@ -19,6 +19,8 @@ class Reader {
     "./dist/processors/unfollows/reader.js",
     "./dist/processors/comments/create/reader.js",
     "./dist/processors/comments/remove/reader.js",
+    "./dist/processors/profile/update/reader.js",
+    "./dist/processors/usernames/create/reader.js",
   ];
   constructor() {}
 

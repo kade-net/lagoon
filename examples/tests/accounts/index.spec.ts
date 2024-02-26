@@ -1,9 +1,10 @@
 import { BCS, TransactionBuilder, TransactionBuilderRemoteABI, TxnBuilderTypes } from "aptos"
-import { ADD_DELEGATE, CREATE_ACCOUNT, FOLLOW_ACCOUNT, client, delegate_1, delegate_2, provider, user_1, user_2 } from "../../constants"
+import { ADD_DELEGATE, CREATE_ACCOUNT, FOLLOW_ACCOUNT, UPDATE_PROFILE, client, delegate_1, delegate_2, provider, user_1, user_2 } from "../../constants"
 
 
 
-
+const ALICE_IMAGE = "https://images.unsplash.com/photo-1613063322946-77d35809140c?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+const BOB_IMAGE = "https://images.unsplash.com/photo-1578681994506-b8f463449011?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 
 describe("TEST ACCOUNT FUNCTIONALITY", ()=> {
 
@@ -31,12 +32,14 @@ describe("TEST ACCOUNT FUNCTIONALITY", ()=> {
 
         const hash = await provider.signAndSubmitTransaction(user_2,transaction)
 
-        console.log("HASH: ", hash)
+        const status = await provider.waitForTransaction(hash)
+        console.log("HASH: ", status)
 
 
     })
 
     it("ADD DELEGATE TO ALICE'S ACCOUNT", async () => {
+        try {
         const builder = new TransactionBuilderRemoteABI(client, {
             sender: user_1.address(),
         })
@@ -75,9 +78,16 @@ describe("TEST ACCOUNT FUNCTIONALITY", ()=> {
             new TxnBuilderTypes.SignedTransaction(rawTx, multiAgentAuthenticator)
         )
     
-        const transactionRes = await client.submitSignedBCSTransaction(bcsTxn)
 
-        console.log("Transaction Response::", transactionRes)
+            const transactionRes = await client.submitSignedBCSTransaction(bcsTxn)
+            console.log("Transaction Response::", transactionRes)
+        }
+        catch (e) {
+            console.log(e)
+        }
+        // const transactionRes = await client.submitSignedBCSTransaction(bcsTxn)
+
+        // console.log("Transaction Response::", transactionRes)
 
       
     })
@@ -154,6 +164,30 @@ describe("TEST ACCOUNT FUNCTIONALITY", ()=> {
 
         console.log("HASH: ", hash)
 
+    })
+
+    it("ALICE UPDATES HER PROFILE", async () => {
+        const transaction = await provider.generateTransaction(delegate_1.address(), {
+            arguments: [ALICE_IMAGE, "Hi, this is Alice", "Alice"],
+            function: UPDATE_PROFILE,
+            type_arguments: []
+        })
+
+        const hash = await provider.signAndSubmitTransaction(delegate_1, transaction)
+
+        console.log("HASH: ", hash)
+    })
+
+    it("BOB UPDATES HIS PROFILE", async () => {
+        const transaction = await provider.generateTransaction(delegate_2.address(), {
+            arguments: [BOB_IMAGE, "Hi, this is Bob", "Bob"],
+            function: UPDATE_PROFILE,
+            type_arguments: []
+        })
+
+        const hash = await provider.signAndSubmitTransaction(delegate_2, transaction)
+
+        console.log("HASH: ", hash)
     })
 
 })

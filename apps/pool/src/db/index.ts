@@ -17,6 +17,8 @@ export const reaction_remove_events = db.collection<KADE_EVENTS.EVENT<KADE_EVENT
 export const repost_create_events = db.collection<KADE_EVENTS.EVENT<KADE_EVENTS.REPOST_CREATE_EVENT>>("repost_create_events")
 export const repost_remove_events = db.collection<KADE_EVENTS.EVENT<KADE_EVENTS.REPOST_REMOVE_EVENT>>("repost_remove_events")
 
+export const username_registration_events = db.collection<KADE_EVENTS.EVENT<KADE_EVENTS.USERNAME_REGISTRATION_EVENT>>("username_registration_events")
+export const profile_update_events = db.collection<KADE_EVENTS.EVENT<KADE_EVENTS.PROFILE_UPDATE_EVENT>>("profile_update_events")
 
 
 export const parserConfig = db.collection<KADE_EVENTS.EVENT_PARSER_CONFIG>("parser_config")
