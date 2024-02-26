@@ -20,6 +20,8 @@ class Writer {
     "./dist/processors/unfollows/writer.js",
     "./dist/processors/comments/create/writer.js",
     "./dist/processors/comments/remove/writer.js",
+    "./dist/processors/profile/update/writer.js",
+    "./dist/processors/usernames/create/writer.js",
   ];
 
   constructor() {}

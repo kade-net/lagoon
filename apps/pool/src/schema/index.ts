@@ -125,6 +125,32 @@ const account_unfollow_event_schema = z.object({
     timestamp: z.string().transform(p => `${p}000`).transform((p)=> parseInt(p)).transform((p)=> new Date(p)),
 })
 
+const username_registration_event_schema = z.object({
+    username: z.string(),
+    owner_address: z.string(),
+    token_address: z.string(),
+    timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p))
+})
+
+
+/**
+ * struct ProfileUpdateEvent has store, drop {
+        user_kid: u64,
+        delegate: address,
+        timestamp: u64,
+        pfp: string::String,
+        bio: string::String,
+        display_name: string::String,
+    }
+ */
+const profile_update_event_schema = z.object({
+    user_kid: z.string().transform((p) => parseInt(p)),
+    delegate: z.string(),
+    timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p)),
+    pfp: z.string(),
+    bio: z.string(),
+    display_name: z.string(),
+})
 
 const schema = {
     account_create_event_schema,
@@ -142,6 +168,8 @@ const schema = {
     comment_remove_event_schema,
     publication_create_event_schema,
     publication_remove_event_schema,
+    username_registration_event_schema,
+    profile_update_event_schema
 }
 
 

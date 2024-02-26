@@ -24,6 +24,8 @@ try {
         comment_remove_last_sequence_number: 0,
         publication_create_last_sequence_number: 0,
         publication_remove_last_sequence_number: 0,
+        profile_update_last_sequence_number: 0,
+        username_registration_last_sequence_number: 0,
     })
 
     console.log("PARSER CONFIG INITIALIZED")
