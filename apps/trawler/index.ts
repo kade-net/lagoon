@@ -38,7 +38,8 @@ const server = new ApolloServer({
     resolvers: [AccountsResolver, PublicationResolver, RepostsResolver, QuoteResolver, {
         Date: dateScalar,
         JSON: GraphQLJSON
-    }] as any
+  }] as any,
+  introspection: true
 })
 
 
