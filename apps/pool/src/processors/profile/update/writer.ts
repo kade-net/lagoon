@@ -1,4 +1,4 @@
-import KadeOracle, { profile } from "oracle";
+import KadeOracle, { eq, profile } from "oracle";
 import { profile_update_events } from "../../../db";
 import { write_builder } from "../../generator";
 
@@ -35,12 +35,25 @@ const { main } = write_builder({
     },
     resolve: async (event, collection) => {
         try {
-            await KadeOracle.insert(profile).values({
-                creator: event.payload.user_kid,
-                bio: event.payload.bio,
-                display_name: event.payload.display_name,
-                pfp: event.payload.pfp,
+            const existingProfile = await KadeOracle.query.profile.findFirst({
+                where: (fields, { eq }) => eq(fields.creator, event.payload.user_kid)
             })
+
+            if (existingProfile) {
+                await KadeOracle.update(profile).set({
+                    bio: event.payload.bio,
+                    display_name: event.payload.display_name,
+                    pfp: event.payload.pfp
+                }).where(eq(profile.creator, event.payload.user_kid))
+            } else {
+                await KadeOracle.insert(profile).values({
+                    creator: event.payload.user_kid,
+                    bio: event.payload.bio,
+                    display_name: event.payload.display_name,
+                    pfp: event.payload.pfp,
+                })
+            }
+
 
             await collection.updateOne({
                 _id: event._id
