@@ -51,7 +51,7 @@ const app = await startStandaloneServer(server, {
         }
     },
     listen: {
-      port: 4000
+      port: (process.env.PORT! || 4000) as any
     },
     
 })
