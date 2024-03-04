@@ -1,3 +1,4 @@
+import { isNull } from "lodash"
 import lmdb from "node-lmdb"
 import { Readable } from "stream"
 
@@ -40,6 +41,9 @@ export class Lama {
         const txn = this.env.beginTxn()
         const value = txn.getBinary(this.dbi, key)
         txn.commit()
+        if (isNull(value)) {
+            return null
+        }
         return value.toString()
     }
 
