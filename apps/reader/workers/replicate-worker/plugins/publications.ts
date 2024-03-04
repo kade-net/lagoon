@@ -49,6 +49,8 @@ export class PublicationRemoveEventPlugin extends ProcessorPlugin {
         if (parsed.success) {
             const data = parsed.data
 
+			// Check if publication exists
+
             try {
                 await oracle.delete(publication).where(eq(publication.id, data.kid))
                 monitor.setSuccess(sequence_number)
@@ -112,6 +114,8 @@ export class CommentRemoveEventPlugin extends ProcessorPlugin {
         if (parsed.success) {
             const data = parsed.data
 
+			// Check if comment exists
+
             try {
                 await oracle.delete(comment).where(eq(comment.id, data.kid))
                 monitor.setSuccess(sequence_number)
@@ -174,6 +178,9 @@ export class RepostRemoveEventPlugin extends ProcessorPlugin {
 
         if (parsed.success) {
             const data = parsed.data
+
+			// Check if repost exists
+
             try {
                 await oracle.delete(repost).where(eq(repost.id, data.kid))
                 monitor.setSuccess(sequence_number)
@@ -233,6 +240,9 @@ export class QuoteRemoveEventPlugin extends ProcessorPlugin {
 
         if (parsed.success) {
             const data = parsed.data
+
+			// Check if quote exists
+
             try {
                 await oracle.delete(quote).where(eq(quote.id, data.kid))
                 monitor.setSuccess(sequence_number)
@@ -296,6 +306,9 @@ export class ReactionRemoveEventPlugin extends ProcessorPlugin {
 
         if (parsed.success) {
             const data = parsed.data
+
+			// Check if reaction exists
+
             try {
                 await oracle.delete(reaction).where(eq(reaction.id, data.kid))
                 monitor.setSuccess(sequence_number)

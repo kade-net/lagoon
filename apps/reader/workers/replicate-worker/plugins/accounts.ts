@@ -89,6 +89,8 @@ export class DelegateRemovePlugin extends ProcessorPlugin {
 
         if (parsed.success) {
             const data = parsed.data
+			
+			// Add code for checking if the user owns the plugin
 
             try {
                 await oracle.delete(delegate).where(eq(delegate.id, data.kid))
@@ -150,6 +152,8 @@ export class AccountUnFollowPlugin extends ProcessorPlugin {
 
         if (parsed.success) {
             const data = parsed.data
+
+			// Check if someone already follows the account
 
             try {
                 await oracle.delete(follow).where(eq(follow.id, data.kid))
