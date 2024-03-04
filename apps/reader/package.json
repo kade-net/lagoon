@@ -7,7 +7,8 @@
   "scripts": {
     "grpc:dev": "ts-node --esm ./workers/grpc-worker/main.ts",
     "replicate:dev": "ts-node --esm ./workers/replicate-worker/main.ts",
-    "test": "ts-node --esm ./test.ts"
+    "test": "ts-node --esm ./test.ts",
+    "all": "pnpm run grpc:dev & pnpm run replicate:dev"
   },
   "dependencies": {
     "@aptos-labs/aptos-protos": "1.1.2",
