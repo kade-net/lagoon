@@ -1,4 +1,6 @@
+import _ from "lodash"
 import { Lama } from "./lama"
+const { isNumber } = _;
 
 
 export abstract class EventProcessor {
@@ -27,7 +29,7 @@ export class LevelDB {
     async getLatestVersion() {
         try {
             const version = await this._version_store.get("version")
-            const p = BigInt(version)
+            const p = isNumber(version) ? BigInt(version) : BigInt(0)
             return p
         }
         catch (e) {
@@ -43,7 +45,7 @@ export class LevelDB {
     async getSequenceNumber() {
         try {
             const number = await this._sequence_store!.get("sequence")
-            const p = parseInt(number)
+            const p = isNumber(number) ? parseInt(number) : 0
             return Number.isNaN(p) ? 0 : p
         }
         catch (e) {
