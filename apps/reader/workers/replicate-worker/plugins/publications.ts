@@ -52,8 +52,17 @@ export class PublicationRemoveEventPlugin extends ProcessorPlugin {
 			// Check if publication exists
 
             try {
-                await oracle.delete(publication).where(eq(publication.id, data.kid))
-                monitor.setSuccess(sequence_number)
+                const publication = oracle.query.publication.findFirst({
+                    where: (fields, { eq }) => eq(fields.id, data.kid)
+                })
+                
+                if (publication) {
+                    await oracle.delete(publication).where(eq(publication.id, data.kid))
+                    monitor.setSuccess(sequence_number)
+                } else {
+                    console.log(`Publication with address ${data.kid} not found`)
+                    monitor.setFailed(sequence_number, JSON.stringify({ error: `Publication with address ${data.kid} not found`}))
+                }
             }
             catch (e) {
                 monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
@@ -117,8 +126,17 @@ export class CommentRemoveEventPlugin extends ProcessorPlugin {
 			// Check if comment exists
 
             try {
-                await oracle.delete(comment).where(eq(comment.id, data.kid))
-                monitor.setSuccess(sequence_number)
+                const comment = oracle.query.comment.findFirst({
+                    where: (fields, { eq }) => eq(fields.id, data.kid)
+                });
+
+                if (comment) {
+                    await oracle.delete(comment).where(eq(comment.id, data.kid))
+                    monitor.setSuccess(sequence_number)
+                } else {
+                    console.log(`Comment with id ${data.kid} not found`)
+                    monitor.setFailed(sequence_number, JSON.stringify({ error: `Comment with id ${data.kid} not found`}))
+                }
             }
             catch (e) {
                 monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
@@ -182,8 +200,17 @@ export class RepostRemoveEventPlugin extends ProcessorPlugin {
 			// Check if repost exists
 
             try {
-                await oracle.delete(repost).where(eq(repost.id, data.kid))
-                monitor.setSuccess(sequence_number)
+                const repost = oracle.query.repost.findFirst({
+                    where: (fields, { eq }) => eq(fields.id, data.kid)
+                });
+
+                if (repost) {
+                    await oracle.delete(repost).where(eq(repost.id, data.kid))
+                    monitor.setSuccess(sequence_number)
+                } else {
+                    console.log(`Repost with id ${data.kid} not found`)
+                    monitor.setFailed(sequence_number, JSON.stringify({ error: `Repost with id ${data.kid} not found`}))
+                }
             }
             catch (e) {
                 monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
@@ -244,8 +271,17 @@ export class QuoteRemoveEventPlugin extends ProcessorPlugin {
 			// Check if quote exists
 
             try {
-                await oracle.delete(quote).where(eq(quote.id, data.kid))
-                monitor.setSuccess(sequence_number)
+                const quote = oracle.query.quote.findFirst({
+                    where: (fields, { eq }) => eq(fields.id, data.kid)
+                })
+
+                if (quote) {
+                    await oracle.delete(quote).where(eq(quote.id, data.kid))
+                    monitor.setSuccess(sequence_number)
+                } else {
+                    console.log(`Quote with id ${data.kid} not found`)
+                    monitor.setFailed(sequence_number, JSON.stringify({ error: `Repost with id ${data.kid} not found`}))
+                }
             }
             catch (e) {
                 monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
@@ -310,8 +346,17 @@ export class ReactionRemoveEventPlugin extends ProcessorPlugin {
 			// Check if reaction exists
 
             try {
-                await oracle.delete(reaction).where(eq(reaction.id, data.kid))
-                monitor.setSuccess(sequence_number)
+                const reaction = oracle.query.reaction.findFirst({
+                    where: (fields, { eq }) => eq(fields.id, data.kid)
+                });
+
+                if(reaction) {
+                    await oracle.delete(reaction).where(eq(reaction.id, data.kid))
+                    monitor.setSuccess(sequence_number)
+                } else {
+                    console.log(`Quote with id ${data.kid} not found`)
+                    monitor.setFailed(sequence_number, JSON.stringify({ error: `Repost with id ${data.kid} not found`}))
+                }
             }
             catch (e) {
                 monitor.setFailed(sequence_number, JSON.stringify({ error: e }))

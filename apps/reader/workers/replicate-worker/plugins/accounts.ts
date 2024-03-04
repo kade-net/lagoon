@@ -90,16 +90,25 @@ export class DelegateRemovePlugin extends ProcessorPlugin {
         if (parsed.success) {
             const data = parsed.data
 			
-			// Add code for checking if the user owns the plugin
 
-            try {
-                await oracle.delete(delegate).where(eq(delegate.id, data.kid))
-                monitor.setSuccess(sequence_number)
-            }
-            catch (e) {
-                console.log(`Something went wrong while processing data: ${e}`)
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
-            }
+                try {
+                    // Add code for checking if the user owns the plugin
+                    const plugin = await oracle.query.delegate.findFirst({
+                        where: (fields, { eq }) => eq(fields.id, data.kid)
+                    })
+
+                    if (plugin) {
+                        await oracle.delete(delegate).where(eq(delegate.id, data.kid))
+                        monitor.setSuccess(sequence_number)
+                    } else {
+                        console.log(`Delegate with address ${data.owner_address} not found`)
+                        monitor.setFailed(sequence_number, JSON.stringify({ error: `Delegate with address ${data.owner_address} not found` }))
+                    }
+                }
+                catch (e) {
+                    console.log(`Something went wrong while processing data: ${e}`)
+                    monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                }
         }
     }
 }
@@ -153,11 +162,19 @@ export class AccountUnFollowPlugin extends ProcessorPlugin {
         if (parsed.success) {
             const data = parsed.data
 
-			// Check if someone already follows the account
-
             try {
-                await oracle.delete(follow).where(eq(follow.id, data.kid))
-                monitor.setSuccess(sequence_number)
+                // Check if someone already follows the account
+                const account = oracle.query.account.findFirst({
+                    where: (fields, { eq }) => eq(fields.id, data.kid)
+                })
+
+                if (account) {
+                    await oracle.delete(follow).where(eq(follow.id, data.kid))
+                    monitor.setSuccess(sequence_number)
+                } else {
+                    console.log(`Account with address ${data.delegate} not found`)
+                    monitor.setFailed(sequence_number, JSON.stringify({ error: `Account with address ${data.delegate} not found` }))
+                }
             }
             catch (e) {
                 console.log(`Something went wrong while processing data: ${e}`)
@@ -166,6 +183,7 @@ export class AccountUnFollowPlugin extends ProcessorPlugin {
         }
     }
 }
+
 
 export class ProfileUpdatePlugin extends ProcessorPlugin {
     name(): string {
