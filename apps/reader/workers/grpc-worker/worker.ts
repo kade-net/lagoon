@@ -6,6 +6,10 @@ import _ from "lodash"
 const { isNull } = _
 import { TransactionsProcessor } from "./read.processor";
 
+export function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 
 export class Worker {
 
@@ -109,6 +113,15 @@ export class Worker {
                 console.log("Stream was reset. Reconnecting...")
                 await this.run()
                 return
+            }
+
+            if (error.message.includes("UNAVAILABLE")) {
+                console.log("Internet unavailable")
+                await sleep(60_000)
+                console.log("Restarting...")
+                await this.run()
+                return
+
             }
 
             console.log("Error: ", error)

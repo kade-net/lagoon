@@ -1,4 +1,5 @@
 import { LevelDB } from "../../db";
+import { ProcessMonitor } from "./monitor";
 import { AccountCreatePlugin, AccountFollowPlugin, AccountUnFollowPlugin, DelegateCreatePlugin, DelegateRemovePlugin, ProfileUpdatePlugin } from "./plugins/accounts";
 import { CommentCreateEventPlugin, CommentRemoveEventPlugin, PublicationCreateEventPlugin, PublicationRemoveEventPlugin, QuoteCreateEventPlugin, QuoteRemoveEventPlugin, ReactionCreateEventPlugin, ReactionRemoveEventPlugin, RepostCreateEventPlugin, RepostRemoveEventPlugin } from "./plugins/publications";
 import { RegisterUsernamePlugin } from "./plugins/usernames";
@@ -6,7 +7,8 @@ import { DataProcessor } from "./writer";
 
 
 const db = await LevelDB.init()
-const dataProcessor = new DataProcessor(db._db.dbi, db._db.env)
+export const monitor = await ProcessMonitor.init()
+const dataProcessor = new DataProcessor(db._db.dbi, db._db.env, monitor)
 
 dataProcessor.registerPlugin(new RegisterUsernamePlugin())
 // ACCOUNT PLUGINS
