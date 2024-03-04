@@ -35,5 +35,7 @@ catch (e) {
         }
         console.log("Starting worker with version", parsed)
         await worker.run(BigInt(parsed))
-	}
+	} else {
+        console.log("Something went wrong while processing data", e);
+    }
 }
