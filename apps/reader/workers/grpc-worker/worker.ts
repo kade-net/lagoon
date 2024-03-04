@@ -115,6 +115,13 @@ export class Worker {
                 return
             }
 
+            if (error.message.includes("RESOURCE_EXHAUSTED")) {
+                console.log("Stream's resource was exhausted");
+                await sleep(180_000);
+                await this.run();
+                return
+            }
+
             if (error.message.includes("UNAVAILABLE")) {
                 console.log("Internet unavailable")
                 await sleep(60_000)
