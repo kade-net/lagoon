@@ -1,6 +1,6 @@
 import _ from "lodash"
 import { Lama } from "./lama"
-const { isNumber } = _;
+const { isNumber, isNull } = _;
 
 
 export abstract class EventProcessor {
@@ -45,10 +45,11 @@ export class LevelDB {
     async getSequenceNumber() {
         try {
             const number = await this._sequence_store!.get("sequence")
-            const p = isNumber(number) ? parseInt(number) : 0
+            const p = isNull(number) ? 0 : parseInt(number)
             return Number.isNaN(p) ? 0 : p
         }
         catch (e) {
+            console.log("Error", e)
             return 0
         }
     }
@@ -69,6 +70,7 @@ export class LevelDB {
         const nextKey = this.getNextKey(sequence);
         await this._db!.put(nextKey, JSON.stringify(data));
         await this._sequence_store!.put("sequence", `${sequence + 1}`);
+        await this._version_store!.put("version", `${sequence + 1}`);
     }
 
     async get(sequence: number) {

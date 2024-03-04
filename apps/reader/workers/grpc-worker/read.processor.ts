@@ -89,7 +89,7 @@ export class ReadProcessor extends TransactionsProcessor {
             for (const event of events) {
                 const eventType = event.typeStr;
                 if (eventType && SUPPORTED_EVENT_TYPES.includes(eventType)) {
-
+                    console.log("Processing event", eventType)
                     await db.put({
                         type: eventType?.split("::")?.at(2),
                         event: event.data

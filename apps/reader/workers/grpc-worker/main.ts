@@ -18,7 +18,7 @@ try {
     if (Number.isNaN(parsed) || isUndefined(parsed)) {
         throw new Error("Invalid starting version")
     }
-
+    console.log("Starting worker with version", parsed)
     await worker.run(BigInt(parsed))
 }
 catch (e) {
