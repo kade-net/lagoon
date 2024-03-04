@@ -1,7 +1,5 @@
 CREATE TABLE IF NOT EXISTS "account" (
 	"id" integer PRIMARY KEY NOT NULL,
-	"bio" text NOT NULL,
-	"username" text NOT NULL,
 	"address" text NOT NULL,
 	"object_address" text NOT NULL,
 	"timestamp" timestamp DEFAULT now() NOT NULL
@@ -61,6 +59,20 @@ CREATE TABLE IF NOT EXISTS "delegate" (
 	"address" text NOT NULL,
 	"owner_id" integer NOT NULL,
 	"timestamp" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "username" (
+	"username" text PRIMARY KEY NOT NULL,
+	"owner_address" text NOT NULL,
+	"token_address" text NOT NULL,
+	"timestamp" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "profile" (
+	"creator" integer PRIMARY KEY NOT NULL,
+	"pfp" text,
+	"bio" text,
+	"display_name" text
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -149,6 +161,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "delegate" ADD CONSTRAINT "delegate_owner_id_account_id_fk" FOREIGN KEY ("owner_id") REFERENCES "account"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "profile" ADD CONSTRAINT "profile_creator_account_id_fk" FOREIGN KEY ("creator") REFERENCES "account"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

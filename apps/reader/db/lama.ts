@@ -16,7 +16,8 @@ export class Lama {
         const env = new lmdb.Env()
         env.open({
             path: `./store/lama`,
-            maxDbs: 4
+            maxDbs: 10,
+            mapSize: 4 * 1024 * 1024 * 1024, // TODO: add a prune worker to remove old data
         })
         const dbi = env.openDbi({
             name,
@@ -28,7 +29,10 @@ export class Lama {
 
     async put(key: string, value: string) {
         const txn = this.env.beginTxn()
-        txn.putBinary(this.dbi, key, Buffer.from(value))
+        const bufferValue = Buffer.from(value)
+        txn.putBinary(this.dbi, key, bufferValue, {
+            noDupData: true
+        })
         txn.commit()
     }
 

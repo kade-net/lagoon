@@ -1,13 +1,16 @@
+import "dotenv/config";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 
-const run = process.env.RUN;
+// const run = process.env.RUN;
 
-if (run !== "init") {
-  console.log("migrations complete");
-  process.exit(0);
-}
+// if (run !== "init") {
+//   console.log("migrations complete");
+//   process.exit(0);
+// }
+
+console.log("CONNECTION STRING :: ", process.env.PG_CONNECTION_STRING);
 
 const migrationClient = postgres(process.env.PG_CONNECTION_STRING, {
   max: 1,
