@@ -39,7 +39,7 @@ export class Worker {
         )
         let startingVersion = BigInt(0) // pass in the starting version;
         let currentStartingVersion = await this.db.getLatestVersion()
-
+        console.log("Latest Version", currentStartingVersion)
         if (currentStartingVersion > startingVersion) {
             startingVersion = currentStartingVersion
         } else {
@@ -122,6 +122,14 @@ export class Worker {
                 await this.run()
                 return
 
+            }
+
+            if (error.message.includes("RESOURCE_EXHAUSTED")) {
+                console.log("Resource exhausted error. Waiting 3 minutes before restarting")
+                await sleep(180_000)
+                console.log("Restarting...")
+                await this.run()
+                return
             }
 
             console.log("Error: ", error)
