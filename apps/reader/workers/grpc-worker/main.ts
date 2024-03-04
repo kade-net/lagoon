@@ -3,10 +3,10 @@ import _ from "lodash"
 const { isUndefined } = _
 import { LevelDB } from "../../db"
 import { ReadProcessor } from "./read.processor"
-import { Worker } from "./worker";
+import { Worker } from "./worker"
 
 
-async function main() {
+try {
     const db = await LevelDB.init()
     const worker = new Worker(
         process.env.INDEXER_API_KEY!,
@@ -21,18 +21,6 @@ async function main() {
     console.log("Starting worker with version", parsed)
     await worker.run(BigInt(parsed))
 }
-
-try {
-    main();
-}
 catch (e) {
-    if (e instanceof Error) {
-        if (e.message === "RESOURCE_EXHAUSTED") {
-            main();
-        } else {
-            console.log("Something went wrong while processing data", e);
-        }
-    } else {
-        console.log("Something went wrong while processing data", e);
-    }
+    console.log("Something went wrong while processing data:", e)
 }
