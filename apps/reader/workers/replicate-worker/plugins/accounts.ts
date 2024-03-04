@@ -188,7 +188,7 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
                         bio: data.bio,
                         display_name: data.display_name,
                         pfp: data.pfp,
-                    })
+                    }).where(eq(profile.creator, data.user_kid))
                 }
                 else {
                     await oracle.insert(profile).values({
