@@ -1,4 +1,5 @@
-import { isNull } from "lodash"
+import _ from "lodash"
+const { isNull } = _;
 import lmdb from "node-lmdb"
 import { Readable } from "stream"
 
