@@ -10,6 +10,7 @@ export const account = pgTable("account", {
     address: text("address").notNull(),
     object_address: text("object_address").notNull(),
     timestamp: timestamp("timestamp").notNull().defaultNow(),
+    signature: text("signature").notNull(),
 })
 
 

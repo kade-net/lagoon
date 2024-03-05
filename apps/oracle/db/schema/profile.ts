@@ -7,6 +7,7 @@ export const profile = pgTable("profile", {
     pfp: text("pfp"),
     bio: text("bio"),
     display_name: text("display_name"),
+    signature: text("signature").notNull(),
 })
 
 export const profile_relations = relations(profile, ({ one, many }) => {

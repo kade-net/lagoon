@@ -15,23 +15,23 @@ const monitor = await ProcessMonitor.init()
 console.log(await levelDB.getLatestVersion())
 console.log(await levelDB.getSequenceNumber())
 
-const reader = new LamaReader(levelDB._db.dbi, levelDB._db.env)
+const reader = new LamaReader(monitor.failed.dbi, monitor.failed.env)
 
 reader.on("data", async (data) => {
     const ev = data.toString()
     console.log("ev::", ev)
-    // if (ev.includes("{")) {
-    //     // console.log("ev::", ev)
-    //     const data = JSON.parse(ev)
-    //     if (["DelegateCreateEvent", "AccountCreateEvent"].includes(data.value.type)) {
-    //         if (data.value.type === "DelegateCreateEvent") {
-    //             await sleep(1000)
-    //         } else {
-    //             await sleep(10_000)
-    //         }
-    //         console.log("data::", data)
-    //     }
-    // }
+    if (ev.includes("{")) {
+        // console.log("ev::", ev)
+        const data = JSON.parse(ev)
+        if (["DelegateCreateEvent", "AccountCreateEvent"].includes(data.value.type)) {
+            if (data.value.type === "DelegateCreateEvent") {
+                await sleep(1000)
+            } else {
+                await sleep(10_000)
+            }
+            console.log("data::", data)
+        }
+    }
 })
 
 // const processor = new DataProcessor(levelDB._db.dbi, levelDB._db.env)

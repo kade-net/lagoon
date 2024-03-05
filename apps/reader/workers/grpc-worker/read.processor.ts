@@ -80,6 +80,9 @@ export class ReadProcessor extends TransactionsProcessor {
 
             const userTransaction = transaction.user!;
 
+            const hex_signature = userTransaction.request?.signature?.ed25519?.signature ?
+                Buffer.from(userTransaction.request?.signature?.ed25519?.signature!).toString('hex') : ''
+
             if (!userTransaction.events) {
                 continue
             }
@@ -92,7 +95,8 @@ export class ReadProcessor extends TransactionsProcessor {
                     console.log("Processing event", eventType)
                     await db.put({
                         type: eventType?.split("::")?.at(2),
-                        event: event.data
+                        event: event.data,
+                        signature: hex_signature,
                     })
                 }
             }

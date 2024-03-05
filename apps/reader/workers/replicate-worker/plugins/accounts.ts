@@ -8,7 +8,7 @@ export class AccountCreatePlugin extends ProcessorPlugin {
     name(): string {
         return "AccountCreateEvent"
     }
-    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
+    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
         const parsed = schema.account_create_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
@@ -22,6 +22,7 @@ export class AccountCreatePlugin extends ProcessorPlugin {
                     address: data.creator_address,
                     object_address: data.account_object_address,
                     timestamp: data.timestamp,
+                    signature
                 })
 
                 monitor.setSuccess(sequence_number)
@@ -39,7 +40,7 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
     name(): string {
         return "DelegateCreateEvent"
     }
-    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
+    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
         const parsed = schema.delegate_create_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
@@ -59,7 +60,8 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
                         address: data.delegate_address,
                         id: data.kid,
                         owner_id: account?.id,
-                        timestamp: data.timestamp
+                        timestamp: data.timestamp,
+                        signature
                     })
                     monitor.setSuccess(sequence_number)
                 }
@@ -80,7 +82,7 @@ export class DelegateRemovePlugin extends ProcessorPlugin {
     name(): string {
         return "DelegateRemoveEvent"
     }
-    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
+    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
         const parsed = schema.delegate_remove_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
@@ -106,7 +108,7 @@ export class AccountFollowPlugin extends ProcessorPlugin {
     name(): string {
         return "AccountFollowEvent"
     }
-    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
+    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
         const parsed = schema.account_follow_event_schema.safeParse(event)
 
         if (!parsed.success) {
@@ -122,7 +124,8 @@ export class AccountFollowPlugin extends ProcessorPlugin {
                     id: data.kid,
                     follower_id: data.follower_kid,
                     following_id: data.following_kid,
-                    timestamp: data.timestamp
+                    timestamp: data.timestamp,
+                    signature
                 })
 
                 monitor.setSuccess(sequence_number)
@@ -167,7 +170,7 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
     name(): string {
         return "ProfileUpdateEvent"
     }
-    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
+    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
         const parsed = schema.profile_update_event_schema.safeParse(event)
 
         if (!parsed.success) {
@@ -195,7 +198,8 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
                         bio: data.bio,
                         display_name: data.display_name,
                         pfp: data.pfp,
-                        creator: data.user_kid
+                        creator: data.user_kid,
+                        signature
                     })
                 }
                 monitor.setSuccess(sequence_number)

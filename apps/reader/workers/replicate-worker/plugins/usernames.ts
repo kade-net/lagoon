@@ -8,7 +8,7 @@ export class RegisterUsernamePlugin extends ProcessorPlugin {
     name(): string {
         return "RegisterUsernameEvent"
     }
-    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
+    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
 
         const parsed = schema.username_registration_event_schema.safeParse(event)
 
@@ -26,7 +26,8 @@ export class RegisterUsernamePlugin extends ProcessorPlugin {
                     owner_address: data.owner_address,
                     token_address: data.token_address,
                     username: data.username,
-                    timestamp: data.timestamp
+                    timestamp: data.timestamp,
+                    signature
                 })
                 monitor.success.put(sequence_number, "success")
                 console.log("Data processed successfully")
