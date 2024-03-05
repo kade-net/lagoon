@@ -55,14 +55,14 @@ export class DataProcessor {
             if (value && !isNull(value)) {
                 const data = JSON.parse(value.toString())
                 const event_type = data.type
-
+                const signature = data.signature
                 const event_data = JSON.parse(data.event)
                 const chosenPlugin = this.registeredPlugins.find(p => p.name() === event_type)
 
                 if (chosenPlugin) {
                     try {
 
-                        await chosenPlugin.process(event_data, this.monitor, key)
+                        await chosenPlugin.process(event_data, this.monitor, key, signature)
                         console.log("Data processed successfully")
                     }
                     catch (e) {

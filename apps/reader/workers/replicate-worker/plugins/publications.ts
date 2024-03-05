@@ -1,4 +1,4 @@
-import oracle, { comment, eq, publication, quote, reaction, repost } from "oracle"
+import oracle, { and, comment, eq, publication, quote, reaction, repost } from "oracle"
 import schema from "../../../schema"
 import { ProcessorPlugin } from "../helpers"
 import { ProcessMonitor } from "../monitor"
@@ -8,7 +8,7 @@ export class PublicationCreateEventPlugin extends ProcessorPlugin {
     name(): string {
         return "PublicationCreate"
     }
-    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
+    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
         const parsed = schema.publication_create_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
@@ -23,7 +23,8 @@ export class PublicationCreateEventPlugin extends ProcessorPlugin {
                     content: JSON.parse(data.payload),
                     creator_id: data.user_kid,
                     id: data.kid,
-                    timestamp: data.timestamp
+                    timestamp: data.timestamp,
+                    signature
                 })
                 monitor.setSuccess(sequence_number)
             }
@@ -65,7 +66,7 @@ export class CommentCreateEventPlugin extends ProcessorPlugin {
     name(): string {
         return "CommentCreateEvent"
     }
-    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
+    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
         const parsed = schema.comment_create_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
@@ -85,7 +86,8 @@ export class CommentCreateEventPlugin extends ProcessorPlugin {
                         data.type == 1 ? { publication_id: data.reference_kid } :
                             data.type == 2 ? { quote_id: data.reference_kid } :
                                 data.type == 3 ? { comment_id: data.reference_kid } : {}
-                    )
+                    ),
+                    signature
                 })
                 monitor.setSuccess(sequence_number)
             }
@@ -128,7 +130,7 @@ export class RepostCreateEventPlugin extends ProcessorPlugin {
     name(): string {
         return "RepostCreateEvent"
     }
-    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
+    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
 
         const parsed = schema.repost_create_event_schema.safeParse(event)
 
@@ -147,7 +149,8 @@ export class RepostCreateEventPlugin extends ProcessorPlugin {
                     creator_id: data.user_kid,
                     id: data.kid,
                     publication_id: data.reference_kid,
-                    timestamp: data.timestamp
+                    timestamp: data.timestamp,
+                    signature
                 })
                 monitor.setSuccess(sequence_number)
             }
@@ -190,7 +193,7 @@ export class QuoteCreateEventPlugin extends ProcessorPlugin {
     name(): string {
         return "QuoteCreateEvent"
     }
-    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
+    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
         const parsed = schema.quote_create_event_schema.safeParse(event)
 
         if (!parsed.success) {
@@ -207,7 +210,8 @@ export class QuoteCreateEventPlugin extends ProcessorPlugin {
                     creator_id: data.user_kid,
                     id: data.kid,
                     publication_id: data.reference_kid,
-                    timestamp: data.timestamp
+                    timestamp: data.timestamp,
+                    signature
                 })
                 monitor.setSuccess(sequence_number)
             }
@@ -249,7 +253,7 @@ export class ReactionCreateEventPlugin extends ProcessorPlugin {
     name(): string {
         return "ReactionCreateEvent"
     }
-    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
+    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
         const parsed = schema.reaction_create_event_schema.safeParse(event)
 
         if (!parsed.success) {
@@ -270,7 +274,8 @@ export class ReactionCreateEventPlugin extends ProcessorPlugin {
                         data.type == 1 ? { publication_id: data.reference_kid } :
                             data.type == 2 ? { quote_id: data.reference_kid } :
                                 data.type == 3 ? { comment_id: data.reference_kid } : {}
-                    )
+                    ),
+                    signature
                 })
                 monitor.setSuccess(sequence_number)
             }
