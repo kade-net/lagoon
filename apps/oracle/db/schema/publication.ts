@@ -9,6 +9,7 @@ export const publication = pgTable("publication",{
     content: json("content").notNull(),
     creator_id: integer("creator_id").notNull().references(()=>account.id),
     timestamp: timestamp("timestamp").defaultNow().notNull(),
+    signature: text("signature").notNull(),
 })
 
 export type PUBLICATION = typeof publication.$inferSelect
@@ -38,6 +39,7 @@ export const repost = pgTable("repost",{
     publication_id: integer("publication_id").notNull().references(()=> publication.id),
     creator_id: integer("creator_id").notNull().references(()=> account.id),
     timestamp: timestamp("timestamp").defaultNow().notNull(),
+    signature: text("signature").notNull(),
 })
 
 export type REPOST = typeof repost.$inferSelect
@@ -64,6 +66,7 @@ export const quote = pgTable("quote",{
     creator_id: integer("creator_id").notNull().references(()=> account.id),
     timestamp: timestamp("timestamp").defaultNow().notNull(),
     content: json("content").notNull(),
+    signature: text("signature").notNull(),
 })
 
 export type QUOTE = typeof quote.$inferSelect
@@ -95,6 +98,7 @@ export const comment = pgTable("comment",{
     timestamp: timestamp("timestamp").defaultNow().notNull(),
     content: json("content").notNull(),
     quote_id: integer("quote_id").references(()=> quote.id),
+    signature: text("signature").notNull(),
 })
 
 export type COMMENT = typeof comment.$inferSelect

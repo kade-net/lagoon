@@ -14,6 +14,7 @@ export const reaction = pgTable("reaction", {
     creator_id: integer("creator_id").notNull().references(()=> account.id),
     timestamp: timestamp("timestamp").defaultNow().notNull(),
     reaction: integer("reaction").notNull(),
+    signature: text("signature").notNull(),
 })
 
 export type REACTION = typeof reaction.$inferSelect
