@@ -12,6 +12,8 @@ const levelDB = await LevelDB.init()
 
 const monitor = await ProcessMonitor.init()
 
+console.log(await levelDB.getLatestVersion())
+console.log(await levelDB.getSequenceNumber())
 
 const reader = new LamaReader(levelDB._db.dbi, levelDB._db.env)
 
