@@ -82,7 +82,12 @@ export class LamaReader extends Readable {
         while ((key = cursor.goToNext()) !== null) {
             value = cursor.getCurrentBinary()
             if (value) {
-                this.push(JSON.stringify({ key, value: JSON.parse(value.toString()) }))
+                const v = value.toString()
+                if (v.startsWith("{") && v.endsWith("}")) {
+                    this.push(JSON.stringify({ key, value: JSON.parse(v) }))
+                } else {
+                    this.push(JSON.stringify({ key, value: v }))
+                }
             }
         }
         cursor.close()

@@ -13,7 +13,7 @@ const levelDB = await LevelDB.init()
 const monitor = await ProcessMonitor.init()
 
 
-const reader = new LamaReader(monitor.success.dbi, monitor.success.env)
+const reader = new LamaReader(levelDB._db.dbi, levelDB._db.env)
 
 reader.on("data", async (data) => {
     const ev = data.toString()
