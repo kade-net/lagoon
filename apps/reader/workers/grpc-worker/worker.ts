@@ -40,7 +40,7 @@ export class Worker {
         let startingVersion = BigInt(0) // pass in the starting version;
         let currentStartingVersion = await this.db.getLatestVersion()
         console.log("Latest Version", currentStartingVersion)
-        if (currentStartingVersion > startingVersion) {
+        if (currentStartingVersion > (_startingVersion ?? 0n)) {
             startingVersion = currentStartingVersion
         } else {
             if (_startingVersion) {
