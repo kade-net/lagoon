@@ -29,7 +29,8 @@ export class LevelDB {
     async getLatestVersion() {
         try {
             const version = await this._version_store.get("version")
-            const p = isNumber(version) ? BigInt(version) : BigInt(0)
+            console.log("Version", version)
+            const p = version ? BigInt(version) : BigInt(0)
             return p
         }
         catch (e) {

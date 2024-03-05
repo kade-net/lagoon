@@ -101,7 +101,7 @@ export class Worker {
             }
 
             currentTxnVersion = currentTxnVersion + 1n
-
+            await this.db.putVersion(currentTxnVersion)
 
 
 

@@ -30,11 +30,10 @@ export class Lama {
 
 
     async put(key: string, value: string) {
+        console.log("Putting", key, value)
         const txn = this.env.beginTxn()
         const bufferValue = Buffer.from(value)
-        txn.putBinary(this.dbi, key, bufferValue, {
-            noDupData: true
-        })
+        txn.putBinary(this.dbi, key, bufferValue)
         txn.commit()
     }
 
