@@ -1,11 +1,11 @@
 import schema from "../../../schema";
-import { ProcessorPlugin } from "../helpers";
+import { EVENT_NAMES, ProcessorPlugin } from "../helpers";
 import oracle, { username } from "oracle"
 import { ProcessMonitor } from "../monitor";
 
 
 export class RegisterUsernamePlugin extends ProcessorPlugin {
-    name(): string {
+    name(): EVENT_NAMES {
         return "RegisterUsernameEvent"
     }
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
@@ -26,8 +26,7 @@ export class RegisterUsernamePlugin extends ProcessorPlugin {
                     owner_address: data.owner_address,
                     token_address: data.token_address,
                     username: data.username,
-                    timestamp: data.timestamp,
-                    signature
+                    timestamp: data.timestamp
                 })
                 monitor.success.put(sequence_number, "success")
                 console.log("Data processed successfully")

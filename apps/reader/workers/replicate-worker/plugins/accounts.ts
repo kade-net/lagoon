@@ -1,11 +1,11 @@
 import schema from "../../../schema";
-import { ProcessorPlugin } from "../helpers";
-import oracle, { account, delegate, eq, follow, profile } from "oracle"
+import { EVENT_NAMES, ProcessorPlugin } from "../helpers";
+import oracle, { account, and, delegate, eq, follow, profile } from "oracle"
 import { ProcessMonitor } from "../monitor";
 
 
 export class AccountCreatePlugin extends ProcessorPlugin {
-    name(): string {
+    name(): EVENT_NAMES {
         return "AccountCreateEvent"
     }
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
@@ -22,7 +22,6 @@ export class AccountCreatePlugin extends ProcessorPlugin {
                     address: data.creator_address,
                     object_address: data.account_object_address,
                     timestamp: data.timestamp,
-                    signature
                 })
 
                 monitor.setSuccess(sequence_number)
@@ -37,7 +36,7 @@ export class AccountCreatePlugin extends ProcessorPlugin {
 
 
 export class DelegateCreatePlugin extends ProcessorPlugin {
-    name(): string {
+    name(): EVENT_NAMES {
         return "DelegateCreateEvent"
     }
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
@@ -60,8 +59,7 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
                         address: data.delegate_address,
                         id: data.kid,
                         owner_id: account?.id,
-                        timestamp: data.timestamp,
-                        signature
+                        timestamp: data.timestamp
                     })
                     monitor.setSuccess(sequence_number)
                 }
@@ -79,7 +77,7 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
 }
 
 export class DelegateRemovePlugin extends ProcessorPlugin {
-    name(): string {
+    name(): EVENT_NAMES {
         return "DelegateRemoveEvent"
     }
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
@@ -105,7 +103,7 @@ export class DelegateRemovePlugin extends ProcessorPlugin {
 }
 
 export class AccountFollowPlugin extends ProcessorPlugin {
-    name(): string {
+    name(): EVENT_NAMES {
         return "AccountFollowEvent"
     }
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
@@ -124,8 +122,7 @@ export class AccountFollowPlugin extends ProcessorPlugin {
                     id: data.kid,
                     follower_id: data.follower_kid,
                     following_id: data.following_kid,
-                    timestamp: data.timestamp,
-                    signature
+                    timestamp: data.timestamp
                 })
 
                 monitor.setSuccess(sequence_number)
@@ -140,7 +137,7 @@ export class AccountFollowPlugin extends ProcessorPlugin {
 }
 
 export class AccountUnFollowPlugin extends ProcessorPlugin {
-    name(): string {
+    name(): EVENT_NAMES {
         return "AccountUnFollowEvent"
     }
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
@@ -155,7 +152,10 @@ export class AccountUnFollowPlugin extends ProcessorPlugin {
             const data = parsed.data
 
             try {
-                await oracle.delete(follow).where(eq(follow.id, data.kid))
+                await oracle.delete(follow).where(and(
+                    eq(follow.follower_id, data.user_kid),
+                    eq(follow.following_id, data.unfollowing_kid)
+                ))
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
@@ -167,7 +167,7 @@ export class AccountUnFollowPlugin extends ProcessorPlugin {
 }
 
 export class ProfileUpdatePlugin extends ProcessorPlugin {
-    name(): string {
+    name(): EVENT_NAMES {
         return "ProfileUpdateEvent"
     }
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
@@ -198,8 +198,7 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
                         bio: data.bio,
                         display_name: data.display_name,
                         pfp: data.pfp,
-                        creator: data.user_kid,
-                        signature
+                        creator: data.user_kid
                     })
                 }
                 monitor.setSuccess(sequence_number)

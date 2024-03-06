@@ -21,12 +21,10 @@ const SUPPORTED_EVENT_TYPES = [
     // PUBLICATIONS
     `${PUBLICATION_MODULE}::PublicationCreate`,
     `${PUBLICATION_MODULE}::PublicationRemove`,
-    `${PUBLICATION_MODULE}::CommentCreateEvent`,
-    `${PUBLICATION_MODULE}::CommentRemoveEvent`,
-    `${PUBLICATION_MODULE}::RepostCreateEvent`,
-    `${PUBLICATION_MODULE}::RepostRemoveEvent`,
-    `${PUBLICATION_MODULE}::QuoteCreateEvent`,
-    `${PUBLICATION_MODULE}::QuoteRemoveEvent`,
+    `${PUBLICATION_MODULE}::PublicationCreateWithRef`,
+    `${PUBLICATION_MODULE}::PublicationRemoveWithRef`,
+    `${PUBLICATION_MODULE}::ReactionRemoveEventWithRef`,
+    `${PUBLICATION_MODULE}::ReactionCreateEventWithRef`,
     `${PUBLICATION_MODULE}::ReactionCreateEvent`,
     `${PUBLICATION_MODULE}::ReactionRemoveEvent`,
 ]

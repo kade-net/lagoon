@@ -1,7 +1,7 @@
 import { LevelDB } from "../../db";
 import { ProcessMonitor } from "./monitor";
 import { AccountCreatePlugin, AccountFollowPlugin, AccountUnFollowPlugin, DelegateCreatePlugin, DelegateRemovePlugin, ProfileUpdatePlugin } from "./plugins/accounts";
-import { CommentCreateEventPlugin, CommentRemoveEventPlugin, PublicationCreateEventPlugin, PublicationRemoveEventPlugin, QuoteCreateEventPlugin, QuoteRemoveEventPlugin, ReactionCreateEventPlugin, ReactionRemoveEventPlugin, RepostCreateEventPlugin, RepostRemoveEventPlugin } from "./plugins/publications";
+import { PublicationCreateEventPlugin, PublicationCreateWithRefEventPlugin, PublicationRemoveEventPlugin, PublicationRemoveWithRefEventPlugin, ReactionCreateEventPlugin, ReactionCreateEventWithRefPlugin, ReactionRemoveEventPlugin, ReactionRemoveEventWithRefPlugin } from "./plugins/publications";
 import { RegisterUsernamePlugin } from "./plugins/usernames";
 import { DataProcessor } from "./writer";
 
@@ -21,12 +21,10 @@ dataProcessor.registerPlugin(new ProfileUpdatePlugin())
 // PUBLICATION PLUGINS
 dataProcessor.registerPlugin(new PublicationCreateEventPlugin())
 dataProcessor.registerPlugin(new PublicationRemoveEventPlugin())
-dataProcessor.registerPlugin(new CommentCreateEventPlugin())
-dataProcessor.registerPlugin(new CommentRemoveEventPlugin())
-dataProcessor.registerPlugin(new RepostCreateEventPlugin())
-dataProcessor.registerPlugin(new RepostRemoveEventPlugin())
-dataProcessor.registerPlugin(new QuoteCreateEventPlugin())
-dataProcessor.registerPlugin(new QuoteRemoveEventPlugin())
+dataProcessor.registerPlugin(new PublicationCreateWithRefEventPlugin())
+dataProcessor.registerPlugin(new PublicationRemoveWithRefEventPlugin())
+dataProcessor.registerPlugin(new ReactionCreateEventWithRefPlugin())
+dataProcessor.registerPlugin(new ReactionRemoveEventWithRefPlugin())
 dataProcessor.registerPlugin(new ReactionCreateEventPlugin())
 dataProcessor.registerPlugin(new ReactionRemoveEventPlugin())
 
