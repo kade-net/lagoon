@@ -8,7 +8,6 @@ export const delegate = pgTable("delegate", {
     address: text("address").notNull(),
     owner_id: integer("owner_id").notNull().references(()=> account.id),
     timestamp: timestamp("timestamp").notNull().defaultNow(),
-    signature: text("signature").notNull(),
 })
 
 

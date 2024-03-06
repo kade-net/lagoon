@@ -5,8 +5,7 @@ export const username = pgTable("username", {
     username: text("username").notNull().primaryKey(),
     owner_address: text("owner_address").notNull(),
     token_address: text("token_address").notNull(),
-    timestamp: timestamp("timestamp").defaultNow().notNull(),
-    signature: text("signature").notNull(),
+    timestamp: timestamp("timestamp").defaultNow().notNull()
 })
 
 export type USERNAME = typeof username.$inferSelect

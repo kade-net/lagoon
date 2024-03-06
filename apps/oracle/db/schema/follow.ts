@@ -8,7 +8,6 @@ export const follow = pgTable("follow", {
     follower_id: integer("follower_id").notNull().references(()=> account.id),
     following_id: integer("following_id").notNull().references(() => account.id),
     timestamp: timestamp("timestamp").defaultNow().notNull(),
-    signature: text("signature").notNull(),
 })
 
 export type FOLLOW = typeof follow.$inferSelect
