@@ -18,3 +18,8 @@ export type PaginationArg = {
 }
 
 export type SORT_ORDER = "ASC" | "DESC"
+
+export type AccountViewer = {
+    follows: boolean,
+    followed: boolean
+}
