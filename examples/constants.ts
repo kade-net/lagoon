@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { AptosAccount, AptosClient, BCS, HexString, Network, Provider, TransactionBuilder, TransactionBuilderRemoteABI, TxnBuilderTypes } from "aptos";
 import { Aptos } from "@aptos-labs/ts-sdk"
 
-export const MODULE_ADDRESS = '0x809001fa9030e21dbe72a45291ddf227610e9c228025c8d93670ddd894f4141d'
+export const MODULE_ADDRESS = '0xe519b74fd94be761a4879e5db5e6e1ea113697c69be5664eb053123a00a03334'
 
 export const ACCOUNTS_RESOURCE_ADDRESS = '0x3859907505843da95c7171838d9233c29268140c26ef4c9c487af52847fe58b9';
 

@@ -1,18 +1,15 @@
-
-union PublicationRefference = Publication | Quote | Comment
 scalar Date
 scalar JSON
 
 type AccountStats {
-    followers: Int!
-    following: Int!
-    publications: Int!
-    delegates: Int!
-    reposts: Int!
-    quotes: Int!
-    comments: Int!
-    reactions: Int!
-    
+  followers: Int!
+  following: Int!
+  posts: Int!
+  delegates: Int!
+  reposts: Int!
+  quotes: Int!
+  comments: Int!
+  reactions: Int!
 }
 
 type Profile {
@@ -29,6 +26,11 @@ type Username {
   timestamp: Date!
 }
 
+type AccountViewerStats {
+  follows: Boolean!
+  followed: Boolean!
+}
+
 type Account {
   id: Int!
   bio: String
@@ -36,142 +38,94 @@ type Account {
   object_address: String!
   followers: [Follow!]
   following: [Follow!]
-  publications: [Publication!]
+  publications(
+    pagination: Pagination
+    type: Int
+    sort: SortOrder
+  ): [Publication!]
   delegates: [Delegate!]
-  reposts: [RePost!]
-  quotes: [Quote!]
-  comments: [Comment!]
   reactions: [Reaction!]
   stats: AccountStats!
   timestamp: Date!
   profile: Profile
   username: Username
+  viewer(viewer: Int): AccountViewerStats
 }
 
 type Delegate {
-    id: Int!
-    address: String!
-    owner_id: Int!
-    owner: Account!
-    timestamp: Date!
+  id: Int!
+  address: String!
+  owner_id: Int!
+  owner: Account!
+  timestamp: Date!
 }
 
 type Follow {
-    id: Int!
-    follower_id: Int!
-    follower: Account!
-    following_id: Int! 
-    following: Account!
-    timestamp: Date!
+  id: Int!
+  follower_id: Int!
+  follower: Account!
+  following_id: Int!
+  following: Account!
+  timestamp: Date!
 }
 
 type PublicationStats {
-    reposts: Int!
-    quotes: Int!
-    comments: Int!
-    reactions: Int!
+  reposts: Int!
+  quotes: Int!
+  comments: Int!
+  reactions: Int!
+}
+
+type PublicationViewerStats {
+  reactions: Int!
+  quotes: Int!
+  comments: Int!
+  reposts: Int!
 }
 
 type Publication {
-    id: Int!
-    content: JSON!
-    creator_id: Int!
-    creator: Account!
-    reposts: [RePost!]
-    quotes: [Quote!]
-    comments: [Comment!]
-    reactions: [Reaction!]
-    timestamp: Date!
-    stats: PublicationStats!
+  id: Int!
+  content: JSON!
+  creator_id: Int!
+  creator: Account!
+  children(pagination: Pagination, type: Int, sort: SortOrder): [Publication!]
+  parent: Publication
+  type: Int!
+  reactions: [Reaction!]
+  timestamp: Date!
+  stats: PublicationStats!
+  viewer(viewer: Int): PublicationViewerStats
+  publication_ref: String
 }
-
-
-type RePost {
-    id: Int!
-    publication_id: Int!
-    publication: Publication!
-    creator_id: Int!
-    creator: Account!
-    timestamp: Date!
-}
-
-type QuoteStats {
-    reactions: Int!
-    comments: Int!
-}
-
-type Quote {
-    id: Int!
-    publication_id: Int!
-    publication: Publication!
-    creator_id: Int!
-    creator: Account!
-    content: JSON!
-    reactions: [Reaction!]
-    comments: [Comment!]
-    stats: QuoteStats!
-    timestamp: Date!
-}
-
-type CommentStats {
-    reactions: Int!
-    comments: Int!
-}
-type Comment {
-    id: Int!
-    publication_id: Int
-    comment_id: Int
-    creator_id: Int!
-    content: JSON
-    creator: Account!
-    refference: PublicationRefference
-    comments: [Comment!]
-    reactions: [Reaction!]
-    stats: CommentStats!
-    timestamp: Date!
-}
-
 
 type Reaction {
-    id: Int!
-    publication_id: Int
-    comment_id: Int
-    quote_id: Int
-    creator_id: Int!
-    reaction: Int!
-    creator: Account!
-    refference: PublicationRefference
-    timestamp: Date!
+  id: Int!
+  publication_id: Int
+  creator_id: Int!
+  reaction: Int!
+  creator: Account!
+  timestamp: Date!
+  publication: Publication
 }
 
-
 input Pagination {
-    page: Int!
-    size: Int!
+  page: Int!
+  size: Int!
 }
 
 enum SortOrder {
-    ASC
-    DESC
+  ASC
+  DESC
 }
 
 type Query {
-    account(id: Int, address: String): Account
-    accounts(pagination: Pagination, sort: SortOrder): [Account!]
-    publication(id: Int): Publication
-    publications(pagination: Pagination, creator: Int, sort: SortOrder): [Publication!]
-    repost(id: Int): RePost 
-    reposts(pagination: Pagination, creator: Int, publication_id: Int, sort: SortOrder): [RePost!]
-    quote(id: Int): Quote
-    quotes(pagination: Pagination, creator: Int, publication_id: Int, sort: SortOrder): [Quote!]
-    comment(id: Int): Comment
-    comments(pagination: Pagination, creator: Int, refference_id: Int, comment_type: Int, sort: SortOrder): [Comment!]
-    reaction(id: Int): Reaction
-    
+  account(id: Int, address: String): Account
+  accounts(pagination: Pagination, sort: SortOrder): [Account!]
+  publication(id: Int, ref: String): Publication
+  publications(
+    pagination: Pagination
+    type: Int
+    creator: Int
+    sort: SortOrder
+  ): [Publication!]
 }
-
-
-
-
-
-

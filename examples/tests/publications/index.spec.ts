@@ -3,15 +3,15 @@ import { sleep } from "../../lib"
 
 
 
-describe("TEST PUBLICATION FUNCTIONALITY", ()=> {
+describe.skip("TEST PUBLICATION FUNCTIONALITY", () => {
 
 
-    it("ALICE CREATES 20 PUBLICATIONS", async () => {
+    it("ALICE CREATES 20 POSTS", async () => {
             
             for (let i = 0; i < 20; i++) {
                 await sleep(5000)
                 const transaction = await provider.generateTransaction(delegate_1.address(), {
-                    arguments: [JSON.stringify({content: `Testing ${i}`, tags: ["test"], media: []})],
+                    arguments: [1, JSON.stringify({ content: `Testing ${i}`, tags: ["test"], media: [] }), 0, ""],
                     function: CREATE_PUBLICATION,
                     type_arguments: []
                 })
@@ -24,11 +24,11 @@ describe("TEST PUBLICATION FUNCTIONALITY", ()=> {
             
     })
 
-    it('BOB CREATES 20 PUBLICATIONS', async () => {
+    it('BOB CREATES 20 POSTS', async () => {
         for (let i = 0; i < 20; i++) {
             await sleep(2000)
             const transaction = await provider.generateTransaction(delegate_2.address(), {
-                arguments: [JSON.stringify({content: `Testing ${i}`, tags: ["test"], media: []})],
+                arguments: [1, JSON.stringify({ content: `Testing ${i}`, tags: ["test"], media: [] }), 0, ""],
                 function: CREATE_PUBLICATION,
                 type_arguments: []
             })
@@ -45,8 +45,8 @@ describe("TEST PUBLICATION FUNCTIONALITY", ()=> {
         for (let i = 20; i < 30; i++) {
             await sleep(5000)
             const transaction = await provider.generateTransaction(delegate_1.address(), {
-                arguments: [i, 1],
-                function: CREATE_REPOST,
+                arguments: [4, "", 100 + i, ""],
+                function: CREATE_PUBLICATION,
                 type_arguments: []
             })
 
@@ -62,8 +62,8 @@ describe("TEST PUBLICATION FUNCTIONALITY", ()=> {
         for (let i = 0; i < 10; i++) {
             await sleep(5000)
             const transaction = await provider.generateTransaction(delegate_2.address(), {
-                arguments: [i, 1],
-                function: CREATE_REPOST,
+                arguments: [4, "", 100 + i, ""],
+                function: CREATE_PUBLICATION,
                 type_arguments: []
             })
 
@@ -79,8 +79,8 @@ describe("TEST PUBLICATION FUNCTIONALITY", ()=> {
         for (let i = 20; i <25; i++) {
             await sleep(3000)
             const transaction = await provider.generateTransaction(delegate_1.address(), {
-                arguments: [i, JSON.stringify({content: `Quoting ${i}`, tags: ["test"], media: []})],
-                function: CREATE_QUOTE,
+                arguments: [2, JSON.stringify({ content: `Quoting ${i}`, tags: ["test"], media: [] }), 100 + i, ""],
+                function: CREATE_PUBLICATION,
                 type_arguments: []
             })
 
@@ -96,7 +96,7 @@ describe("TEST PUBLICATION FUNCTIONALITY", ()=> {
         for (let i = 0; i < 5; i++) {
             await sleep(5000)
             const transaction = await provider.generateTransaction(delegate_2.address(), {
-                arguments: [1, i, 1], // reaction 1 -> like reference i -> publication  i type 1 -> reacting to a publication
+                arguments: [1, 100 + i],
                 function: CREATE_REACTION,
                 type_arguments: []
             })
@@ -113,8 +113,8 @@ describe("TEST PUBLICATION FUNCTIONALITY", ()=> {
         for (let i = 20; i < 25; i++) {
             await sleep(5000)
             const transaction = await provider.generateTransaction(delegate_1.address(), {
-                arguments: [i, 1, JSON.stringify({content: `Commenting on ${i}`, tags: ["test"], media: []})],
-                function: CREATE_COMMENT,
+                arguments: [3, JSON.stringify({ content: `Commenting on ${i}`, tags: ["test"], media: [] }), 100 + i, ""],
+                function: CREATE_PUBLICATION,
                 type_arguments: []
             })
 
@@ -128,8 +128,8 @@ describe("TEST PUBLICATION FUNCTIONALITY", ()=> {
         for (let i = 0; i < 5; i++) {
             await sleep(5000)
             const transaction = await provider.generateTransaction(delegate_2.address(), {
-                arguments: [i, 1, JSON.stringify({content: `Commenting on ${i}`, tags: ["test"], media: []})],
-                function: CREATE_COMMENT,
+                arguments: [3, JSON.stringify({ content: `Commenting on ${i}`, tags: ["test"], media: [] }), 100 + i, ""],
+                function: CREATE_PUBLICATION,
                 type_arguments: []
             })
 

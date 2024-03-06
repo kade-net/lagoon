@@ -1,6 +1,6 @@
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types";
 import _ from "lodash"
-import { ACCOUNT, account, asc, count, delegate, desc, eq, follow, publication, repost } from "oracle";
+import { ACCOUNT, account, and, asc, count, delegate, desc, eq, follow, publication, reaction } from "oracle";
 const { isUndefined } = _
 
 interface ResolverMap {
@@ -11,15 +11,13 @@ interface ResolverMap {
     Account: {
         followers: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
         following: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
-        publications: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
-        delegates: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
-        reposts: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
-        quotes: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
-        comments: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
+        publications: Resolver<ACCOUNT, PaginationArg & { sort: SORT_ORDER, type: number }, Context>
+        delegates: Resolver<ACCOUNT, PaginationArg & { sort: SORT_ORDER }, Context>
         reactions: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
         stats: Resolver<ACCOUNT, any, Context>,
         profile: Resolver<ACCOUNT, any, Context>,
-        username: Resolver<ACCOUNT, any, Context>
+        username: Resolver<ACCOUNT, any, Context>,
+        viewer: Resolver<ACCOUNT, { viewer: number }, Context>
     }
 }
 
@@ -75,9 +73,13 @@ export const AccountsResolver: ResolverMap = {
             })
         },
         publications: async (parent, args, context) => {
+            const { type } = args
             const { size = 10, page = 0 } = args.pagination ?? {}
             return await context.oracle.query.publication.findMany({
-                where: (fields, {eq}) => eq(fields.creator_id, parent.id),
+                where: (fields, { eq }) => type ? and(
+                    eq(fields.creator_id, parent.id),
+                    eq(fields.type, type)
+                ) : eq(fields.creator_id, parent.id),
                 offset: page * size,
                 limit: size,
                 orderBy: args?.sort == "ASC" ? asc(publication.timestamp) : desc(publication.timestamp)
@@ -92,40 +94,13 @@ export const AccountsResolver: ResolverMap = {
                 orderBy: args?.sort == "ASC" ? asc(delegate.timestamp) : desc(delegate.timestamp)
             })
         },
-        reposts: async (parent, args, context) => {
-            const { size = 10, page = 0 } = args.pagination ?? {}
-            return await context.oracle.query.repost.findMany({
-                where: (fields, {eq}) => eq(fields.creator_id, parent.id),
-                offset: page * size,
-                limit: size,
-                orderBy: args?.sort == "ASC" ? asc(repost.timestamp) : desc(repost.timestamp)
-            })
-        },
-        quotes: async (parent, args, context) => {
-            const { size = 10, page = 0 } = args.pagination ?? {}
-            return (await context.oracle.query.quote.findMany({
-                where: (fields, {eq}) => eq(fields.creator_id, parent.id),
-                offset: page * size,
-                limit: size,
-                orderBy: args?.sort == "ASC" ? asc(repost.timestamp) : desc(repost.timestamp)
-            }))
-        },
-        comments: async (parent, args, context) => {
-            const { size = 10, page = 0 } = args.pagination ?? {}
-            return await context.oracle.query.comment.findMany({
-                where: (fields, {eq}) => eq(fields.creator_id, parent.id),
-                offset: page * size,
-                limit: size,
-                orderBy: args?.sort == "ASC" ? asc(repost.timestamp) : desc(repost.timestamp)
-            })
-        },
         reactions: async (parent, args, context) => {
             const { size = 10, page = 0 } = args.pagination ?? {}
             return await context.oracle.query.reaction.findMany({
                 where: (fields, {eq}) => eq(fields.creator_id, parent.id),
                 offset: page * size,
                 limit: size,
-                orderBy: args?.sort == "ASC" ? asc(repost.timestamp) : desc(repost.timestamp)
+                orderBy: args?.sort == "ASC" ? asc(reaction.timestamp) : desc(reaction.timestamp)
             })
         },
         stats: async (parent, _, context) => {
@@ -137,9 +112,12 @@ export const AccountsResolver: ResolverMap = {
                 value: count()
             }).from(follow).where(eq(follow.follower_id, parent.id))
 
-            const publications_count = await context.oracle.select({
+            const post_count = await context.oracle.select({
                 value: count()
-            }).from(publication).where(eq(publication.creator_id, parent.id))
+            }).from(publication).where(and(
+                eq(publication.creator_id, parent.id),
+                eq(publication.type, 1)
+            ))
 
             const delegates_count = await context.oracle.select({
                 value: count()
@@ -147,15 +125,30 @@ export const AccountsResolver: ResolverMap = {
 
             const reposts_count = await context.oracle.select({
                 value: count()
-            }).from(repost).where(eq(repost.creator_id, parent.id))
+            }).from(publication).where(
+                and(
+                    eq(publication.parent_id, parent.id),
+                    eq(publication.type, 4)
+                )
+            )
 
             const quotes_count = await context.oracle.select({
                 value: count()
-            }).from(publication).where(eq(publication.creator_id, parent.id))
+            }).from(publication).where(
+                and(
+                    eq(publication.parent_id, parent.id),
+                    eq(publication.type, 2)
+                )
+            )
 
             const comments_count = await context.oracle.select({
                 value: count()
-            }).from(publication).where(eq(publication.creator_id, parent.id))
+            }).from(publication).where(
+                and(
+                    eq(publication.parent_id, parent.id),
+                    eq(publication.type, 3)
+                )
+            )
 
             const reactions_count = await context.oracle.select({
                 value: count()
@@ -164,7 +157,7 @@ export const AccountsResolver: ResolverMap = {
             return {
                 followers: followers_count.at(0)?.value ?? 0,
                 following: following_count.at(0)?.value ?? 0,
-                publications: publications_count.at(0)?.value ?? 0,
+                publications: post_count.at(0)?.value ?? 0,
                 delegates: delegates_count.at(0)?.value ?? 0,
                 reposts: reposts_count.at(0)?.value ?? 0,
                 quotes: quotes_count.at(0)?.value ?? 0,
@@ -181,6 +174,32 @@ export const AccountsResolver: ResolverMap = {
             return await context.oracle.query.username.findFirst({
                 where: (fields, { eq }) => eq(fields.owner_address, parent.address)
             })
+        },
+        viewer: async (parent, args, context) => {
+            const { viewer } = args
+
+            if (!viewer) {
+                return null
+            }
+
+            const follows = await context.oracle.query.follow.findFirst({
+                where: (fields, { and, eq }) => and(
+                    eq(fields.follower_id, viewer),
+                    eq(fields.following_id, parent.id)
+                )
+            })
+
+            const followed = await context.oracle.query.follow.findFirst({
+                where: (fields, { and, eq }) => and(
+                    eq(fields.follower_id, parent.id),
+                    eq(fields.following_id, viewer)
+                )
+            })
+
+            return {
+                follows: follows ? true : false,
+                followed: followed ? true : false
+            }
         }
     }
 }

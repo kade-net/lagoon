@@ -1,5 +1,5 @@
 {
-  "id": "a5b569d2-b458-4b50-b2ec-46ecbe52d994",
+  "id": "c40d432e-c363-47fb-9d41-97526dda5173",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -101,99 +101,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "comment": {
-      "name": "comment",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "publication_id": {
-          "name": "publication_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "comment_id": {
-          "name": "comment_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "creator_id": {
-          "name": "creator_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "timestamp": {
-          "name": "timestamp",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "content": {
-          "name": "content",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "quote_id": {
-          "name": "quote_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "comment_publication_id_publication_id_fk": {
-          "name": "comment_publication_id_publication_id_fk",
-          "tableFrom": "comment",
-          "tableTo": "publication",
-          "columnsFrom": [
-            "publication_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "comment_creator_id_account_id_fk": {
-          "name": "comment_creator_id_account_id_fk",
-          "tableFrom": "comment",
-          "tableTo": "account",
-          "columnsFrom": [
-            "creator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "comment_quote_id_quote_id_fk": {
-          "name": "comment_quote_id_quote_id_fk",
-          "tableFrom": "comment",
-          "tableTo": "quote",
-          "columnsFrom": [
-            "quote_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "publication": {
       "name": "publication",
       "schema": "",
@@ -222,6 +129,25 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "type": {
+          "name": "type",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "publication_ref": {
+          "name": "publication_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -238,130 +164,13 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "quote": {
-      "name": "quote",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
         },
-        "publication_id": {
-          "name": "publication_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "creator_id": {
-          "name": "creator_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "timestamp": {
-          "name": "timestamp",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "content": {
-          "name": "content",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "quote_publication_id_publication_id_fk": {
-          "name": "quote_publication_id_publication_id_fk",
-          "tableFrom": "quote",
+        "publication_parent_id_publication_id_fk": {
+          "name": "publication_parent_id_publication_id_fk",
+          "tableFrom": "publication",
           "tableTo": "publication",
           "columnsFrom": [
-            "publication_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "quote_creator_id_account_id_fk": {
-          "name": "quote_creator_id_account_id_fk",
-          "tableFrom": "quote",
-          "tableTo": "account",
-          "columnsFrom": [
-            "creator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "repost": {
-      "name": "repost",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "publication_id": {
-          "name": "publication_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "creator_id": {
-          "name": "creator_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "timestamp": {
-          "name": "timestamp",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "repost_publication_id_publication_id_fk": {
-          "name": "repost_publication_id_publication_id_fk",
-          "tableFrom": "repost",
-          "tableTo": "publication",
-          "columnsFrom": [
-            "publication_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "repost_creator_id_account_id_fk": {
-          "name": "repost_creator_id_account_id_fk",
-          "tableFrom": "repost",
-          "tableTo": "account",
-          "columnsFrom": [
-            "creator_id"
+            "parent_id"
           ],
           "columnsTo": [
             "id"
@@ -385,18 +194,6 @@
         },
         "publication_id": {
           "name": "publication_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "comment_id": {
-          "name": "comment_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "quote_id": {
-          "name": "quote_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -429,32 +226,6 @@
           "tableTo": "publication",
           "columnsFrom": [
             "publication_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "reaction_comment_id_comment_id_fk": {
-          "name": "reaction_comment_id_comment_id_fk",
-          "tableFrom": "reaction",
-          "tableTo": "comment",
-          "columnsFrom": [
-            "comment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "reaction_quote_id_quote_id_fk": {
-          "name": "reaction_quote_id_quote_id_fk",
-          "tableFrom": "reaction",
-          "tableTo": "quote",
-          "columnsFrom": [
-            "quote_id"
           ],
           "columnsTo": [
             "id"

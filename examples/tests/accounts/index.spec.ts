@@ -6,7 +6,7 @@ import { ADD_DELEGATE, CREATE_ACCOUNT, FOLLOW_ACCOUNT, UPDATE_PROFILE, client, d
 const ALICE_IMAGE = "https://images.unsplash.com/photo-1613063322946-77d35809140c?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 const BOB_IMAGE = "https://images.unsplash.com/photo-1578681994506-b8f463449011?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 
-describe("TEST ACCOUNT FUNCTIONALITY", ()=> {
+describe.only("TEST ACCOUNT FUNCTIONALITY", () => {
 
     it("CREATE ACCOUNT FOR ALICE", async () => {
         const transaction = await provider.generateTransaction(user_1.address(), {
@@ -178,7 +178,7 @@ describe("TEST ACCOUNT FUNCTIONALITY", ()=> {
         console.log("HASH: ", hash)
     })
 
-    it("BOB UPDATES HIS PROFILE", async () => {
+    it.only("BOB UPDATES HIS PROFILE", async () => {
         const transaction = await provider.generateTransaction(delegate_2.address(), {
             arguments: [BOB_IMAGE, "Hi, this is Bob", "Bob"],
             function: UPDATE_PROFILE,

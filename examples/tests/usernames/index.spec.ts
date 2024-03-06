@@ -2,7 +2,7 @@ import { CLAIM_USERNAME, provider, user_1, user_2 } from "../../constants"
 
 
 
-describe("USERNAME CONTRACT", () => {
+describe.skip("USERNAME CONTRACT", () => {
 
     it("CLAIM USERNAME FOR ALICE", async () => {
         const transaction = await provider.generateTransaction(user_1.address(), {

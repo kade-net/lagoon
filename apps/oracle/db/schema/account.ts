@@ -3,6 +3,7 @@ import { pgTable, integer, text, timestamp } from "drizzle-orm/pg-core";
 import { follow } from "./follow";
 import { delegate } from "./delegate";
 import { profile } from "./profile";
+import { publication } from "./publication";
 
 
 export const account = pgTable("account", {
@@ -10,7 +11,6 @@ export const account = pgTable("account", {
     address: text("address").notNull(),
     object_address: text("object_address").notNull(),
     timestamp: timestamp("timestamp").notNull().defaultNow(),
-    signature: text("signature").notNull(),
 })
 
 
@@ -33,6 +33,9 @@ export const account_relations = relations(account, ({one, many})=> {
             fields: [account.id],
             references: [profile.creator],
             relationName: "profile"
+        }),
+        publications: many(publication, {
+            relationName: "publications"
         })
     }
 })
