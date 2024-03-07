@@ -140,4 +140,5 @@ type Query {
     viewer: Int
     address: String
   ): PublicationViewerStats
+  publicationComments(id: Int, ref: String, pagination: Pagination,  sort: SortOrder): [Publication!]
 }

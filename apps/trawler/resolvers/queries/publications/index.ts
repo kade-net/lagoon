@@ -8,6 +8,7 @@ interface ResolverMap {
         publications: Resolver<any, PaginationArg & { creator: number, sort: SORT_ORDER, type: number }, Context>,
         publicationStats: Resolver<any, { id: number, ref: string }, Context>,
         publicationInteractionsByViewer: Resolver<any, { id: number, ref: string, viewer: number, address: string }, Context>
+        publicationComments: Resolver<any, PaginationArg & { id: number, ref: string, sort: SORT_ORDER }, Context>
     },
     Publication: {
         reactions: Resolver<PUBLICATION, PaginationArg & { sort: SORT_ORDER }, Context>
@@ -177,6 +178,27 @@ export const PublicationResolver: ResolverMap = {
                 repost_refs: reposts.map(r => r.publication_ref),
                 ref: _publication?.publication_ref
             }
+        },
+        publicationComments: async (_, args, context) => {
+            const { id, ref } = args
+            const publication_id = id ?? (await context.oracle.query.publication.findFirst({
+                where: (fields, { eq }) => eq(fields.publication_ref, ref)
+            }))?.id
+
+            if (!publication_id) {
+                return null
+            }
+
+            const { size = 10, page = 0 } = args.pagination ?? {}
+            return await context.oracle.query.publication.findMany({
+                offset: page * size,
+                limit: size,
+                where: (fields, { eq, and }) => (
+                    eq(fields.parent_id, publication_id),
+                    eq(fields.type, 3) // COMMENET TYPE
+                ),
+                orderBy: args?.sort == "ASC" ? asc(publication.timestamp) : desc(publication.timestamp)
+            })
         }
     },
     Publication: {
