@@ -5,7 +5,9 @@ import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../
 interface ResolverMap {
     Query : {
         publication: Resolver<any, { id: number, creator: number, ref: string }, Context>,
-        publications: Resolver<any, PaginationArg & { creator: number, sort: SORT_ORDER, type: number }, Context>
+        publications: Resolver<any, PaginationArg & { creator: number, sort: SORT_ORDER, type: number }, Context>,
+        publicationStats: Resolver<any, { id: number, ref: string }, Context>,
+        publicationInteractionsByViewer: Resolver<any, { id: number, ref: string, viewer: number, address: string }, Context>
     },
     Publication: {
         reactions: Resolver<PUBLICATION, PaginationArg & { sort: SORT_ORDER }, Context>
@@ -49,6 +51,118 @@ export const PublicationResolver: ResolverMap = {
                     (fields, { eq }) => type ? eq(fields.type, type) : undefined,
                 orderBy: args?.sort == "ASC" ? asc(publication.timestamp) : desc(publication.timestamp)
             })
+        },
+        publicationStats: async (_, args, context) => {
+            const { id, ref } = args
+            const publication_id = id ?? (await context.oracle.query.publication.findFirst({
+                where: (fields, { eq }) => eq(fields.publication_ref, ref)
+            }))?.id
+
+            if (!publication_id) {
+                return null
+            }
+
+            const reactions_count = await context.oracle.select({
+                value: count()
+            }).from(reaction).where(eq(reaction.publication_id, publication_id))
+
+            const comments_count = await context.oracle.select({
+                value: count()
+            }).from(publication).where(and(
+                eq(publication.parent_id, publication_id),
+                eq(publication.type, 3)
+            ))
+
+            const quotes_count = await context.oracle.select({
+                value: count()
+            }).from(publication).where(
+                and(
+                    eq(publication.parent_id, publication_id),
+                    eq(publication.type, 2)
+                )
+            )
+
+            const reposts_count = await context.oracle.select({
+                value: count()
+            }).from(publication).where(
+                and(
+                    eq(publication.parent_id, publication_id),
+                    eq(publication.type, 4)
+                )
+            )
+
+            return {
+                reactions: reactions_count.at(0)?.value ?? 0,
+                comments: comments_count.at(0)?.value ?? 0,
+                quotes: quotes_count.at(0)?.value ?? 0,
+                reposts: reposts_count.at(0)?.value ?? 0
+            }
+        },
+        publicationInteractionsByViewer: async (_, args, context) => {
+            const { id, ref, viewer, address } = args
+
+            const publication_id = id ?? (await context.oracle.query.publication.findFirst({
+                where: (fields, { eq }) => eq(fields.publication_ref, ref)
+            }))?.id
+
+            if (!publication_id) {
+                return null
+            }
+
+            const viewer_id = viewer ?? (await context.oracle.query.account.findFirst({
+                where: (fields, { eq }) => eq(fields.address, address)
+            }))?.id
+
+
+            const reactions = await context.oracle.select({
+                value: count()
+            }).from(reaction)
+                .where(
+                    and(
+                        eq(reaction.publication_id, publication_id),
+                        eq(reaction.creator_id, viewer_id)
+                    )
+                )
+
+            const comments = await context.oracle.select({
+                value: count()
+            }).from(publication)
+                .where(
+                    and(
+                        eq(publication.parent_id, publication_id),
+                        eq(publication.type, 3),
+                        eq(publication.creator_id, viewer_id)
+                    )
+                )
+
+            const quotes = await context.oracle.select({
+                value: count()
+            }).from(publication)
+                .where(
+                    and(
+                        eq(publication.parent_id, publication_id),
+                        eq(publication.type, 2),
+                        eq(publication.creator_id, viewer_id)
+                    )
+                )
+
+            const reposts = await context.oracle.select({
+                value: count()
+            }).from(publication)
+                .where(
+                    and(
+                        eq(publication.parent_id, publication_id),
+                        eq(publication.type, 4),
+                        eq(publication.creator_id, viewer_id)
+                    )
+                )
+
+            return {
+                reacted: (reactions.at(0)?.value ?? 0) > 0,
+                commented: (comments.at(0)?.value ?? 0) > 0,
+                quoted: (quotes.at(0)?.value ?? 0) > 0,
+                reposted: (reposts.at(0)?.value ?? 0) > 0
+            }
         }
     },
     Publication: {
@@ -155,10 +269,10 @@ export const PublicationResolver: ResolverMap = {
                 )
 
             return {
-                reactions: reactions.at(0)?.value ?? 0,
-                comments: comments.at(0)?.value ?? 0,
-                quotes: quotes.at(0)?.value ?? 0,
-                reposts: reposts.at(0)?.value ?? 0
+                reacted: (reactions.at(0)?.value ?? 0) > 0,
+                commented: (comments.at(0)?.value ?? 0) > 0,
+                quoted: (quotes.at(0)?.value ?? 0) > 0,
+                reposted: (reposts.at(0)?.value ?? 0) > 0
             }
         },
         children: async (parent, args, context) => {

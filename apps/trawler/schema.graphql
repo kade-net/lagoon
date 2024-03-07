@@ -77,10 +77,10 @@ type PublicationStats {
 }
 
 type PublicationViewerStats {
-  reactions: Int!
-  quotes: Int!
-  comments: Int!
-  reposts: Int!
+  reacted: Boolean!
+  quoted: Boolean!
+  commented: Boolean!
+  reposted: Boolean!
 }
 
 type Publication {
@@ -128,4 +128,11 @@ type Query {
     creator: Int
     sort: SortOrder
   ): [Publication!]
+  publicationStats(id: Int, ref: String): PublicationStats
+  publicationInteractionsByViewer(
+    id: Int
+    ref: String
+    viewer: Int
+    address: String
+  ): PublicationViewerStats
 }
