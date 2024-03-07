@@ -81,8 +81,11 @@ type PublicationViewerStats {
   ref: String!
   reacted: Boolean!
   quoted: Boolean!
+  quote_refs: [String!]
   commented: Boolean!
+  comment_refs: [String!]
   reposted: Boolean!
+  repost_refs: [String!]
 }
 
 type Publication {

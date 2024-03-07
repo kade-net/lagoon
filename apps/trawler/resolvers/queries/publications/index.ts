@@ -133,44 +133,48 @@ export const PublicationResolver: ResolverMap = {
                     )
                 )
 
-            const comments = await context.oracle.select({
-                value: count()
-            }).from(publication)
-                .where(
-                    and(
-                        eq(publication.parent_id, publication_id),
-                        eq(publication.type, 3),
-                        eq(publication.creator_id, viewer_id)
-                    )
-                )
+            const comments = await context.oracle.query.publication.findMany({
+                where: (fields, { eq, and }) => and(
+                    eq(fields.parent_id, publication_id),
+                    eq(fields.type, 3),
+                    eq(fields.creator_id, viewer_id)
+                ),
+                columns: {
+                    publication_ref: true
+                }
+            })
 
-            const quotes = await context.oracle.select({
-                value: count()
-            }).from(publication)
-                .where(
-                    and(
-                        eq(publication.parent_id, publication_id),
-                        eq(publication.type, 2),
-                        eq(publication.creator_id, viewer_id)
-                    )
-                )
 
-            const reposts = await context.oracle.select({
-                value: count()
-            }).from(publication)
-                .where(
-                    and(
-                        eq(publication.parent_id, publication_id),
-                        eq(publication.type, 4),
-                        eq(publication.creator_id, viewer_id)
-                    )
-                )
+            const quotes = await context.oracle.query.publication.findMany({
+                where: (fields, { eq, and }) => and(
+                    eq(fields.parent_id, publication_id),
+                    eq(fields.type, 2),
+                    eq(fields.creator_id, viewer_id)
+                ),
+                columns: {
+                    publication_ref: true
+                }
+            })
+
+            const reposts = await context.oracle.query.publication.findMany({
+                where: (fields, { eq, and }) => and(
+                    eq(fields.parent_id, publication_id),
+                    eq(fields.type, 4),
+                    eq(fields.creator_id, viewer_id)
+                ),
+                columns: {
+                    publication_ref: true
+                }
+            })
 
             return {
                 reacted: (reactions.at(0)?.value ?? 0) > 0,
-                commented: (comments.at(0)?.value ?? 0) > 0,
-                quoted: (quotes.at(0)?.value ?? 0) > 0,
-                reposted: (reposts.at(0)?.value ?? 0) > 0,
+                commented: comments.length > 0,
+                comment_refs: comments.map(c => c.publication_ref),
+                quoted: quotes.length > 0,
+                quote_refs: quotes.map(q => q.publication_ref),
+                reposted: reposts.length > 0,
+                repost_refs: reposts.map(r => r.publication_ref),
                 ref: _publication?.publication_ref
             }
         }
@@ -245,44 +249,49 @@ export const PublicationResolver: ResolverMap = {
                 )
 
 
-            const comments = await context.oracle.select({
-                value: count()
-            }).from(publication)
-                .where(
-                    and(
-                        eq(publication.parent_id, parent.id),
-                        eq(publication.type, 3),
-                        eq(publication.creator_id, viewer)
-                    )
-                )
+            const comments = await context.oracle.query.publication.findMany({
+                where: (fields, { eq, and }) => and(
+                    eq(fields.parent_id, parent.id),
+                    eq(fields.type, 3),
+                    eq(fields.creator_id, viewer)
+                ),
+                columns: {
+                    publication_ref: true
+                }
+            })
 
-            const quotes = await context.oracle.select({
-                value: count()
-            }).from(publication)
-                .where(
-                    and(
-                        eq(publication.parent_id, parent.id),
-                        eq(publication.type, 2),
-                        eq(publication.creator_id, viewer)
-                    )
-                )
 
-            const reposts = await context.oracle.select({
-                value: count()
-            }).from(publication)
-                .where(
-                    and(
-                        eq(publication.parent_id, parent.id),
-                        eq(publication.type, 4),
-                        eq(publication.creator_id, viewer)
-                    )
-                )
+
+            const quotes = await context.oracle.query.publication.findMany({
+                where: (fields, { eq, and }) => and(
+                    eq(fields.parent_id, parent.id),
+                    eq(fields.type, 2),
+                    eq(fields.creator_id, viewer)
+                ),
+                columns: {
+                    publication_ref: true
+                }
+            })
+
+            const reposts = await context.oracle.query.publication.findMany({
+                where: (fields, { eq, and }) => and(
+                    eq(fields.parent_id, parent.id),
+                    eq(fields.type, 4),
+                    eq(fields.creator_id, viewer)
+                ),
+                columns: {
+                    publication_ref: true
+                }
+            })
 
             return {
                 reacted: (reactions.at(0)?.value ?? 0) > 0,
-                commented: (comments.at(0)?.value ?? 0) > 0,
-                quoted: (quotes.at(0)?.value ?? 0) > 0,
-                reposted: (reposts.at(0)?.value ?? 0) > 0,
+                commented: comments.length > 0,
+                comment_refs: comments.map(c => c.publication_ref),
+                quoted: quotes.length > 0,
+                quote_refs: quotes.map(q => q.publication_ref),
+                reposted: reposts.length > 0,
+                repost_refs: reposts.map(r => r.publication_ref),
                 ref: parent.publication_ref
             }
         },
