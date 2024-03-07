@@ -193,7 +193,7 @@ export const PublicationResolver: ResolverMap = {
             return await context.oracle.query.publication.findMany({
                 offset: page * size,
                 limit: size,
-                where: (fields, { eq, and }) => (
+                where: (fields, { eq, and }) => and(
                     eq(fields.parent_id, publication_id),
                     eq(fields.type, 3) // COMMENET TYPE
                 ),
