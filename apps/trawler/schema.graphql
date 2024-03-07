@@ -70,6 +70,7 @@ type Follow {
 }
 
 type PublicationStats {
+  ref: String!
   reposts: Int!
   quotes: Int!
   comments: Int!
@@ -77,6 +78,7 @@ type PublicationStats {
 }
 
 type PublicationViewerStats {
+  ref: String!
   reacted: Boolean!
   quoted: Boolean!
   commented: Boolean!

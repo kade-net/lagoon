@@ -62,6 +62,10 @@ export const PublicationResolver: ResolverMap = {
                 return null
             }
 
+            const _publication = await context.oracle.query.publication.findFirst({
+                where: (fields, { eq }) => eq(fields.id, publication_id)
+            })
+
             const reactions_count = await context.oracle.select({
                 value: count()
             }).from(reaction).where(eq(reaction.publication_id, publication_id))
@@ -95,7 +99,8 @@ export const PublicationResolver: ResolverMap = {
                 reactions: reactions_count.at(0)?.value ?? 0,
                 comments: comments_count.at(0)?.value ?? 0,
                 quotes: quotes_count.at(0)?.value ?? 0,
-                reposts: reposts_count.at(0)?.value ?? 0
+                reposts: reposts_count.at(0)?.value ?? 0,
+                ref: _publication?.publication_ref
             }
         },
         publicationInteractionsByViewer: async (_, args, context) => {
@@ -108,6 +113,10 @@ export const PublicationResolver: ResolverMap = {
             if (!publication_id) {
                 return null
             }
+
+            const _publication = await context.oracle.query.publication.findFirst({
+                where: (fields, { eq }) => eq(fields.id, publication_id)
+            })
 
             const viewer_id = viewer ?? (await context.oracle.query.account.findFirst({
                 where: (fields, { eq }) => eq(fields.address, address)
@@ -161,7 +170,8 @@ export const PublicationResolver: ResolverMap = {
                 reacted: (reactions.at(0)?.value ?? 0) > 0,
                 commented: (comments.at(0)?.value ?? 0) > 0,
                 quoted: (quotes.at(0)?.value ?? 0) > 0,
-                reposted: (reposts.at(0)?.value ?? 0) > 0
+                reposted: (reposts.at(0)?.value ?? 0) > 0,
+                ref: _publication?.publication_ref
             }
         }
     },
@@ -272,7 +282,8 @@ export const PublicationResolver: ResolverMap = {
                 reacted: (reactions.at(0)?.value ?? 0) > 0,
                 commented: (comments.at(0)?.value ?? 0) > 0,
                 quoted: (quotes.at(0)?.value ?? 0) > 0,
-                reposted: (reposts.at(0)?.value ?? 0) > 0
+                reposted: (reposts.at(0)?.value ?? 0) > 0,
+                ref: parent.publication_ref
             }
         },
         children: async (parent, args, context) => {
