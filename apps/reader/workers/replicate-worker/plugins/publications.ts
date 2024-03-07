@@ -20,7 +20,7 @@ export class PublicationCreateEventPlugin extends ProcessorPlugin {
 
             try {
                 await oracle.insert(publication).values({
-                    content: data.type == 4 ? undefined : JSON.parse(data.payload),
+                    content: data.type == 4 ? {} : JSON.parse(data.payload),
                     creator_id: data.user_kid,
                     id: data.kid,
                     timestamp: data.timestamp,
@@ -88,7 +88,7 @@ export class PublicationCreateWithRefEventPlugin extends ProcessorPlugin {
                     return
                 }
                 await oracle.insert(publication).values({
-                    content: data.type == 4 ? undefined : JSON.parse(data.payload),
+                    content: data.type == 4 ? {} : JSON.parse(data.payload),
                     creator_id: data.user_kid,
                     id: data.kid,
                     timestamp: data.timestamp,
