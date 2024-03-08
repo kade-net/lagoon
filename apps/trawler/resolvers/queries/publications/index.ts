@@ -356,6 +356,7 @@ export const PublicationResolver: ResolverMap = {
             })
         },
         parent: async (parent, _, context) => {
+            if (parent.type == 1) return null
             const parent_id = parent.parent_id
             if (!parent_id) {
                 return null
