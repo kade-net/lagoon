@@ -133,6 +133,7 @@ type Query {
     creator: Int
     sort: SortOrder
     creator_address: String
+    types: [Int!]
   ): [Publication!]
   publicationStats(id: Int, ref: String): PublicationStats
   publicationInteractionsByViewer(

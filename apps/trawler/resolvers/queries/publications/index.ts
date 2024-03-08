@@ -5,7 +5,7 @@ import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../
 interface ResolverMap {
     Query : {
         publication: Resolver<any, { id: number, creator: number, ref: string, creator_address: string }, Context>,
-        publications: Resolver<any, PaginationArg & { creator: number, sort: SORT_ORDER, type: number, creator_address: string }, Context>,
+        publications: Resolver<any, PaginationArg & { creator: number, sort: SORT_ORDER, type: number, creator_address: string, types?: Array<number> }, Context>,
         publicationStats: Resolver<any, { id: number, ref: string }, Context>,
         publicationInteractionsByViewer: Resolver<any, { id: number, ref: string, viewer: number, address: string }, Context>
         publicationComments: Resolver<any, PaginationArg & { id: number, ref: string, sort: SORT_ORDER }, Context>
@@ -47,7 +47,7 @@ export const PublicationResolver: ResolverMap = {
             })
         },
         publications: async (_, args, context) => {
-            const { type, creator_address, creator } = args
+            const { type, creator_address, creator, types } = args
 
             const { size = 10, page = 0 } = args.pagination ?? {}
 
@@ -64,11 +64,17 @@ export const PublicationResolver: ResolverMap = {
                 offset: page * size,
                 limit: size,
                 where: creator_id ?
-                    (fields, { eq, and }) => type ? and(
+                    (fields, { eq, and, inArray }) => type ? and(
                         eq(fields.creator_id, creator_id),
                         eq(fields.type, type)
-                    ) : eq(fields.creator_id, creator_id) :
-                    (fields, { eq }) => type ? eq(fields.type, type) : undefined,
+                    ) :
+                        types ? and(
+                            eq(fields.creator_id, creator_id),
+                            inArray(fields.type, types)
+                        ) :
+                            eq(fields.creator_id, creator_id) :
+                    (fields, { eq, inArray }) => type ? eq(fields.type, type) : types ? inArray(fields.type, types) : undefined,
+
                 orderBy: args?.sort == "ASC" ? asc(publication.timestamp) : desc(publication.timestamp)
             })
         },
