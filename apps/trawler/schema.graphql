@@ -141,4 +141,6 @@ type Query {
     address: String
   ): PublicationViewerStats
   publicationComments(id: Int, ref: String, pagination: Pagination,  sort: SortOrder): [Publication!]
+  accountViewerStats(accountAddress: String!, viewerAddress: String!): AccountViewerStats
+  accountPublications(accountAddress: String!, pagination: Pagination, sort: SortOrder, type: Int): [Publication!]
 }

@@ -7,6 +7,8 @@ interface ResolverMap {
     Query: {
         account: Resolver<any, {id?: number, address?: string}, Context>,
         accounts: Resolver<any, PaginationArg & {sort: SORT_ORDER}, Context>
+        accountViewerStats: Resolver<any, { accountAddress: string, viewerAddress: string }, Context>
+        accountPublications: Resolver<any, PaginationArg & { sort: SORT_ORDER, type: number, accountAddress: string }, Context>
     },
     Account: {
         followers: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
@@ -51,6 +53,61 @@ export const AccountsResolver: ResolverMap = {
                     limit: size,
                     orderBy: args?.sort == "ASC" ? asc(account.timestamp) : desc(account.timestamp)
                 })
+        },
+        accountViewerStats: async (_, args, context) => {
+            const { accountAddress, viewerAddress } = args
+            const account = await context.oracle.query.account.findFirst({
+                where: (fields, { eq }) => eq(fields.address, accountAddress)
+            })
+
+            const viewer = await context.oracle.query.account.findFirst({
+                where: (fields, { eq }) => eq(fields.address, viewerAddress)
+            })
+
+            if (!account || !viewer) {
+                return null
+            }
+
+            const follows = await context.oracle.query.follow.findFirst({
+                where: (fields, { and, eq }) => and(
+                    eq(fields.follower_id, viewer.id),
+                    eq(fields.following_id, account.id)
+                )
+            })
+
+            const followed = await context.oracle.query.follow.findFirst({
+                where: (fields, { and, eq }) => and(
+                    eq(fields.follower_id, account.id),
+                    eq(fields.following_id, viewer.id)
+                )
+            })
+
+            return {
+                follows: follows ? true : false,
+                followed: followed ? true : false
+            }
+        },
+        accountPublications: async (_, args, context) => {
+            const { size = 10, page = 0 } = args.pagination ?? {}
+            const { accountAddress, type } = args
+
+            const account = await context.oracle.query.account.findFirst({
+                where: (fields, { eq }) => eq(fields.address, accountAddress)
+            })
+
+            if (!account) {
+                return null
+            }
+
+            return await context.oracle.query.publication.findMany({
+                where: (fields, { eq }) => type ? and(
+                    eq(fields.creator_id, account.id),
+                    eq(fields.type, type)
+                ) : eq(fields.creator_id, account.id),
+                offset: page * size,
+                limit: size,
+                orderBy: args?.sort == "ASC" ? asc(publication.timestamp) : desc(publication.timestamp)
+            })
         }
     },
     Account: {
