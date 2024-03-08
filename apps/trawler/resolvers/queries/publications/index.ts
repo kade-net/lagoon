@@ -63,7 +63,7 @@ export const PublicationResolver: ResolverMap = {
             return await context.oracle.query.publication.findMany({
                 offset: page * size,
                 limit: size,
-                where: args.creator ?
+                where: creator_id ?
                     (fields, { eq, and }) => type ? and(
                         eq(fields.creator_id, creator_id),
                         eq(fields.type, type)
