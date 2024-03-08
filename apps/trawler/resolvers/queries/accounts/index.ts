@@ -157,7 +157,7 @@ export const AccountsResolver: ResolverMap = {
             return {
                 followers: followers_count.at(0)?.value ?? 0,
                 following: following_count.at(0)?.value ?? 0,
-                publications: post_count.at(0)?.value ?? 0,
+                posts: post_count.at(0)?.value ?? 0,
                 delegates: delegates_count.at(0)?.value ?? 0,
                 reposts: reposts_count.at(0)?.value ?? 0,
                 quotes: quotes_count.at(0)?.value ?? 0,
