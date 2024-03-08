@@ -4,7 +4,7 @@ import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../
 
 interface ResolverMap {
     Query : {
-        publication: Resolver<any, { id: number, creator: number, ref: string }, Context>,
+        publication: Resolver<any, { id: number, creator: number, ref: string, creator_address: string }, Context>,
         publications: Resolver<any, PaginationArg & { creator: number, sort: SORT_ORDER, type: number }, Context>,
         publicationStats: Resolver<any, { id: number, ref: string }, Context>,
         publicationInteractionsByViewer: Resolver<any, { id: number, ref: string, viewer: number, address: string }, Context>
@@ -23,14 +23,22 @@ interface ResolverMap {
 export const PublicationResolver: ResolverMap = {
     Query: {
         publication: async (_, args, context) => {
-            const { id, creator, ref } = args
+            const { id, creator, ref, creator_address } = args
+            let creator_id = creator
+            if (!creator_id && creator_address) {
+                const account = await context.oracle.query.account.findFirst({
+                    where: (fields, { eq }) => eq(fields.address, creator_address)
+                })
+                if (account)
+                    creator_id = account?.id
+            }
             return await context.oracle.query.publication.findFirst({
                 where: (fields, {eq}) => {
                     if (id){
                         return eq(fields.id, id)
                     }
-                    if (creator){
-                        return eq(fields.creator_id, creator)
+                    if (creator_id) {
+                        return eq(fields.creator_id, creator_id)
                     }
                     if (ref) {
                         return eq(fields.publication_ref, ref)
