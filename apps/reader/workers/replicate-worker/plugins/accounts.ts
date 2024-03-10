@@ -2,6 +2,7 @@ import schema from "../../../schema";
 import { ProcessorPlugin } from "../helpers";
 import oracle, { account, delegate, eq, follow, profile } from "oracle"
 import { ProcessMonitor } from "../monitor";
+import { InterfaceError, KadeEvents, KadeItems, handleEitherPostgresOrUnkownError, setItemNotExistError, setSchemaError } from "./errors";
 
 
 export class AccountCreatePlugin extends ProcessorPlugin {
@@ -12,7 +13,7 @@ export class AccountCreatePlugin extends ProcessorPlugin {
         const parsed = schema.account_create_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.AccountCreate);
         }
         if (parsed.success) {
             const data = parsed.data
@@ -28,7 +29,7 @@ export class AccountCreatePlugin extends ProcessorPlugin {
             }
             catch (e) {
                 console.log(e)
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
             }
         }
     }
@@ -43,7 +44,7 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
         const parsed = schema.delegate_create_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.DelegateCreate);
         }
 
         if (parsed.success) {
@@ -65,12 +66,12 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
                 }
                 else {
                     console.log(`Account with address ${data.owner_address} not found`)
-                    monitor.setFailed(sequence_number, JSON.stringify({ error: `Account with address ${data.owner_address} not found` }))
+                    setItemNotExistError(monitor, sequence_number, KadeItems.Account);
                 }
             }
             catch (e) {
                 console.log(`Something went wrong while processing data: ${e}`)
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
             }
         }
     }
@@ -84,7 +85,7 @@ export class DelegateRemovePlugin extends ProcessorPlugin {
         const parsed = schema.delegate_remove_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.DelegateRemove);
         }
 
         if (parsed.success) {
@@ -96,7 +97,7 @@ export class DelegateRemovePlugin extends ProcessorPlugin {
             }
             catch (e) {
                 console.log(`Something went wrong while processing data: ${e}`)
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
             }
         }
     }
@@ -111,6 +112,7 @@ export class AccountFollowPlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.AccountFollow)
             monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
         }
 
@@ -129,8 +131,7 @@ export class AccountFollowPlugin extends ProcessorPlugin {
             }
             catch (e) {
                 console.log(`Something went wrong while processing data: ${e}`)
-
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
             }
         }
     }
@@ -145,7 +146,7 @@ export class AccountUnFollowPlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.AccountUnfollow);
         }
 
         if (parsed.success) {
@@ -157,7 +158,7 @@ export class AccountUnFollowPlugin extends ProcessorPlugin {
             }
             catch (e) {
                 console.log(`Something went wrong while processing data: ${e}`)
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
             }
         }
     }
@@ -172,7 +173,7 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.ProfileUpdate);
         }
 
         if (parsed.success) {
@@ -201,8 +202,8 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                console.log(`Something went wrong while processing data: ${e}`)
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                console.log(`Something went wrong while processing data: ${e}`);
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
             }
         }
     }

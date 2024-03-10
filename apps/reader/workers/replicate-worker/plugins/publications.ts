@@ -2,6 +2,7 @@ import oracle, { comment, eq, publication, quote, reaction, repost } from "oracl
 import schema from "../../../schema"
 import { ProcessorPlugin } from "../helpers"
 import { ProcessMonitor } from "../monitor"
+import { KadeEvents, handleEitherPostgresOrUnkownError, setSchemaError } from "./errors"
 
 
 export class PublicationCreateEventPlugin extends ProcessorPlugin {
@@ -11,8 +12,8 @@ export class PublicationCreateEventPlugin extends ProcessorPlugin {
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
         const parsed = schema.publication_create_event_schema.safeParse(event)
         if (!parsed.success) {
-            console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            console.log(parsed.error);
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.PublicationCreate);
         }
 
         if (parsed.success) {
@@ -28,7 +29,7 @@ export class PublicationCreateEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -42,8 +43,8 @@ export class PublicationRemoveEventPlugin extends ProcessorPlugin {
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
         const parsed = schema.publication_remove_event_schema.safeParse(event)
         if (!parsed.success) {
-            console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            console.log(parsed.error);
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.PublicationRemove);
         }
 
         if (parsed.success) {
@@ -54,7 +55,7 @@ export class PublicationRemoveEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -69,7 +70,7 @@ export class CommentCreateEventPlugin extends ProcessorPlugin {
         const parsed = schema.comment_create_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.CommentCreate);
         }
 
         if (parsed.success) {
@@ -90,7 +91,7 @@ export class CommentCreateEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -106,7 +107,7 @@ export class CommentRemoveEventPlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.CommentRemove);
         }
 
         if (parsed.success) {
@@ -117,7 +118,7 @@ export class CommentRemoveEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -134,7 +135,7 @@ export class RepostCreateEventPlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.RepostCreate);
         }
 
 
@@ -152,7 +153,7 @@ export class RepostCreateEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -168,8 +169,8 @@ export class RepostRemoveEventPlugin extends ProcessorPlugin {
         const parsed = schema.repost_remove_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            console.log(parsed.error);
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.RepostRemove);
         }
 
         if (parsed.success) {
@@ -179,7 +180,7 @@ export class RepostRemoveEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -194,8 +195,8 @@ export class QuoteCreateEventPlugin extends ProcessorPlugin {
         const parsed = schema.quote_create_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            console.log(parsed.error);
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.QuoteCreate);
         }
 
         if (parsed.success) {
@@ -212,7 +213,7 @@ export class QuoteCreateEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -228,7 +229,7 @@ export class QuoteRemoveEventPlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.QuoteRemove);
         }
 
         if (parsed.success) {
@@ -238,7 +239,7 @@ export class QuoteRemoveEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -253,8 +254,8 @@ export class ReactionCreateEventPlugin extends ProcessorPlugin {
         const parsed = schema.reaction_create_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            console.log(parsed.error);
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.ReactionCreate);
         }
 
         if (parsed.success) {
@@ -275,7 +276,7 @@ export class ReactionCreateEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -291,7 +292,7 @@ export class ReactionRemoveEventPlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.ReactionRemove);
         }
 
         if (parsed.success) {
@@ -301,7 +302,7 @@ export class ReactionRemoveEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }

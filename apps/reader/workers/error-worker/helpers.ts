@@ -4,10 +4,10 @@ import { AccountCreatePlugin, AccountFollowPlugin, AccountUnFollowPlugin, Delega
 import { CommentCreateEventPlugin, CommentRemoveEventPlugin, PublicationCreateEventPlugin, PublicationRemoveEventPlugin, QuoteCreateEventPlugin, QuoteRemoveEventPlugin, ReactionCreateEventPlugin, ReactionRemoveEventPlugin, RepostCreateEventPlugin } from "../replicate-worker/plugins/publications";
 import { RegisterUsernamePlugin } from "../replicate-worker/plugins/usernames";
 
-export interface PluginError {
+export interface LagoonError {
     sequence_number: string,
     code: string,
-    type: "schema_error" | "pg_error"
+    type: "schema_error" | "pg_error" | "unkown_error" | "item_not_exist_error"
 }
 
 export function getPlugin(type: string): ProcessorPlugin | undefined {

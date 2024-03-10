@@ -2,6 +2,7 @@ import schema from "../../../schema";
 import { ProcessorPlugin } from "../helpers";
 import oracle, { username } from "oracle"
 import { ProcessMonitor } from "../monitor";
+import { KadeEvents, handleEitherPostgresOrUnkownError, setSchemaError } from "./errors";
 
 
 export class RegisterUsernamePlugin extends ProcessorPlugin {
@@ -14,7 +15,7 @@ export class RegisterUsernamePlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.UsernameRegisteration);
         }
 
 
@@ -32,7 +33,7 @@ export class RegisterUsernamePlugin extends ProcessorPlugin {
                 console.log("Data processed successfully")
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
