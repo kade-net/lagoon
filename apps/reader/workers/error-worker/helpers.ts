@@ -4,6 +4,12 @@ import { AccountCreatePlugin, AccountFollowPlugin, AccountUnFollowPlugin, Delega
 import { CommentCreateEventPlugin, CommentRemoveEventPlugin, PublicationCreateEventPlugin, PublicationRemoveEventPlugin, QuoteCreateEventPlugin, QuoteRemoveEventPlugin, ReactionCreateEventPlugin, ReactionRemoveEventPlugin, RepostCreateEventPlugin } from "../replicate-worker/plugins/publications";
 import { RegisterUsernamePlugin } from "../replicate-worker/plugins/usernames";
 
+export interface PluginError {
+    sequence_number: string,
+    code: string,
+    type: "schema_error" | "pg_error"
+}
+
 export function getPlugin(type: string): ProcessorPlugin | undefined {
     if (type === `RegisterUsernameEvent`) {
         return new RegisterUsernamePlugin();
