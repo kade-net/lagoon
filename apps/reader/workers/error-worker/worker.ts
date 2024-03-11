@@ -1,5 +1,5 @@
 import { LevelDB } from "../../db";
-import { LamaReader } from "../../db/lama";
+import { Lama, LamaReader } from "../../db/lama";
 import { sleep } from "../replicate-worker/helpers";
 import { ProcessMonitor } from "../replicate-worker/monitor";
 import { PostgresErrors, parsePostgresErrorType } from "./classify_error";
@@ -9,11 +9,13 @@ export class ErrorWorker {
     reader: LamaReader
     db: LevelDB
     monitor: ProcessMonitor
+    lama: Lama
 
-    constructor(monitor: ProcessMonitor, lastKey: string, db: LevelDB) {
+    constructor(monitor: ProcessMonitor, lastKey: string, db: LevelDB, lama: Lama) {
         this.reader = new LamaReader(monitor.failed.dbi, monitor.failed.env, lastKey);
         this.db = db;
         this.monitor = monitor;
+        this.lama = lama;
     }
 
     async run() {
@@ -51,6 +53,9 @@ export class ErrorWorker {
                     } else if (postgresErrorType == PostgresErrors.UniqueViolation) {
                         // ignore
                     }
+
+                    // Record that I've dealt with error
+                    this.lama.put("lastRead", key);
                 }
             }
         });
