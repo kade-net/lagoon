@@ -2,7 +2,7 @@ import schema from "../../../schema";
 import { ProcessorPlugin } from "../helpers";
 import oracle, { username } from "oracle"
 import { ProcessMonitor } from "../monitor";
-import { KadeEvents, handleEitherPostgresOrUnkownError, setSchemaError } from "./errors";
+import { KadeEvents, handleEitherPostgresOrUnkownError, setSchemaError } from "../../error-worker/errors";
 
 
 export class RegisterUsernamePlugin extends ProcessorPlugin {

@@ -2,7 +2,7 @@ import oracle, { comment, eq, publication, quote, reaction, repost } from "oracl
 import schema from "../../../schema"
 import { ProcessorPlugin } from "../helpers"
 import { ProcessMonitor } from "../monitor"
-import { KadeEvents, handleEitherPostgresOrUnkownError, setSchemaError } from "./errors"
+import { KadeEvents, handleEitherPostgresOrUnkownError, setSchemaError } from "../../error-worker/errors"
 
 
 export class PublicationCreateEventPlugin extends ProcessorPlugin {

@@ -37,6 +37,12 @@ export class Lama {
         txn.commit()
     }
 
+    async delete(key: string) {
+        const txn = this.env.beginTxn();
+        txn.del(this.dbi, key);
+        txn.commit();
+    }
+
     async get(key: string) {
         const txn = this.env.beginTxn()
         const value = txn.getBinary(this.dbi, key)

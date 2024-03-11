@@ -1,8 +1,8 @@
-import { ZodError } from "zod";
-import { LagoonError } from "../../error-worker/helpers";
-import { PostgresErrors } from "../../error-worker/classify_error";
+import { ZodError, z } from "zod";
+import { LagoonError, LagoonTypeSchema } from "./helpers";
+import { PostgresErrors } from "./classify_error";
 import { PostgresError } from "postgres";
-import { ProcessMonitor } from "../monitor";
+import { ProcessMonitor } from "../replicate-worker/monitor";
 
 export enum KadeItems {
     Account = "account"
@@ -30,55 +30,74 @@ export enum KadeEvents {
 
 export class ItemNotExistError {
     item: string;
+    id: number;
 
-    constructor(item: KadeItems) {
+    constructor(item: KadeItems, id: number) {
         this.item = item;
+        this.id = id;
     }
 }
 
 export class InterfaceError implements LagoonError {
     sequence_number: string;
     code: string;
-    type: "schema_error" | "pg_error" | "unkown_error" | "item_not_exist_error";
+    type: z.infer<typeof LagoonTypeSchema>
+    id: number;
+    item: string
 
-    constructor(err: any, sequence_number: string, item?: KadeEvents) {
-        this.sequence_number = sequence_number;
+    static init(err: any, sequence_number: string, item?: KadeEvents): InterfaceError {
+        let type: z.infer<typeof LagoonTypeSchema>;
+        let code;
+        let id;
 
         // Handle depending on type of error
         if (err instanceof ZodError) {
-            this.type = "schema_error";
-            this.code = item!;
+            type = "schema_error";
+            code = item!;
+            id = 0;
         } else if (err instanceof PostgresError) {
-            this.code = err.code;
-            this.type = "pg_error";
+            code = err.code;
+            type = "pg_error";
+            id = 0;
         } else if (err instanceof ItemNotExistError) {
-            this.code = err.item;
-            this.type = "item_not_exist_error"
+            code = err.item;
+            type = "item_not_exist_error"
+            id = err.id;
         } else {
-            this.code = "unknown"
-            this.type = "unkown_error";
+            code = "unknown"
+            type = "unkown_error";
+            id = 0;
         }
+
+        return new InterfaceError(sequence_number, code, type, id);
+    }
+
+    constructor(sequence_number: string, code: string, type: z.infer<typeof LagoonTypeSchema>, id: number) {
+        this.code = code;
+        this.sequence_number = sequence_number;
+        this.type = type;
+        this.id = id;
     }
 }
 
 export function setPostgresError(monitor: ProcessMonitor, err: PostgresError, sequence_number: string) {
-    const error = new InterfaceError(err, sequence_number);
+    const error = InterfaceError.init(err, sequence_number);
     monitor.setFailed(sequence_number, JSON.stringify(error));
 }
 
 export function setSchemaError(monitor: ProcessMonitor, err: ZodError, sequence_number: string, item: KadeEvents) {
-    const error = new InterfaceError(err, sequence_number, item);
+    const error = InterfaceError.init(err, sequence_number, item);
     monitor.setFailed(sequence_number, JSON.stringify(error));
 }
 
 export function setItemNotExistError(monitor: ProcessMonitor, sequence_number: string, item: KadeItems) {
     const itemError = new ItemNotExistError(item);
-    const error = new InterfaceError(itemError, sequence_number);
+    const error = InterfaceError.init(itemError, sequence_number);
     monitor.setFailed(sequence_number, JSON.stringify(error));
 }
 
 export function setUnkownError(monitor: ProcessMonitor, err: any, sequence_number: string) {
-    const error = new InterfaceError(err, sequence_number);
+    const error = InterfaceError.init(err, sequence_number);
     monitor.setFailed(sequence_number, JSON.stringify(error));
 }
 

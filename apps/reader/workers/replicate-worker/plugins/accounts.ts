@@ -2,7 +2,7 @@ import schema from "../../../schema";
 import { ProcessorPlugin } from "../helpers";
 import oracle, { account, delegate, eq, follow, profile } from "oracle"
 import { ProcessMonitor } from "../monitor";
-import { InterfaceError, KadeEvents, KadeItems, handleEitherPostgresOrUnkownError, setItemNotExistError, setSchemaError } from "./errors";
+import { InterfaceError, KadeEvents, KadeItems, handleEitherPostgresOrUnkownError, setItemNotExistError, setSchemaError } from "../../error-worker/errors";
 
 
 export class AccountCreatePlugin extends ProcessorPlugin {
