@@ -2,7 +2,8 @@ import oracle, { comment, eq, publication, quote, reaction, repost } from "oracl
 import schema from "../../../schema"
 import { ProcessorPlugin } from "../helpers"
 import { ProcessMonitor } from "../monitor"
-import { KadeEvents, handleEitherPostgresOrUnkownError, setSchemaError } from "../../error-worker/errors"
+import { KadeEvents, KadeItems, handleEitherPostgresOrUnkownError, setSchemaError } from "../../error-worker/errors"
+import { PostgresError } from "postgres"
 
 
 export class PublicationCreateEventPlugin extends ProcessorPlugin {
@@ -29,7 +30,7 @@ export class PublicationCreateEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, KadeItems.Account, data.user_kid);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -55,7 +56,8 @@ export class PublicationRemoveEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                // I think its very hard to get foreign key violation in this case so there is no need to provide item and id
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, "", 1);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -91,7 +93,24 @@ export class CommentCreateEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                let item = "";
+                let id = 0;
+
+                if (e instanceof PostgresError) {
+                    // Try getting item that could have been missing
+                    if (e.detail?.includes("publication_id")) {
+                        item = KadeItems.Publication;
+                        id = data.reference_kid;
+                    } else if (e.detail?.includes("quote_id")) {
+                        item = KadeItems.Quote,
+                            id = data.reference_kid;
+                    } else if (e.detail?.includes("creator_id")) {
+                        item = KadeItems.Account,
+                            id = data.reference_kid;
+                    }
+                }
+
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -118,7 +137,10 @@ export class CommentRemoveEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                // Very hard for a foreign key error to occur here so no need to set item and id
+                let item = "";
+                let id = 0;
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -153,7 +175,20 @@ export class RepostCreateEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                let item = "";
+                let id = 0;
+
+                if (e instanceof PostgresError) {
+                    if (e.detail?.includes("publication_id")) {
+                        item = KadeItems.Publication;
+                        id = data.reference_kid;
+                    } else if (e.detail?.includes("creator_id")) {
+                        item = KadeItems.Account;
+                        id = data.user_kid;
+                    }
+                }
+
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -180,7 +215,10 @@ export class RepostRemoveEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                // Very hard to get foreign key error so no need to set item and id
+                let item = "";
+                let id = 0;
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -213,7 +251,20 @@ export class QuoteCreateEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                let item = "";
+                let id = 0;
+
+                if (e instanceof PostgresError) {
+                    if (e.detail?.includes("publication_id")) {
+                        item = KadeItems.Publication;
+                        id = data.reference_kid;
+                    } else if (e.detail?.includes("creator_id")) {
+                        item = KadeItems.Account;
+                        id = data.user_kid;
+                    }
+                }
+
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -239,7 +290,10 @@ export class QuoteRemoveEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                // Very hard to get Foreign Key error so no need to set item and id
+                let item = "";
+                let id = 0;
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -276,7 +330,23 @@ export class ReactionCreateEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                let item = "";
+                let id = 0;
+
+                if (e instanceof PostgresError) {
+                    if (e.detail?.includes("publication_id")) {
+                        item = KadeItems.Publication;
+                        id = data.reference_kid;
+                    } else if (e.detail?.includes("creator_id")) {
+                        item = KadeItems.Account;
+                        id = data.user_kid;
+                    } else if (e.detail?.includes("comment_id")) {
+                        item = KadeItems.Comment;
+                        id = data.reference_kid;
+                    }
+                }
+
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -302,7 +372,10 @@ export class ReactionRemoveEventPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                // Very hard to get Foreign key error
+                let item = "";
+                let id = 0;
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }

@@ -4,7 +4,8 @@ import { AccountCreatePlugin, AccountFollowPlugin, AccountUnFollowPlugin, Delega
 import { CommentCreateEventPlugin, CommentRemoveEventPlugin, PublicationCreateEventPlugin, PublicationRemoveEventPlugin, QuoteCreateEventPlugin, QuoteRemoveEventPlugin, ReactionCreateEventPlugin, ReactionRemoveEventPlugin, RepostCreateEventPlugin } from "../replicate-worker/plugins/publications";
 import { RegisterUsernamePlugin } from "../replicate-worker/plugins/usernames";
 import {z} from 'zod';
-import { setUnkownError } from "./errors";
+import { KadeItems, setUnkownError } from "./errors";
+import oracle, { account, comment, delegate, eq, follow, profile, publication, publication, quote } from "oracle"
 
 export const LagoonTypeSchema = z.union([
     z.literal("schema_error"),
@@ -92,5 +93,56 @@ export async function retry(event: string | undefined, monitor: ProcessMonitor, 
             setUnkownError(monitor, err, sequenceNumber);
             return false;
         }
+    }
+}
+
+export async function checkIfItemExistsAndRetryIfExists(item: string, id: number, eventData: string, monitor: ProcessMonitor, sequence_number: string) {
+    try {
+        if (item == KadeItems.Account) {
+            const eventAccount = await oracle.select().from(account).where(eq(account.id, id));
+
+            if(eventAccount) {
+                // Redo event
+                retry(eventData, monitor, sequence_number)
+            } else {
+                // Delete event from failed
+                monitor.failed.delete(sequence_number);
+            }
+        }
+
+        else if (item === KadeItems.Publication) {
+            // TO DO
+            const eventPublication = await oracle.select().from(publication).where(eq(publication.id, id));
+
+            if (eventPublication) {
+                retry(eventData, monitor, sequence_number);
+            } else {
+                monitor.failed.delete(sequence_number);
+            }
+        }
+
+        else if (item === KadeItems.Quote) {
+            // TO DO
+            const eventQuote = await oracle.select().from(quote).where(eq(quote.id, id));
+
+            if (eventQuote) {
+                retry(eventData, monitor, sequence_number)
+            } else {
+                monitor.failed.delete(sequence_number);
+            }
+        }
+
+        else if (item === KadeItems.Comment) {
+            // TO DO
+            const eventComment = await oracle.select().from(comment).where(eq(comment.id, id));
+
+            if (eventComment) {
+                retry(eventData, monitor, sequence_number)
+            } else {
+                monitor.failed.delete(sequence_number);
+            }
+        }
+    } catch(err) {
+        console.log("Could Not Check If Item Exits");
     }
 }

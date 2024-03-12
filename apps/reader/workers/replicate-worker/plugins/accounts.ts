@@ -1,8 +1,9 @@
 import schema from "../../../schema";
-import { ProcessorPlugin } from "../helpers";
+import { ProcessorPlugin, sleep } from "../helpers";
 import oracle, { account, delegate, eq, follow, profile } from "oracle"
 import { ProcessMonitor } from "../monitor";
 import { InterfaceError, KadeEvents, KadeItems, handleEitherPostgresOrUnkownError, setItemNotExistError, setSchemaError } from "../../error-worker/errors";
+import { PostgresError } from "postgres";
 
 
 export class AccountCreatePlugin extends ProcessorPlugin {
@@ -28,8 +29,11 @@ export class AccountCreatePlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
+                // Very hard to get Foreign Key error
+                let item = "";
+                let id = 0;
                 console.log(e)
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
             }
         }
     }
@@ -51,27 +55,43 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
             const data = parsed.data
 
             try {
-                const account = await oracle.query.account.findFirst({
+                const accounts = await oracle.query.account.findFirst({
                     where: (fields, { eq }) => eq(fields.address, data.owner_address)
                 })
 
-                if (account) {
+                if (accounts) {
                     await oracle.insert(delegate).values({
                         address: data.delegate_address,
                         id: data.kid,
-                        owner_id: account?.id,
+                        owner_id: accounts?.id,
                         timestamp: data.timestamp
-                    })
+                    });
                     monitor.setSuccess(sequence_number)
                 }
                 else {
+                    await sleep(60_000);
+                    const result = await oracle.select({
+                        id: account.id
+                    }).from(account).where(eq(account.address, data.owner_address));
+                    let item = KadeItems.Account;
                     console.log(`Account with address ${data.owner_address} not found`)
-                    setItemNotExistError(monitor, sequence_number, KadeItems.Account);
+                    setItemNotExistError(monitor, sequence_number, KadeItems.Account, result[0].id);
                 }
             }
             catch (e) {
+                let item = "";
+                let id = 0;
+
+                if (e instanceof PostgresError) {
+                    const result = await oracle.select({
+                        id: account.id
+                    }).from(account).where(eq(account.address, data.owner_address));
+                    let item = KadeItems.Account;
+                    let id = result[0].id
+                }
+
                 console.log(`Something went wrong while processing data: ${e}`)
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
             }
         }
     }
@@ -96,8 +116,11 @@ export class DelegateRemovePlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
+                // Very hard to get Foreign Key error
+                let item = "";
+                let id = 0;
                 console.log(`Something went wrong while processing data: ${e}`)
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
             }
         }
     }
@@ -130,8 +153,21 @@ export class AccountFollowPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
+                let item = "";
+                let id = 0;
+
+                if (e instanceof PostgresError) {
+                    if (e.detail?.includes("follower_id")) {
+                        let item = KadeItems.Account;
+                        let id = data.follower_kid
+                    } else if (e.detail?.includes("following_id")) {
+                        let item = KadeItems.Account;
+                        let id = data.following_kid;
+                    }
+                }
+
                 console.log(`Something went wrong while processing data: ${e}`)
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
             }
         }
     }
@@ -157,8 +193,11 @@ export class AccountUnFollowPlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
+                // Very hard to get Foreign Key error
+                let item = "";
+                let id = 0;
                 console.log(`Something went wrong while processing data: ${e}`)
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
             }
         }
     }
@@ -202,8 +241,18 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
+                let item = "";
+                let id = 0;
+
+                if (e instanceof PostgresError) {
+                    if (e.detail?.includes("creator")) {
+                        let item = KadeItems.Account;
+                        let id = data.user_kid;
+                    }
+                }
+
                 console.log(`Something went wrong while processing data: ${e}`);
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
             }
         }
     }

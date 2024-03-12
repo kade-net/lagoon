@@ -33,7 +33,10 @@ export class RegisterUsernamePlugin extends ProcessorPlugin {
                 console.log("Data processed successfully")
             }
             catch (e) {
-                handleEitherPostgresOrUnkownError(sequence_number, monitor, e);
+                // Very hard to get foreign key error
+                let item = "";
+                let id = 0;
+                handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }

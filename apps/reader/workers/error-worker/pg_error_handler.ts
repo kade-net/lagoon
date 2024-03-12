@@ -1,8 +1,10 @@
+import { LevelDB } from "../../db";
 import { sleep } from "../replicate-worker/helpers";
 import { ProcessMonitor } from "../replicate-worker/monitor";
 import { PostgresErrors, parsePostgresErrorType } from "./classify_error";
 import { InterfaceError } from "./errors";
 import { retry } from "./helpers";
+import { checkIfItemExistsAndRetryIfExists } from "./item_exist_error_handler";
 
 async function retryXTimes(x: number, eventData: string, monitor: ProcessMonitor, sequence_number: string) {
     let tries = 0;
@@ -15,7 +17,7 @@ async function retryXTimes(x: number, eventData: string, monitor: ProcessMonitor
     } 
 }
 
-export async function handlePgError(error: InterfaceError, eventData: string, monitor: ProcessMonitor, sequence_number: string) {
+export async function handlePgError(error: InterfaceError, eventData: string, monitor: ProcessMonitor, sequence_number: string, db: LevelDB) {
     try {
         // get type of postgres error
         const errorType = parsePostgresErrorType(error.code);
@@ -32,6 +34,7 @@ export async function handlePgError(error: InterfaceError, eventData: string, mo
         } else if(errorType === PostgresErrors.UniqueViolation) {
             // Delete event since it already occured
             monitor.failed.delete(sequence_number);
+            db._db.delete(sequence_number);
         } else if(errorType === PostgresErrors.NotNullViolation) {
             // Some data was missing in the event delete it from monitor for now
             console.log(`\n###################\n#SOME DATA IS MISSING FROM THIS EVENT\n###############\n`);
@@ -40,35 +43,24 @@ export async function handlePgError(error: InterfaceError, eventData: string, mo
             // Some data was missing in the event delete it from monitor for now
             console.log(`\n###################\n#BAD DATA SENT IN EVENT\n###############\n`);
             console.log(`Error Causing event is ${eventData}`);
-        } else if(errorType === PostgresErrors.ForeignKeyViolation) {
-            // Wait abit
-            await sleep(60_000);
-            // See if foreign key create
         } else if(errorType === PostgresErrors.InvalidCursorTransactionState) {
             console.log(`\n###################\n#CURSOR NOT IN VALID STATE\n###############\n`);
             console.log(`Error Causing event is ${eventData}`);
-        } else {
+        } else if (errorType === PostgresErrors.IntegrityViolation) {
+            // Whaterver it's trying to add has already been done
+            monitor.failed.delete(sequence_number);
+            db._db.delete(sequence_number);
+        } else if (errorType === PostgresErrors.ForeignKeyViolation) {
+            // Wait abit
+            await sleep(60_000);
+
+            const item = error.item;
+            const id = error.id;
+            // Check if item exists and retry if exists
+            checkIfItemExistsAndRetryIfExists(item, id, eventData, monitor, sequence_number);
+        }else {
             console.log(`\n###################\n#OTHER ERROR\n###############\n`);
             console.log(`Error Causing event is ${eventData}`);
-        }
-
-
-        if (errorType === PostgresErrors.ConnectionError) {
-            // retry
-            await sleep(60_000);
-            await retry(eventData, this.monitor, key);
-        } else if ([PostgresErrors.InsufficientResources, PostgresErrors.InvalidCursorTransactionState, PostgresErrors.OtherError].includes(errorType)) {
-            // retry after a pause
-            await sleep(180_000);
-            await retry(eventData, this.monitor, key);
-        } else if ([PostgresErrors.ForeignKeyViolation, PostgresErrors.IntegrityViolation].includes(errorType)) {
-            // retry after a pause
-            await sleep(180_000);
-            await retry(eventData, this.monitor, key);
-        } else if ([PostgresErrors.DataExceptionError, PostgresErrors.NotNullViolation].includes(errorType)) {
-            // somehow get data again?
-        } else if (errorType == PostgresErrors.UniqueViolation, PostgresErrors.ProgramLimitExceeded) {
-            // ignore
         }
     } catch(err) {
         console.log("Could Not Handle Pg Error");
