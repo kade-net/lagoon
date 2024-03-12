@@ -46,7 +46,7 @@ export class ErrorWorker {
 
                     if (error.success) {
                         const data = error.data;
-                        const interfaceerror = new InterfaceError(data.sequence_number, data.code, data.type);
+                        const interfaceerror = new InterfaceError(data.sequence_number, data.code, data.type, data.id, data.item);
                         await this.processor.processError(interfaceerror, key)
 
                         // Record that I've dealt with error

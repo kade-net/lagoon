@@ -5,7 +5,7 @@ import { CommentCreateEventPlugin, CommentRemoveEventPlugin, PublicationCreateEv
 import { RegisterUsernamePlugin } from "../replicate-worker/plugins/usernames";
 import {z} from 'zod';
 import { KadeItems, setUnkownError } from "./errors";
-import oracle, { account, comment, delegate, eq, follow, profile, publication, publication, quote } from "oracle"
+import oracle, { account, comment, delegate, eq, follow, profile, publication, quote } from "oracle"
 
 export const LagoonTypeSchema = z.union([
     z.literal("schema_error"),
@@ -25,7 +25,8 @@ export const interfaceErrorSchema = z.object({
     sequence_number: z.string(),
     code: z.string(),
     type: LagoonTypeSchema,
-    id: z.number()
+    id: z.number(),
+    item: z.string()
 })
 
 export function getPlugin(type: string): ProcessorPlugin | undefined {
@@ -74,7 +75,7 @@ export function getPlugin(type: string): ProcessorPlugin | undefined {
  * @param sequenceNumber The sequence number of the event that caused the event
  * @returns whether or not operation retried successfully
  */
-export async function retry(event: string | undefined, monitor: ProcessMonitor, sequenceNumber: string): boolean {
+export async function retry(event: string | undefined, monitor: ProcessMonitor, sequenceNumber: string): Promise<boolean> {
     if (event) {
         try {
             // Parse event to get event type
@@ -88,12 +89,14 @@ export async function retry(event: string | undefined, monitor: ProcessMonitor, 
                 monitor.setSuccess(sequenceNumber);
                 return true;
             }
+            return false;
         } catch(err) {
             console.log("Error while retrying: ", err);
             setUnkownError(monitor, err, sequenceNumber);
             return false;
         }
     }
+    return false;
 }
 
 export async function checkIfItemExistsAndRetryIfExists(item: string, id: number, eventData: string, monitor: ProcessMonitor, sequence_number: string) {

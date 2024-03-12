@@ -12,7 +12,7 @@ async function retryXTimes(x: number, eventData: string, monitor: ProcessMonitor
 
     while (success === false && tries < x) {
         await sleep(60_000);
-        success = retry(eventData, monitor, sequence_number);
+        success = await retry(eventData, monitor, sequence_number);
         tries += 1;
     } 
 }

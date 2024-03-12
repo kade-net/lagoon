@@ -1,6 +1,6 @@
 import { sleep } from "../replicate-worker/helpers";
 import { InterfaceError, KadeItems } from "./errors";
-import { retry } from "./helpers";
+import { checkIfItemExistsAndRetryIfExists, retry } from "./helpers";
 import { ProcessMonitor } from "../replicate-worker/monitor";
 
 export async function handleItemNotExistError(err: InterfaceError, eventData: string, monitor: ProcessMonitor, sequence_number: string) {
@@ -16,3 +16,5 @@ export async function handleItemNotExistError(err: InterfaceError, eventData: st
         console.log("Could Not Handle Item Not Exist Error")
     }
 }
+
+export { checkIfItemExistsAndRetryIfExists };
