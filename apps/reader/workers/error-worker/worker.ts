@@ -2,8 +2,8 @@ import { LevelDB } from "../../db";
 import { Lama, LamaReader } from "../../db/lama";
 import { sleep } from "../replicate-worker/helpers";
 import { ProcessMonitor } from "../replicate-worker/monitor";
-import { PostgresErrors, parsePostgresErrorType } from "./classify_error";
-import { ErrorProcessor } from "./error_processor";
+import { PostgresErrors, parsePostgresErrorType } from "./classify-error";
+import { ErrorProcessor } from "./error-processor";
 import { InterfaceError } from "./errors";
 import { interfaceErrorSchema, retry } from "./helpers";
 

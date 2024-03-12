@@ -1,6 +1,6 @@
 import { ZodError, z } from "zod";
 import { LagoonError, LagoonTypeSchema } from "./helpers";
-import { PostgresErrors } from "./classify_error";
+import { PostgresErrors } from "./classify-error";
 import { PostgresError } from "postgres";
 import { ProcessMonitor } from "../replicate-worker/monitor";
 

@@ -2,10 +2,10 @@ import { LevelDB } from "../../db";
 import { Lama } from "../../db/lama";
 import { sleep } from "../replicate-worker/helpers";
 import { ProcessMonitor } from "../replicate-worker/monitor";
-import { PostgresErrors, parsePostgresErrorType } from "./classify_error";
+import { PostgresErrors, parsePostgresErrorType } from "./classify-error";
 import { InterfaceError } from "./errors";
 import { retry } from "./helpers";
-import { handleItemNotExistError } from "./item_exist_error_handler";
+import { handleItemNotExistError } from "./item-exist-error-handler";
 
 export class ErrorProcessor {
     lama: Lama

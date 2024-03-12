@@ -1,10 +1,10 @@
 import { LevelDB } from "../../db";
 import { sleep } from "../replicate-worker/helpers";
 import { ProcessMonitor } from "../replicate-worker/monitor";
-import { PostgresErrors, parsePostgresErrorType } from "./classify_error";
+import { PostgresErrors, parsePostgresErrorType } from "./classify-error";
 import { InterfaceError } from "./errors";
 import { retry } from "./helpers";
-import { checkIfItemExistsAndRetryIfExists } from "./item_exist_error_handler";
+import { checkIfItemExistsAndRetryIfExists } from "./item-exist-error-handler";
 
 async function retryXTimes(x: number, eventData: string, monitor: ProcessMonitor, sequence_number: string) {
     let tries = 0;
