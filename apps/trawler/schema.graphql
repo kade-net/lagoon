@@ -1,6 +1,34 @@
 scalar Date
 scalar JSON
 
+type CommunityStats {
+  members: Int!
+  publications: Int!
+}
+
+type Community {
+  id: Int!
+  name: String!
+  description: String!
+  image: String!
+  user_id: Int!
+  timestamp: Date!
+  creator: Account!
+  hosts: [Account!]
+  stats: CommunityStats!
+}
+
+type Membership {
+  id: Int!
+  community_id: Int!
+  community: Community!
+  user_id: Int!
+  user: Account!
+  type: Int!
+  timestamp: Date!
+  is_active: Boolean!
+}
+
 type AccountStats {
   followers: Int!
   following: Int!
@@ -101,6 +129,7 @@ type Publication {
   stats: PublicationStats!
   viewer(viewer: Int): PublicationViewerStats
   publication_ref: String
+  community: Community
 }
 
 type Reaction {
@@ -142,7 +171,37 @@ type Query {
     viewer: Int
     address: String
   ): PublicationViewerStats
-  publicationComments(id: Int, ref: String, pagination: Pagination,  sort: SortOrder): [Publication!]
-  accountViewerStats(accountAddress: String!, viewerAddress: String!): AccountViewerStats
-  accountPublications(accountAddress: String!, pagination: Pagination, sort: SortOrder, type: Int): [Publication!]
+  publicationComments(
+    id: Int
+    ref: String
+    pagination: Pagination
+    sort: SortOrder
+  ): [Publication!]
+  accountViewerStats(
+    accountAddress: String!
+    viewerAddress: String!
+  ): AccountViewerStats
+  accountPublications(
+    accountAddress: String!
+    pagination: Pagination
+    sort: SortOrder
+    type: Int
+  ): [Publication!]
+  communities(
+    pagination: Pagination
+    sort: SortOrder
+    creator: String
+  ): [Community!]
+  accountCommunities(
+    accountAddress: String!
+    pagination: Pagination
+    sort: SortOrder
+  ): [Community!]
+  community(id: Int, name: String): Community
+  communityPublications(
+    communityId: Int
+    communityName: String
+    pagination: Pagination
+    sort: SortOrder
+  ): [Publication!]
 }
