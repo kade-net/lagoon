@@ -8,6 +8,20 @@
       "when": 1709662078534,
       "tag": "0000_square_king_cobra",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1710327213478,
+      "tag": "0001_legal_cassandra_nova",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1710346170713,
+      "tag": "0002_complete_hex",
+      "breakpoints": true
     }
   ]
 }
