@@ -3,9 +3,12 @@ import { LevelDB } from "../../db";
 
 const MODULE_ADDRESS = process.env.MODULE_ADDRESS!
 
+const COMMUNITY_MODULE_ADDRESS = process.env.COMMUNITY_MODULE_ADDRESS!
+
 const USERNAME_MODULE = `${MODULE_ADDRESS}::usernames`
 const ACCOUNT_MODULE = `${MODULE_ADDRESS}::accounts`
 const PUBLICATION_MODULE = `${MODULE_ADDRESS}::publications`
+const COMMUNITY_MODULE = `${COMMUNITY_MODULE_ADDRESS}::community`
 
 
 const SUPPORTED_EVENT_TYPES = [
@@ -27,6 +30,12 @@ const SUPPORTED_EVENT_TYPES = [
     `${PUBLICATION_MODULE}::ReactionCreateEventWithRef`,
     `${PUBLICATION_MODULE}::ReactionCreateEvent`,
     `${PUBLICATION_MODULE}::ReactionRemoveEvent`,
+    // COMMUNITY
+    `${COMMUNITY_MODULE}::CommunityRegisteredEvent`,
+    `${COMMUNITY_MODULE}::MemberJoinEvent`,
+    `${COMMUNITY_MODULE}::MembershipChangeEvent`,
+    `${COMMUNITY_MODULE}::MembershipDeleteEvent`,
+    `${COMMUNITY_MODULE}::MembershipReclaimEvent`
 ]
 
 export type ProcessingResult = {

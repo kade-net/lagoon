@@ -1,6 +1,7 @@
 import { LevelDB } from "../../db";
 import { ProcessMonitor } from "./monitor";
 import { AccountCreatePlugin, AccountFollowPlugin, AccountUnFollowPlugin, DelegateCreatePlugin, DelegateRemovePlugin, ProfileUpdatePlugin } from "./plugins/accounts";
+import { CommunityRegisteredEventPlugin, MemberJoinEventPlugin, MembershipChangeEventPlugin, MembershipDeleteEventPlugin, MembershipReclaimEventPlugin } from "./plugins/communities";
 import { PublicationCreateEventPlugin, PublicationCreateWithRefEventPlugin, PublicationRemoveEventPlugin, PublicationRemoveWithRefEventPlugin, ReactionCreateEventPlugin, ReactionCreateEventWithRefPlugin, ReactionRemoveEventPlugin, ReactionRemoveEventWithRefPlugin } from "./plugins/publications";
 import { RegisterUsernamePlugin } from "./plugins/usernames";
 import { DataProcessor } from "./writer";
@@ -27,5 +28,11 @@ dataProcessor.registerPlugin(new ReactionCreateEventWithRefPlugin())
 dataProcessor.registerPlugin(new ReactionRemoveEventWithRefPlugin())
 dataProcessor.registerPlugin(new ReactionCreateEventPlugin())
 dataProcessor.registerPlugin(new ReactionRemoveEventPlugin())
+// COMMUNITY PLUGINS
+dataProcessor.registerPlugin(new CommunityRegisteredEventPlugin())
+dataProcessor.registerPlugin(new MemberJoinEventPlugin())
+dataProcessor.registerPlugin(new MembershipChangeEventPlugin())
+dataProcessor.registerPlugin(new MembershipDeleteEventPlugin())
+dataProcessor.registerPlugin(new MembershipReclaimEventPlugin())
 
 export default dataProcessor

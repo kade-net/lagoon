@@ -14,7 +14,12 @@ export type EVENT_NAMES = 'RegisterUsernameEvent' |
     'ReactionRemoveEventWithRef' |
     'ReactionCreateEventWithRef' |
     'ReactionCreateEvent' |
-    'ReactionRemoveEvent';
+    'ReactionRemoveEvent' |
+    'CommunityRegisteredEvent' |
+    'MemberJoinEvent' |
+    'MembershipChangeEvent' |
+    'MembershipDeleteEvent' |
+    'MembershipReclaimEvent';
 
 export abstract class ProcessorPlugin {
     abstract name(): EVENT_NAMES 

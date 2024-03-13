@@ -1,7 +1,8 @@
-import oracle, { and, eq, publication, reaction } from "oracle"
+import oracle, { and, community_posts, eq, publication, reaction } from "oracle"
 import schema from "../../../schema"
 import { EVENT_NAMES, ProcessorPlugin } from "../helpers"
 import { ProcessMonitor } from "../monitor"
+import { randomBytes } from "crypto"
 
 
 export class PublicationCreateEventPlugin extends ProcessorPlugin {
@@ -13,21 +14,55 @@ export class PublicationCreateEventPlugin extends ProcessorPlugin {
         if (!parsed.success) {
             console.log(parsed.error)
             monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            return
         }
 
         if (parsed.success) {
             const data = parsed.data
+            const payload = data.type == 4 ? null : JSON.parse(data.payload)
+
 
             try {
-                await oracle.insert(publication).values({
-                    content: data.type == 4 ? {} : JSON.parse(data.payload),
-                    creator_id: data.user_kid,
-                    id: data.kid,
-                    timestamp: data.timestamp,
-                    publication_ref: data.publication_ref.length == 0 ? undefined : data.publication_ref,
-                    parent_id: data.reference_kid < 100 ? undefined : data.reference_kid,
-                    type: data.type
+                await oracle.transaction(async (txn) => {
+
+                    await txn.insert(publication).values({
+                        content: data.type == 4 ? {} : JSON.parse(data.payload),
+                        creator_id: data.user_kid,
+                        id: data.kid,
+                        timestamp: data.timestamp,
+                        publication_ref: data.publication_ref.length == 0 ? undefined : data.publication_ref,
+                        parent_id: data.reference_kid < 100 ? undefined : data.reference_kid,
+                        type: data.type
+                    }).returning()
+
+                    if (data.type == 1 && payload && payload.community) { // only posts
+                        const community = await txn.query.communities.findFirst({
+                            where: (fields, { eq }) => eq(fields.name, payload.community)
+                        })
+                        if (community) {
+                            const membership = await txn.query.membership.findFirst({
+                                where: (fields, { eq, and }) => and(
+                                    eq(fields.community_id, community.id),
+                                    eq(fields.user_kid, data.user_kid),
+                                    eq(fields.is_active, true)
+                                )
+                            })
+
+                            if (membership) {
+                                await txn.insert(community_posts).values({
+                                    community_id: community.id,
+                                    id: randomBytes(32).toString('hex'),
+                                    post_id: data.kid,
+                                    user_kid: data.user_kid
+                                })
+                            }
+                            // IGNORE IF MEMBERSHIP NOT FOUND
+                        }
+                        // IGNORE IF COMMUNITY NOT FOUND
+                    }
                 })
+
+
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
@@ -54,6 +89,8 @@ export class PublicationRemoveEventPlugin extends ProcessorPlugin {
 
             try {
                 await oracle.delete(publication).where(eq(publication.id, data.kid))
+                await oracle.delete(reaction).where(eq(reaction.publication_id, data.kid))
+                await oracle.delete(community_posts).where(eq(community_posts.post_id, data.kid))
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
@@ -73,6 +110,7 @@ export class PublicationCreateWithRefEventPlugin extends ProcessorPlugin {
         if (!parsed.success) {
             console.log(parsed.error)
             monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            return 
         }
 
         if (parsed.success) {
@@ -130,6 +168,8 @@ export class PublicationRemoveWithRefEventPlugin extends ProcessorPlugin {
                     return
                 }
                 await oracle.delete(publication).where(eq(publication.id, chosen.id))
+                await oracle.delete(reaction).where(eq(reaction.publication_id, chosen.id))
+                await oracle.delete(community_posts).where(eq(community_posts.post_id, chosen.id))
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
