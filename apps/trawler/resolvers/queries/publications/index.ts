@@ -17,6 +17,7 @@ interface ResolverMap {
         viewer: Resolver<PUBLICATION, { viewer: number }, Context>
         children: Resolver<PUBLICATION, PaginationArg & { sort: SORT_ORDER, type: number }, Context>,
         parent: Resolver<PUBLICATION, any, Context>
+        community: Resolver<PUBLICATION, any, Context>
     }
 }
 
@@ -364,6 +365,21 @@ export const PublicationResolver: ResolverMap = {
             return await context.oracle.query.publication.findFirst({
                 where: (fields, { eq }) => eq(fields.id, parent_id)
             })
+        },
+        community: async (parent, _, context) => {
+            const community_post = await context.oracle.query.community_posts.findFirst({
+                where: (fields, { eq }) => eq(fields.post_id, parent.id)
+            })
+
+            if (!community_post) {
+                return null
+            }
+
+            const community = await context.oracle.query.communities.findFirst({
+                where: (fields, { eq }) => eq(fields.id, community_post.community_id)
+            })
+
+            return community
         }
     }
 }
