@@ -3,6 +3,8 @@ import { ProcessorPlugin } from "../helpers";
 import oracle, { username } from "oracle"
 import { ProcessMonitor } from "../monitor";
 import { KadeEvents, handleEitherPostgresOrUnkownError, setSchemaError } from "../../error-worker/errors";
+import { capture_event } from "posthog";
+import { PostHogAppId, PostHogEvents } from "../../../posthog/events";
 
 
 export class RegisterUsernamePlugin extends ProcessorPlugin {
@@ -14,7 +16,6 @@ export class RegisterUsernamePlugin extends ProcessorPlugin {
         const parsed = schema.username_registration_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.UsernameRegisteration);
         }
 
@@ -29,15 +30,18 @@ export class RegisterUsernamePlugin extends ProcessorPlugin {
                     username: data.username,
                     timestamp: data.timestamp
                 })
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "RegisterUsernameEvent"
+                });
                 monitor.success.put(sequence_number, "success")
-                console.log("Data processed successfully")
             }
             catch (e) {
                 // Very hard to get foreign key error
                 let item = "";
                 let id = 0;
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
-                console.log(`Something went wrong while processing data: ${e}`)
             }
         }
 

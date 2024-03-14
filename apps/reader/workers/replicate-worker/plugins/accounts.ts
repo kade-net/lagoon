@@ -27,7 +27,7 @@ export class AccountCreatePlugin extends ProcessorPlugin {
                     timestamp: data.timestamp,
                 })
 
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "AccountCreateEvent"
@@ -71,7 +71,7 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
                         timestamp: data.timestamp
                     });
                     
-                    capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN, {
+                    capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                         message: "success",
                         sequence_number: sequence_number,
                         event: "DelegateCreateEvent"
@@ -84,7 +84,7 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
                         id: account.id
                     }).from(account).where(eq(account.address, data.owner_address));
                     let item = KadeItems.Account;
-                    capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN_ERROR, {
+                    capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                         message: "Account with address not found",
                         address: data.owner_address
                     })
@@ -123,7 +123,7 @@ export class DelegateRemovePlugin extends ProcessorPlugin {
 
             try {
                 await oracle.delete(delegate).where(eq(delegate.id, data.kid))
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "DelegateRemoveEvent"
@@ -161,7 +161,7 @@ export class AccountFollowPlugin extends ProcessorPlugin {
                     following_id: data.following_kid,
                     timestamp: data.timestamp
                 })
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "AccountFollowEvent"
@@ -203,7 +203,7 @@ export class AccountUnFollowPlugin extends ProcessorPlugin {
 
             try {
                 await oracle.delete(follow).where(eq(follow.id, data.kid))
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "AccountUnFollowEvent"
@@ -254,7 +254,7 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
                         creator: data.user_kid
                     })
                 }
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "AccountUnFollowEvent"

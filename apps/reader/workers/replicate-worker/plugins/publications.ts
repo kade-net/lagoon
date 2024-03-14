@@ -28,7 +28,7 @@ export class PublicationCreateEventPlugin extends ProcessorPlugin {
                     id: data.kid,
                     timestamp: data.timestamp
                 })
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "PublicationCreate"
@@ -57,7 +57,7 @@ export class PublicationRemoveEventPlugin extends ProcessorPlugin {
 
             try {
                 await oracle.delete(publication).where(eq(publication.id, data.kid))
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "PublicationRemoveEvent"
@@ -97,7 +97,7 @@ export class CommentCreateEventPlugin extends ProcessorPlugin {
                                 data.type == 3 ? { comment_id: data.reference_kid } : {}
                     )
                 });
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "CommentCreateEvent"
@@ -144,7 +144,7 @@ export class CommentRemoveEventPlugin extends ProcessorPlugin {
 
             try {
                 await oracle.delete(comment).where(eq(comment.id, data.kid))
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "CommentRemoveEvent"
@@ -185,7 +185,7 @@ export class RepostCreateEventPlugin extends ProcessorPlugin {
                     publication_id: data.reference_kid,
                     timestamp: data.timestamp
                 });
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "RepostCreateEvent"
@@ -228,7 +228,7 @@ export class RepostRemoveEventPlugin extends ProcessorPlugin {
             const data = parsed.data
             try {
                 await oracle.delete(repost).where(eq(repost.id, data.kid))
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "RepostRemoveEvent"
@@ -267,7 +267,7 @@ export class QuoteCreateEventPlugin extends ProcessorPlugin {
                     publication_id: data.reference_kid,
                     timestamp: data.timestamp
                 })
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "QuoteCreateEvent"
@@ -309,7 +309,7 @@ export class QuoteRemoveEventPlugin extends ProcessorPlugin {
             const data = parsed.data
             try {
                 await oracle.delete(quote).where(eq(quote.id, data.kid))
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "QuoteRemoveEvent"
@@ -352,7 +352,7 @@ export class ReactionCreateEventPlugin extends ProcessorPlugin {
                                 data.type == 3 ? { comment_id: data.reference_kid } : {}
                     )
                 })
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "ReactionCreateEvent"
@@ -397,7 +397,7 @@ export class ReactionRemoveEventPlugin extends ProcessorPlugin {
             const data = parsed.data
             try {
                 await oracle.delete(reaction).where(eq(reaction.id, data.kid))
-                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_SUCCESS, {
                     message: "success",
                     sequence_number: sequence_number,
                     event: "ReactionRemoveEvent"
