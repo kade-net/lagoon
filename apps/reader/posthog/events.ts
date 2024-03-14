@@ -7,7 +7,8 @@ export enum PostHogEvents {
    GRPC_WORKER_STREAM_ERROR = 'grpc-worker-stream-error',
    GRPC_WORKER_STREAM_STATUS = 'grpc-worker-stream-status',
    REPLICATE_WORKER_ACCOUNT_PLUGIN = 'replicate-worker-account-plugin',
-   REPLICATE_WORKER_ACCOUNT_PLUGIN_ERROR = 'replicate-worker-account-plugin-error'
+   REPLICATE_WORKER_ACCOUNT_PLUGIN_ERROR = 'replicate-worker-account-plugin-error',
+   REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR = 'replicate-worker-account-publication-error'
 };
 
 export const PostHogAppId = 'kade-network-app';

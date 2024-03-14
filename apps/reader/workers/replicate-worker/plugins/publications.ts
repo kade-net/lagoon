@@ -4,6 +4,8 @@ import { ProcessorPlugin } from "../helpers"
 import { ProcessMonitor } from "../monitor"
 import { KadeEvents, KadeItems, handleEitherPostgresOrUnkownError, setSchemaError } from "../../error-worker/errors"
 import { PostgresError } from "postgres"
+import { capture_event } from "posthog"
+import { PostHogAppId, PostHogEvents } from "../../../posthog/events"
 
 
 export class PublicationCreateEventPlugin extends ProcessorPlugin {
@@ -13,7 +15,6 @@ export class PublicationCreateEventPlugin extends ProcessorPlugin {
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
         const parsed = schema.publication_create_event_schema.safeParse(event)
         if (!parsed.success) {
-            console.log(parsed.error);
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.PublicationCreate);
         }
 
@@ -27,11 +28,15 @@ export class PublicationCreateEventPlugin extends ProcessorPlugin {
                     id: data.kid,
                     timestamp: data.timestamp
                 })
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "PublicationCreate"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, KadeItems.Account, data.user_kid);
-                console.log(`Something went wrong while processing data: ${e}`)
             }
         }
     }
@@ -44,7 +49,6 @@ export class PublicationRemoveEventPlugin extends ProcessorPlugin {
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
         const parsed = schema.publication_remove_event_schema.safeParse(event)
         if (!parsed.success) {
-            console.log(parsed.error);
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.PublicationRemove);
         }
 
@@ -53,12 +57,16 @@ export class PublicationRemoveEventPlugin extends ProcessorPlugin {
 
             try {
                 await oracle.delete(publication).where(eq(publication.id, data.kid))
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "PublicationRemoveEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
                 // I think its very hard to get foreign key violation in this case so there is no need to provide item and id
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, "", 1);
-                console.log(`Something went wrong while processing data: ${e}`)
             }
         }
     }
@@ -71,7 +79,6 @@ export class CommentCreateEventPlugin extends ProcessorPlugin {
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
         const parsed = schema.comment_create_event_schema.safeParse(event)
         if (!parsed.success) {
-            console.log(parsed.error)
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.CommentCreate);
         }
 
@@ -89,7 +96,12 @@ export class CommentCreateEventPlugin extends ProcessorPlugin {
                             data.type == 2 ? { quote_id: data.reference_kid } :
                                 data.type == 3 ? { comment_id: data.reference_kid } : {}
                     )
-                })
+                });
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "CommentCreateEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
@@ -111,7 +123,6 @@ export class CommentCreateEventPlugin extends ProcessorPlugin {
                 }
 
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
-                console.log(`Something went wrong while processing data: ${e}`)
             }
         }
     }
@@ -125,7 +136,6 @@ export class CommentRemoveEventPlugin extends ProcessorPlugin {
         const parsed = schema.comment_remove_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.CommentRemove);
         }
 
@@ -134,6 +144,11 @@ export class CommentRemoveEventPlugin extends ProcessorPlugin {
 
             try {
                 await oracle.delete(comment).where(eq(comment.id, data.kid))
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "CommentRemoveEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
@@ -141,7 +156,6 @@ export class CommentRemoveEventPlugin extends ProcessorPlugin {
                 let item = "";
                 let id = 0;
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
-                console.log(`Something went wrong while processing data: ${e}`)
             }
         }
     }
@@ -156,7 +170,6 @@ export class RepostCreateEventPlugin extends ProcessorPlugin {
         const parsed = schema.repost_create_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.RepostCreate);
         }
 
@@ -171,7 +184,12 @@ export class RepostCreateEventPlugin extends ProcessorPlugin {
                     id: data.kid,
                     publication_id: data.reference_kid,
                     timestamp: data.timestamp
-                })
+                });
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "RepostCreateEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
@@ -189,7 +207,6 @@ export class RepostCreateEventPlugin extends ProcessorPlugin {
                 }
 
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
-                console.log(`Something went wrong while processing data: ${e}`)
             }
         }
     }
@@ -204,7 +221,6 @@ export class RepostRemoveEventPlugin extends ProcessorPlugin {
         const parsed = schema.repost_remove_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error);
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.RepostRemove);
         }
 
@@ -212,6 +228,11 @@ export class RepostRemoveEventPlugin extends ProcessorPlugin {
             const data = parsed.data
             try {
                 await oracle.delete(repost).where(eq(repost.id, data.kid))
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "RepostRemoveEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
@@ -219,7 +240,6 @@ export class RepostRemoveEventPlugin extends ProcessorPlugin {
                 let item = "";
                 let id = 0;
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
-                console.log(`Something went wrong while processing data: ${e}`)
             }
         }
     }
@@ -233,7 +253,6 @@ export class QuoteCreateEventPlugin extends ProcessorPlugin {
         const parsed = schema.quote_create_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error);
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.QuoteCreate);
         }
 
@@ -248,6 +267,11 @@ export class QuoteCreateEventPlugin extends ProcessorPlugin {
                     publication_id: data.reference_kid,
                     timestamp: data.timestamp
                 })
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "QuoteCreateEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
@@ -265,7 +289,6 @@ export class QuoteCreateEventPlugin extends ProcessorPlugin {
                 }
 
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
-                console.log(`Something went wrong while processing data: ${e}`)
             }
         }
     }
@@ -279,7 +302,6 @@ export class QuoteRemoveEventPlugin extends ProcessorPlugin {
         const parsed = schema.quote_remove_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.QuoteRemove);
         }
 
@@ -287,6 +309,11 @@ export class QuoteRemoveEventPlugin extends ProcessorPlugin {
             const data = parsed.data
             try {
                 await oracle.delete(quote).where(eq(quote.id, data.kid))
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "QuoteRemoveEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
@@ -294,7 +321,6 @@ export class QuoteRemoveEventPlugin extends ProcessorPlugin {
                 let item = "";
                 let id = 0;
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
-                console.log(`Something went wrong while processing data: ${e}`)
             }
         }
     }
@@ -308,7 +334,6 @@ export class ReactionCreateEventPlugin extends ProcessorPlugin {
         const parsed = schema.reaction_create_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error);
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.ReactionCreate);
         }
 
@@ -327,6 +352,11 @@ export class ReactionCreateEventPlugin extends ProcessorPlugin {
                                 data.type == 3 ? { comment_id: data.reference_kid } : {}
                     )
                 })
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "ReactionCreateEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
@@ -347,7 +377,6 @@ export class ReactionCreateEventPlugin extends ProcessorPlugin {
                 }
 
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
-                console.log(`Something went wrong while processing data: ${e}`)
             }
         }
     }
@@ -361,7 +390,6 @@ export class ReactionRemoveEventPlugin extends ProcessorPlugin {
         const parsed = schema.reaction_remove_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.ReactionRemove);
         }
 
@@ -369,6 +397,11 @@ export class ReactionRemoveEventPlugin extends ProcessorPlugin {
             const data = parsed.data
             try {
                 await oracle.delete(reaction).where(eq(reaction.id, data.kid))
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PUBLICATION_ERROR, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "ReactionRemoveEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
@@ -376,7 +409,6 @@ export class ReactionRemoveEventPlugin extends ProcessorPlugin {
                 let item = "";
                 let id = 0;
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
-                console.log(`Something went wrong while processing data: ${e}`)
             }
         }
     }
