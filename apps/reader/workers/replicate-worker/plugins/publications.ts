@@ -138,7 +138,8 @@ export class PublicationCreateWithRefEventPlugin extends ProcessorPlugin {
                     })
 
                     const payload = data.type == 4 ? null : JSON.parse(data.payload)
-
+                    console.log("The payload is: ", payload)
+                    console.log("Current Data is:", data)
                     if (data.type == 1 && payload && payload.community) { // only posts
                         const community = await txn.query.communities.findFirst({
                             where: (fields, { eq }) => eq(fields.name, payload.community)
