@@ -13,7 +13,7 @@ export class CommunityRegisteredEventPlugin implements ProcessorPlugin {
         const parsed = schema.community_registered_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error);
             return
         }
 
@@ -30,11 +30,11 @@ export class CommunityRegisteredEventPlugin implements ProcessorPlugin {
                     timestamp: data.timestamp
                 })
 
-                monitor.setSuccess(sequence_number)
+                monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
                 console.log(e)
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                monitor.setPosthogFailed(sequence_number, {error: e});
             }
         }
     }
@@ -51,7 +51,7 @@ export class MemberJoinEventPlugin implements ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error);
             return
         }
 
@@ -64,7 +64,7 @@ export class MemberJoinEventPlugin implements ProcessorPlugin {
                 })
 
                 if (!community) {
-                    monitor.setFailed(sequence_number, JSON.stringify({ error: "Community not found" }))
+                    monitor.setPosthogFailed(sequence_number, { error: "Community not found" });
                     return
                 }
 
@@ -85,11 +85,11 @@ export class MemberJoinEventPlugin implements ProcessorPlugin {
                         is_active: true,
                     })
                 })
-                monitor.setSuccess(sequence_number)
+                monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
                 console.log(e)
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                monitor.setPosthogFailed(sequence_number, {error: e});
             }
         }
     }
@@ -105,7 +105,7 @@ export class MembershipChangeEventPlugin implements ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error);
             return
         }
 
@@ -117,12 +117,12 @@ export class MembershipChangeEventPlugin implements ProcessorPlugin {
             })
 
             if (!community) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: "Community not found" }))
+                monitor.setPosthogFailed(sequence_number, { error: "Community not found" });
                 return
             }
 
             if (community.creator_address != data.made_by) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: "Only creator can change membership" }))
+                monitor.setPosthogFailed(sequence_number, { error: "Only creator can change membership" });
                 return
             }
 
@@ -133,11 +133,11 @@ export class MembershipChangeEventPlugin implements ProcessorPlugin {
                 eq(membership.community_id, community.id)
             ))
 
-            monitor.setSuccess(sequence_number)
+            monitor.setPosthogSuccess(sequence_number);
         }
         catch (e) {
             console.log(e)
-            monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+            monitor.setPosthogFailed(sequence_number, {error: e});
         }
 
     }
@@ -153,7 +153,7 @@ export class MembershipDeleteEventPlugin implements ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error);
             return
         }
 
@@ -165,7 +165,7 @@ export class MembershipDeleteEventPlugin implements ProcessorPlugin {
             })
 
             if (!community) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: "Community not found" }))
+                monitor.setPosthogFailed(sequence_number, { error: "Community not found" });
                 return
             }
 
@@ -176,11 +176,11 @@ export class MembershipDeleteEventPlugin implements ProcessorPlugin {
                 eq(membership.community_id, community.id)
             ))
 
-            monitor.setSuccess(sequence_number)
+            monitor.setPosthogSuccess(sequence_number);
         }
         catch (e) {
             console.log(e)
-            monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+            monitor.setPosthogFailed(sequence_number, {error: e})
         }
 
     }
@@ -196,7 +196,7 @@ export class MembershipReclaimEventPlugin implements ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error);
             return
         }
 
@@ -208,7 +208,7 @@ export class MembershipReclaimEventPlugin implements ProcessorPlugin {
             })
 
             if (!community) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: "Community not found" }))
+                monitor.setPosthogFailed(sequence_number, { error: "Community not found" });
                 return
             }
 
@@ -219,11 +219,11 @@ export class MembershipReclaimEventPlugin implements ProcessorPlugin {
                 eq(membership.community_id, community.id)
             ))
 
-            monitor.setSuccess(sequence_number)
+            monitor.setPosthogSuccess(sequence_number);
         }
         catch (e) {
             console.log(e)
-            monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+            monitor.setPosthogFailed(sequence_number, {error: e});
         }
 
     }
