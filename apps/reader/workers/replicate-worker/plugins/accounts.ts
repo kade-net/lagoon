@@ -4,6 +4,8 @@ import oracle, { account, delegate, eq, follow, profile } from "oracle"
 import { ProcessMonitor } from "../monitor";
 import { InterfaceError, KadeEvents, KadeItems, handleEitherPostgresOrUnkownError, setItemNotExistError, setSchemaError } from "../../error-worker/errors";
 import { PostgresError } from "postgres";
+import { capture_event } from "posthog";
+import { PostHogAppId, PostHogEvents } from "../../../posthog/events";
 
 
 export class AccountCreatePlugin extends ProcessorPlugin {
@@ -13,7 +15,6 @@ export class AccountCreatePlugin extends ProcessorPlugin {
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
         const parsed = schema.account_create_event_schema.safeParse(event)
         if (!parsed.success) {
-            console.log(parsed.error)
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.AccountCreate);
         }
         if (parsed.success) {
@@ -26,13 +27,17 @@ export class AccountCreatePlugin extends ProcessorPlugin {
                     timestamp: data.timestamp,
                 })
 
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "AccountCreateEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
                 // Very hard to get Foreign Key error
                 let item = "";
                 let id = 0;
-                console.log(e)
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
             }
         }
@@ -47,7 +52,6 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
         const parsed = schema.delegate_create_event_schema.safeParse(event)
         if (!parsed.success) {
-            console.log(parsed.error)
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.DelegateCreate);
         }
 
@@ -66,6 +70,12 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
                         owner_id: accounts?.id,
                         timestamp: data.timestamp
                     });
+                    
+                    capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN, {
+                        message: "success",
+                        sequence_number: sequence_number,
+                        event: "DelegateCreateEvent"
+                    });
                     monitor.setSuccess(sequence_number)
                 }
                 else {
@@ -74,7 +84,10 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
                         id: account.id
                     }).from(account).where(eq(account.address, data.owner_address));
                     let item = KadeItems.Account;
-                    console.log(`Account with address ${data.owner_address} not found`)
+                    capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN_ERROR, {
+                        message: "Account with address not found",
+                        address: data.owner_address
+                    })
                     setItemNotExistError(monitor, sequence_number, KadeItems.Account, result[0].id);
                 }
             }
@@ -89,8 +102,6 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
                     let item = KadeItems.Account;
                     let id = result[0].id
                 }
-
-                console.log(`Something went wrong while processing data: ${e}`)
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
             }
         }
@@ -104,7 +115,6 @@ export class DelegateRemovePlugin extends ProcessorPlugin {
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string): Promise<void> {
         const parsed = schema.delegate_remove_event_schema.safeParse(event)
         if (!parsed.success) {
-            console.log(parsed.error)
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.DelegateRemove);
         }
 
@@ -113,13 +123,17 @@ export class DelegateRemovePlugin extends ProcessorPlugin {
 
             try {
                 await oracle.delete(delegate).where(eq(delegate.id, data.kid))
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "DelegateRemoveEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
                 // Very hard to get Foreign Key error
                 let item = "";
                 let id = 0;
-                console.log(`Something went wrong while processing data: ${e}`)
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
             }
         }
@@ -134,9 +148,7 @@ export class AccountFollowPlugin extends ProcessorPlugin {
         const parsed = schema.account_follow_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.AccountFollow)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
         }
 
         if (parsed.success) {
@@ -149,7 +161,11 @@ export class AccountFollowPlugin extends ProcessorPlugin {
                     following_id: data.following_kid,
                     timestamp: data.timestamp
                 })
-
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "AccountFollowEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
@@ -165,8 +181,6 @@ export class AccountFollowPlugin extends ProcessorPlugin {
                         let id = data.following_kid;
                     }
                 }
-
-                console.log(`Something went wrong while processing data: ${e}`)
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
             }
         }
@@ -181,7 +195,6 @@ export class AccountUnFollowPlugin extends ProcessorPlugin {
         const parsed = schema.account_unfollow_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.AccountUnfollow);
         }
 
@@ -190,13 +203,17 @@ export class AccountUnFollowPlugin extends ProcessorPlugin {
 
             try {
                 await oracle.delete(follow).where(eq(follow.id, data.kid))
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "AccountUnFollowEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
                 // Very hard to get Foreign Key error
                 let item = "";
                 let id = 0;
-                console.log(`Something went wrong while processing data: ${e}`)
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
             }
         }
@@ -211,7 +228,6 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
         const parsed = schema.profile_update_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
             setSchemaError(monitor, parsed.error, sequence_number, KadeEvents.ProfileUpdate);
         }
 
@@ -238,6 +254,11 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
                         creator: data.user_kid
                     })
                 }
+                capture_event(PostHogAppId, PostHogEvents.REPLICATE_WORKER_ACCOUNT_PLUGIN, {
+                    message: "success",
+                    sequence_number: sequence_number,
+                    event: "AccountUnFollowEvent"
+                });
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
@@ -250,8 +271,6 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
                         let id = data.user_kid;
                     }
                 }
-
-                console.log(`Something went wrong while processing data: ${e}`);
                 handleEitherPostgresOrUnkownError(sequence_number, monitor, e, item, id);
             }
         }
