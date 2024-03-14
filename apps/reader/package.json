@@ -23,6 +23,7 @@
     "lodash": "^4.17.21",
     "node-lmdb": "^0.10.0",
     "oracle": "workspace:*",
+    "posthog": "workspace:*",
     "postgres": "^3.4.3",
     "readable-stream": "^4.5.2",
     "rocksdb": "^5.2.1",
