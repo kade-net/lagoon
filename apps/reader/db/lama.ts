@@ -1,7 +1,9 @@
 import _ from "lodash"
 const { isNull } = _;
 import lmdb from "node-lmdb"
+import { capture_event } from "posthog";
 import { Readable } from "stream"
+import { PostHogAppId, PostHogEvents } from "../posthog/events";
 
 
 export class Lama {
@@ -30,7 +32,11 @@ export class Lama {
 
 
     async put(key: string, value: string) {
-        console.log("Putting", key, value)
+        capture_event(PostHogAppId, PostHogEvents.LAMA, {
+            message: "Putting",
+            key,
+            value
+        });
         const txn = this.env.beginTxn()
         const bufferValue = Buffer.from(value)
         txn.putBinary(this.dbi, key, bufferValue)
@@ -77,11 +83,16 @@ export class LamaReader extends Readable {
         const cursor = new lmdb.Cursor(txn, this.dbi)
         const atRange = cursor.goToRange(this.lastKey)
         if (!atRange) {
-            console.log("No more data")
+            capture_event(PostHogAppId, PostHogEvents.LAMAREADER, {
+                message: "No more data"
+            })
             this.push(null)
             return
         }
-        console.log("At range", this.lastKey)
+        capture_event(PostHogAppId, PostHogEvents.LAMAREADER, {
+            message: "At range",
+            lastKey: this.lastKey
+        })
         let key
         let value
         while ((key = cursor.goToNext()) !== null) {
