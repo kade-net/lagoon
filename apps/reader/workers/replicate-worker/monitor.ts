@@ -1,4 +1,6 @@
+import { capture_event } from "posthog";
 import { Lama } from "../../db/lama";
+import { PostHogAppID, PosthogEvents } from "../../posthog/events";
 
 
 
@@ -29,7 +31,15 @@ export class ProcessMonitor {
         return this.failed.put(sequence_number, payload)
     }
 
+    setPosthogFailed(sequence_number: string, payload: Record<string, any>) {
+        capture_event(PostHogAppID, PosthogEvents.FAILED, {payload, sequence_number});
+    }
+
     setSuccess(sequence_number: string) {
         return this.success.put(sequence_number, "success")
+    }
+
+    setPosthogSuccess(sequence_number: string) {
+        capture_event(PostHogAppID, PosthogEvents.SUCCESS, {sequence_number});
     }
 }

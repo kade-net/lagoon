@@ -14,7 +14,7 @@ export class RegisterUsernamePlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error);
         }
 
 
@@ -28,11 +28,11 @@ export class RegisterUsernamePlugin extends ProcessorPlugin {
                     username: data.username,
                     timestamp: data.timestamp
                 })
-                monitor.success.put(sequence_number, "success")
+                monitor.setPosthogSuccess(sequence_number);
                 console.log("Data processed successfully")
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                monitor.setPosthogFailed(sequence_number, {error: e})
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }

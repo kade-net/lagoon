@@ -25,7 +25,8 @@
     "timer-node": "^5.0.7",
     "ts-node": "^10.9.2",
     "zod": "^3.22.4",
-    "oracle": "workspace:*"
+    "oracle": "workspace:*",
+    "posthog": "workspace:*"
   },
   "devDependencies": {
     "@types/google-protobuf": "^3.15.6",
