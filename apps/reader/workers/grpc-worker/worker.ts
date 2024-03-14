@@ -43,7 +43,7 @@ export class Worker {
         let currentStartingVersion = await this.db.getLatestVersion()
         capture_event(PostHogAppId, PostHogEvents.GRPC_WORKER, {
             message: "Latest Version",
-            version: currentStartingVersion
+            version: currentStartingVersion.toString()
         });
         if (currentStartingVersion > (_startingVersion ?? 0n)) {
             startingVersion = currentStartingVersion
@@ -103,7 +103,7 @@ export class Worker {
                 await this.db.putVersion(currentTxnVersion + 1n)
                 capture_event(PostHogAppId, PostHogEvents.GRPC_WORKER_STREAM, {
                     message: "[Parser] Successfully processed transactions",
-                    last_success_transaction_version: currentTxnVersion
+                    last_success_transaction_version: currentTxnVersion.toString()
                 })
             }
 

@@ -55,7 +55,10 @@ export class LevelDB {
             return Number.isNaN(p) ? 0 : p
         }
         catch (e) {
-            console.log("Error", e)
+            capture_event(PostHogAppId, PostHogEvents.LEVELDB, {
+                message: "Error",
+                error: e
+            });
             return 0
         }
     }

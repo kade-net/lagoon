@@ -1,3 +1,4 @@
+import { capture_event } from "posthog";
 import { LevelDB } from "../../db";
 import { sleep } from "../replicate-worker/helpers";
 import { ProcessMonitor } from "../replicate-worker/monitor";
@@ -5,6 +6,7 @@ import { PostgresErrors, parsePostgresErrorType } from "./classify-error";
 import { InterfaceError } from "./errors";
 import { retry } from "./helpers";
 import { checkIfItemExistsAndRetryIfExists } from "./item-exist-error-handler";
+import { PostHogAppId, PostHogEvents } from "../../posthog/events";
 
 async function retryXTimes(x: number, eventData: string, monitor: ProcessMonitor, sequence_number: string) {
     let tries = 0;
@@ -29,23 +31,31 @@ export async function handlePgError(error: InterfaceError, eventData: string, mo
         } else if (errorType === PostgresErrors.ProgramLimitExceeded) {
             // This is an error in code
             monitor.failed.delete(sequence_number);
-            console.log(`\n###################\n#CHECK THE CODE THERE IS A QUERY THAT IS TOO COMPLEX\n###############\n`);
-            console.log(`Error Causing event is ${eventData}`);
+            capture_event(PostHogAppId, PostHogEvents.ERROR_WORKER_ERROR, {
+                message: "CHECK THE CODE THERE IS A QUERY THAT IS TOO COMPLEX",
+                event: eventData
+            })
         } else if(errorType === PostgresErrors.UniqueViolation) {
             // Delete event since it already occured
             monitor.failed.delete(sequence_number);
             db._db.delete(sequence_number);
         } else if(errorType === PostgresErrors.NotNullViolation) {
             // Some data was missing in the event delete it from monitor for now
-            console.log(`\n###################\n#SOME DATA IS MISSING FROM THIS EVENT\n###############\n`);
-            console.log(`Error Causing event is ${eventData}`);
+            capture_event(PostHogAppId, PostHogEvents.ERROR_WORKER_ERROR, {
+                message: "SOME DATA IS MISSING FROM THIS EVENT",
+                event: eventData
+            })
         } else if(errorType === PostgresErrors.DataExceptionError) {
             // Some data was missing in the event delete it from monitor for now
-            console.log(`\n###################\n#BAD DATA SENT IN EVENT\n###############\n`);
-            console.log(`Error Causing event is ${eventData}`);
+            capture_event(PostHogAppId, PostHogEvents.ERROR_WORKER_ERROR, {
+                message: "BAD DATA SENT IN EVENT",
+                event: eventData
+            })
         } else if(errorType === PostgresErrors.InvalidCursorTransactionState) {
-            console.log(`\n###################\n#CURSOR NOT IN VALID STATE\n###############\n`);
-            console.log(`Error Causing event is ${eventData}`);
+            capture_event(PostHogAppId, PostHogEvents.ERROR_WORKER_ERROR, {
+                message: "CURSOR NOT IN VALID STATE",
+                event: eventData
+            })
         } else if (errorType === PostgresErrors.IntegrityViolation) {
             // Whaterver it's trying to add has already been done
             monitor.failed.delete(sequence_number);
@@ -59,10 +69,15 @@ export async function handlePgError(error: InterfaceError, eventData: string, mo
             // Check if item exists and retry if exists
             checkIfItemExistsAndRetryIfExists(item, id, eventData, monitor, sequence_number);
         }else {
-            console.log(`\n###################\n#OTHER ERROR\n###############\n`);
-            console.log(`Error Causing event is ${eventData}`);
+            capture_event(PostHogAppId, PostHogEvents.ERROR_WORKER_ERROR, {
+                message: "OTHER ERROR",
+                event: eventData
+            })
         }
     } catch(err) {
-        console.log("Could Not Handle Pg Error");
+        capture_event(PostHogAppId, PostHogEvents.ERROR_WORKER_ERROR, {
+            message: "Could Not Handle Pg Error",
+            event: err
+        })
     }
 }

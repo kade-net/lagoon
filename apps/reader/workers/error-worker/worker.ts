@@ -1,3 +1,4 @@
+import { capture_event } from "posthog";
 import { LevelDB } from "../../db";
 import { Lama, LamaReader } from "../../db/lama";
 import { sleep } from "../replicate-worker/helpers";
@@ -6,6 +7,7 @@ import { PostgresErrors, parsePostgresErrorType } from "./classify-error";
 import { ErrorProcessor } from "./error-processor";
 import { InterfaceError } from "./errors";
 import { interfaceErrorSchema, retry } from "./helpers";
+import { PostHogAppId, PostHogEvents } from "../../posthog/events";
 
 export class ErrorWorker {
     reader: LamaReader
@@ -26,12 +28,10 @@ export class ErrorWorker {
         this.reader.on('data', async (data) => {
             try {
                 const event = data.toString();
-                console.log(`event:: ${event}`);
 
                 // If event is json parse it
                 if (event.includes("{")) {
                     const data = JSON.parse(event);
-                    console.log(data);
 
                     // Some how get the key I need
                     const key = data['key'];
@@ -53,12 +53,17 @@ export class ErrorWorker {
                         this.lama.put("lastRead", key);
                     }
                     // Record that event has been dealt with
-                    console.log("Could Not Get Event Data From Lama");
+                    capture_event(PostHogAppId, PostHogEvents.ERROR_WORKER_ERROR, {
+                        message: "Could Not Get Event Data From Lama",
+                        key,
+                    })
                     this.lama.put("lastRead", key);
                 }
             } catch (err) {
-                console.log(`\nOHH SHIT\n`);
-                console.log(err);
+                capture_event(PostHogAppId, PostHogEvents.ERROR_WORKER_ERROR, {
+                    message: "Error At Error Worker",
+                    error: err,
+                })
             }
         });
     }

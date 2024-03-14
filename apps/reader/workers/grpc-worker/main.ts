@@ -23,7 +23,7 @@ try {
     const v = await db.getLatestVersion()
     capture_event(PostHogAppId, PostHogEvents.START_GRPC_WORKER, {
         message: "Starting worker with version",
-        version: v
+        version: v.toString()
     });
     await worker.run(BigInt(parsed))
 }

@@ -6,6 +6,8 @@ import { RegisterUsernamePlugin } from "../replicate-worker/plugins/usernames";
 import {z} from 'zod';
 import { KadeItems, setUnkownError } from "./errors";
 import oracle, { account, comment, delegate, eq, follow, profile, publication, quote } from "oracle"
+import { capture_event } from "posthog";
+import { PostHogAppId, PostHogEvents } from "../../posthog/events";
 
 export const LagoonTypeSchema = z.union([
     z.literal("schema_error"),
@@ -91,7 +93,6 @@ export async function retry(event: string | undefined, monitor: ProcessMonitor, 
             }
             return false;
         } catch(err) {
-            console.log("Error while retrying: ", err);
             setUnkownError(monitor, err, sequenceNumber);
             return false;
         }
@@ -146,6 +147,8 @@ export async function checkIfItemExistsAndRetryIfExists(item: string, id: number
             }
         }
     } catch(err) {
-        console.log("Could Not Check If Item Exits");
+        capture_event(PostHogAppId, PostHogEvents.ERROR_WORKER_ERROR, {
+            message: "Could Not Check If Item Exits"
+        })
     }
 }

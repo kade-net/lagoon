@@ -13,7 +13,13 @@ export enum PostHogEvents {
    REPLICATE_WORKER_WRITER_ERROR = 'replicate-worker-writer-error',
    LEVELDB = 'level-db',
    LAMA = 'lama',
-   LAMAREADER = 'lamareader'
+   LAMAREADER = 'lamareader',
+   ERROR_WORKER_ERROR = 'error-worker-error',
+   POSTGRES_ERROR = 'postgres-error',
+   ITEM_ERROR = 'item-error',
+   SCHEMA_ERROR = 'schema-error',
+   UNKOWN_ERROR = 'unkown-error',
+   Rockie = 'rockie'
 };
 
 export const PostHogAppId = 'kade-network-app';

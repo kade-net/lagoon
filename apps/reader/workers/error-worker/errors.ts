@@ -2,6 +2,8 @@ import { ZodError, z } from "zod";
 import { LagoonError, LagoonTypeSchema } from "./helpers";
 import { PostgresError } from "postgres";
 import { ProcessMonitor } from "../replicate-worker/monitor";
+import { capture_event } from "posthog";
+import { PostHogAppId, PostHogEvents } from "../../posthog/events";
 
 export enum KadeItems {
     Account = "account",
@@ -103,22 +105,44 @@ export class InterfaceError implements LagoonError {
 export function setPostgresError(monitor: ProcessMonitor, err: PostgresError, sequence_number: string, item: string, id: number) {
     const pgError = new MyPostgresError(err.code, item, id);
     const error = InterfaceError.init(pgError, sequence_number);
+    capture_event(PostHogAppId, PostHogEvents.POSTGRES_ERROR, {
+        message: "Got A Postgres Error",
+        code: err.code,
+        sequence_number,
+        details: err.detail ?? ""
+    })
     monitor.setFailed(sequence_number, JSON.stringify(error));
 }
 
 export function setSchemaError(monitor: ProcessMonitor, err: ZodError, sequence_number: string, item: KadeEvents) {
     const error = InterfaceError.init(err, sequence_number, item);
+    capture_event(PostHogAppId, PostHogEvents.SCHEMA_ERROR, {
+        message: "Got An Error While Parsing Schema",
+        error: err,
+        sequence_number,
+        item: item
+    })
     monitor.setFailed(sequence_number, JSON.stringify(error));
 }
 
 export function setItemNotExistError(monitor: ProcessMonitor, sequence_number: string, item: KadeItems, id: number) {
     const itemError = new ItemNotExistError(item, id);
     const error = InterfaceError.init(itemError, sequence_number);
+    capture_event(PostHogAppId, PostHogEvents.SCHEMA_ERROR, {
+        message: "Got An Item Not Exist Error",
+        sequence_number,
+        item: item
+    })
     monitor.setFailed(sequence_number, JSON.stringify(error));
 }
 
 export function setUnkownError(monitor: ProcessMonitor, err: any, sequence_number: string) {
     const error = InterfaceError.init(err, sequence_number);
+    capture_event(PostHogAppId, PostHogEvents.SCHEMA_ERROR, {
+        message: "Got An Item Not Exist Error",
+        sequence_number,
+        error: err
+    })
     monitor.setFailed(sequence_number, JSON.stringify(error));
 }
 

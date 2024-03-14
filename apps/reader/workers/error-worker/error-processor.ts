@@ -1,8 +1,10 @@
+import { capture_event } from "posthog";
 import { LevelDB } from "../../db";
 import { Lama } from "../../db/lama";
 import { ProcessMonitor } from "../replicate-worker/monitor";
 import { InterfaceError } from "./errors";
 import { handleItemNotExistError } from "./item-exist-error-handler";
+import { PostHogAppId, PostHogEvents } from "../../posthog/events";
 
 export class ErrorProcessor {
     lama: Lama
@@ -34,8 +36,10 @@ export class ErrorProcessor {
                 throw "Could Not Get Event that caused error"
             }
         } catch(err) {
-            console.log(`\nOHH SHIT\n`);
-            console.log(err);
+            capture_event(PostHogAppId, PostHogEvents.ERROR_WORKER_ERROR, {
+                message: "Error While processing error",
+                error: err
+            })
         }
     }
 }

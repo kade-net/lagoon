@@ -1,4 +1,6 @@
 import RocksDB from "rocksdb"
+import { PostHogAppId, PostHogEvents } from "../posthog/events"
+import { capture_event } from "posthog"
 
 export class Rockie<K extends string = string, V extends string = string> {
     private _location: string
@@ -30,7 +32,9 @@ export class Rockie<K extends string = string, V extends string = string> {
                     reject(err)
                 }
                 else {
-                    console.log("opened")
+                    capture_event(PostHogAppId, PostHogEvents.Rockie, {
+                        message: "opened"
+                    })
                     resolve(new Rockie(location))
                 }
             })
