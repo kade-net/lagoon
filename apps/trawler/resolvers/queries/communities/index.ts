@@ -173,7 +173,7 @@ export const CommunityResolver: ResolverMap = {
 
             return {
                 members: members?.length ?? 0,
-                posts: posts?.length ?? 0
+                publications: posts?.length ?? 0
             }
         }
     }
