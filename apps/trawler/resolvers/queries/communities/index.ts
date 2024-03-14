@@ -22,7 +22,7 @@ export const CommunityResolver: ResolverMap = {
     Query: {
         communities: async (_, args, context) => {
             const { creator, pagination, sort = "DESC" } = args
-            const { page = 0, size = 20 } = pagination ?? null
+            const { page = 0, size = 20 } = pagination ?? {}
 
 
             const data = await context.oracle.query.communities.findMany({
@@ -40,7 +40,7 @@ export const CommunityResolver: ResolverMap = {
         },
         accountCommunities: async (_, args, context) => {
             const { accountAddress, pagination, sort = "DESC" } = args
-            const { page = 0, size = 20 } = pagination ?? null
+            const { page = 0, size = 20 } = pagination ?? {}
             const account = await context.oracle.query.account.findFirst({
                 where(fields, { eq }) {
                     return eq(fields.address, accountAddress)
@@ -84,7 +84,7 @@ export const CommunityResolver: ResolverMap = {
         },
         communityPublications: async (_, args, context) => {
             const { communityId, communityName, pagination, sort = "DESC" } = args
-            const { page = 0, size = 20 } = pagination ?? null
+            const { page = 0, size = 20 } = pagination ?? {}
 
             const community = await context.oracle.transaction(async (txn) => {
                 if (communityId) {
