@@ -176,6 +176,7 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
         if (!parsed.success) {
             console.log(parsed.error)
             monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error);
         }
 
         if (parsed.success) {
@@ -202,10 +203,12 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
                     })
                 }
                 monitor.setSuccess(sequence_number)
+                monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
                 console.log(`Something went wrong while processing data: ${e}`)
                 monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                monitor.setPosthogFailed(sequence_number, {error: e});
             }
         }
     }

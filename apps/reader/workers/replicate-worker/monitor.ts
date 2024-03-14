@@ -32,14 +32,14 @@ export class ProcessMonitor {
     }
 
     setPosthogFailed(sequence_number: string, payload: Record<string, any>) {
-        capture_event(PostHogAppID, PosthogEvents.FAILED, payload);
+        capture_event(PostHogAppID, PosthogEvents.FAILED, {payload, sequence_number});
     }
 
     setSuccess(sequence_number: string) {
         return this.success.put(sequence_number, "success")
     }
 
-    setPosthogSuccess(sequence_number: string, payload: Record<string, any>) {
-        capture_event(PostHogAppID, PosthogEvents.SUCCESS, payload);
+    setPosthogSuccess(sequence_number: string) {
+        capture_event(PostHogAppID, PosthogEvents.SUCCESS, {sequence_number});
     }
 }
