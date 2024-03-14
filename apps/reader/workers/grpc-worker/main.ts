@@ -4,6 +4,8 @@ const { isUndefined } = _
 import { LevelDB } from "../../db"
 import { ReadProcessor } from "./read.processor"
 import { Worker } from "./worker"
+import { capture_event } from "posthog"
+import { PostHogAppId, PostHogEvents } from "../../posthog/events"
 
 
 try {
@@ -19,9 +21,15 @@ try {
         throw new Error("Invalid starting version")
     }
     const v = await db.getLatestVersion()
-    console.log("Starting worker with version", v)
+    capture_event(PostHogAppId, PostHogEvents.START_GRPC_WORKER, {
+        message: "Starting worker with version",
+        version: v
+    });
     await worker.run(BigInt(parsed))
 }
 catch (e) {
-    console.log("Something went wrong while processing data:", e)
+    capture_event(PostHogAppId, PostHogEvents.GRPC_WORKER_ERROR, {
+        message: "Something went wrong while processing data",
+        error: e,
+    });
 }

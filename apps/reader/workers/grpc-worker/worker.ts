@@ -5,6 +5,8 @@ import { LevelDB } from "../../db";
 import _ from "lodash"
 const { isNull } = _
 import { TransactionsProcessor } from "./read.processor";
+import { capture_event } from "posthog";
+import { PostHogAppId, PostHogEvents } from "../../posthog/events";
 
 export function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -39,7 +41,10 @@ export class Worker {
         )
         let startingVersion = BigInt(0) // pass in the starting version;
         let currentStartingVersion = await this.db.getLatestVersion()
-        console.log("Latest Version", currentStartingVersion)
+        capture_event(PostHogAppId, PostHogEvents.GRPC_WORKER, {
+            message: "Latest Version",
+            version: currentStartingVersion
+        });
         if (currentStartingVersion > (_startingVersion ?? 0n)) {
             startingVersion = currentStartingVersion
         } else {
@@ -64,7 +69,9 @@ export class Worker {
         timer.start()
 
         stream.on("data", async (response: aptos.indexer.v1.TransactionsResponse) => {
-            console.log("Stream sent data")
+            capture_event(PostHogAppId, PostHogEvents.GRPC_WORKER_STREAM, {
+                message: "Stream sent data"
+            });
             stream.pause()
 
             const transactions = response.transactions
@@ -94,7 +101,7 @@ export class Worker {
                 await this.db.putVersion(currentTxnVersion + 1n)
             } else if (currentTxnVersion % 1000n == 0n) {
                 await this.db.putVersion(currentTxnVersion + 1n)
-                console.log({
+                capture_event(PostHogAppId, PostHogEvents.GRPC_WORKER_STREAM, {
                     message: "[Parser] Successfully processed transactions",
                     last_success_transaction_version: currentTxnVersion
                 })
@@ -110,36 +117,50 @@ export class Worker {
 
         stream.on("error", async (error) => {
             if (error.message.includes("RST_STREAM")) {
-                console.log("Stream was reset. Reconnecting...")
+                capture_event(PostHogAppId, PostHogEvents.GRPC_WORKER_STREAM_ERROR, {
+                    message: "Stream was reset. Reconnecting..."
+                });
                 await this.run()
                 return
             }
 
             if (error.message.includes("UNAVAILABLE")) {
-                console.log("Internet unavailable")
+                capture_event(PostHogAppId, PostHogEvents.GRPC_WORKER_STREAM_ERROR, {
+                    message: "Internet unavailable"
+                });
                 await sleep(60_000)
-                console.log("Restarting...")
+                capture_event(PostHogAppId, PostHogEvents.GRPC_WORKER_STREAM_ERROR, {
+                    message: "Restarting..."
+                });
                 await this.run()
                 return
 
             }
 
             if (error.message.includes("RESOURCE_EXHAUSTED")) {
-                console.log("Resource exhausted error. Waiting 3 minutes before restarting")
+                capture_event(PostHogAppId, PostHogEvents.GRPC_WORKER_STREAM_ERROR, {
+                    message: "Resource exhausted error. Waiting 3 minutes before restarting"
+                });
                 await sleep(180_000)
-                console.log("Restarting...")
+                capture_event(PostHogAppId, PostHogEvents.GRPC_WORKER_STREAM_ERROR, {
+                    message: "Restarting..."
+                });
                 await this.run()
                 return
             }
 
-            console.log("Error: ", error)
+            capture_event(PostHogAppId, PostHogEvents.GRPC_WORKER_STREAM_ERROR, {
+                message: "Error: ",
+                error: error
+            });
         })
 
 
         stream.on("status", (status) => {
-
-            console.log("Status: ", status)
-
+            capture_event(PostHogAppId, PostHogEvents.GRPC_WORKER_STREAM_STATUS, {
+                message: "Status: ",
+                error: status
+            });
         })
 
     }

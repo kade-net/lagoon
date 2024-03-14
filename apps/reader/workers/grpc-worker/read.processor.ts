@@ -1,5 +1,7 @@
 import protos, { aptos } from "@aptos-labs/aptos-protos";
 import { LevelDB } from "../../db";
+import { capture_event } from "posthog";
+import { PostHogAppId, PostHogEvents } from "../../posthog/events";
 
 const MODULE_ADDRESS = process.env.MODULE_ADDRESS!
 
@@ -89,7 +91,10 @@ export class ReadProcessor extends TransactionsProcessor {
             for (const event of events) {
                 const eventType = event.typeStr;
                 if (eventType && SUPPORTED_EVENT_TYPES.includes(eventType)) {
-                    console.log("Processing event", eventType)
+                    capture_event(PostHogAppId, PostHogEvents.GRPC_READ_PROCESSOR, {
+                        message: "Processing event",
+                        eventType: eventType
+                    })
                     await db.put({
                         type: eventType?.split("::")?.at(2),
                         event: event.data
