@@ -5,7 +5,7 @@ import { Context, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 
 interface ResolverMap {
     Query: {
-        communities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, creator: string }, Context>,
+        communities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, creator: string, search: string }, Context>,
         accountCommunities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, accountAddress: string }, Context>,
         community?: Resolver<any, { id: number, name: string }, Context>
         communityPublications?: Resolver<any, PaginationArg & { communityId: number, communityName: string, sort: SORT_ORDER }, Context>
@@ -21,14 +21,17 @@ interface ResolverMap {
 export const CommunityResolver: ResolverMap = {
     Query: {
         communities: async (_, args, context) => {
-            const { creator, pagination, sort = "DESC" } = args
+            const { creator, pagination, sort = "DESC", search } = args
             const { page = 0, size = 20 } = pagination ?? {}
 
 
             const data = await context.oracle.query.communities.findMany({
-                where(fields, { eq, and }) {
+                where(fields, { eq, and, like }) {
                     if (creator) {
                         return eq(fields.creator_address, creator)
+                    }
+                    if (search) {
+                        return like(fields.name, `${search}`)
                     }
                 },
                 orderBy: sort === "ASC" ? asc(communities.timestamp) : desc(communities.timestamp),

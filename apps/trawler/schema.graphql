@@ -191,6 +191,7 @@ type Query {
     pagination: Pagination
     sort: SortOrder
     creator: String
+    search: String
   ): [Community!]
   accountCommunities(
     accountAddress: String!
