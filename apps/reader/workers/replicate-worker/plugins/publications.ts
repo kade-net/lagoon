@@ -125,15 +125,51 @@ export class PublicationCreateWithRefEventPlugin extends ProcessorPlugin {
                     monitor.setFailed(sequence_number, JSON.stringify({ error: "Parent publication not found" }))
                     return
                 }
-                await oracle.insert(publication).values({
-                    content: data.type == 4 ? {} : JSON.parse(data.payload),
-                    creator_id: data.user_kid,
-                    id: data.kid,
-                    timestamp: data.timestamp,
-                    publication_ref: data.publication_ref,
-                    type: data.type,
-                    parent_id: parent.id
+
+                await oracle.transaction(async (txn) => {
+                    await oracle.insert(publication).values({
+                        content: data.type == 4 ? {} : JSON.parse(data.payload),
+                        creator_id: data.user_kid,
+                        id: data.kid,
+                        timestamp: data.timestamp,
+                        publication_ref: data.publication_ref,
+                        type: data.type,
+                        parent_id: parent.id
+                    })
+
+                    const payload = data.type == 4 ? null : JSON.parse(data.payload)
+
+                    if (data.type == 1 && payload && payload.community) { // only posts
+                        const community = await txn.query.communities.findFirst({
+                            where: (fields, { eq }) => eq(fields.name, payload.community)
+                        })
+                        if (community) {
+                            const membership = await txn.query.membership.findFirst({
+                                where: (fields, { eq, and }) => and(
+                                    eq(fields.community_id, community.id),
+                                    eq(fields.user_kid, data.user_kid),
+                                    eq(fields.is_active, true)
+                                )
+                            })
+
+                            if (membership) {
+                                await txn.insert(community_posts).values({
+                                    community_id: community.id,
+                                    id: randomBytes(32).toString('hex'),
+                                    post_id: data.kid,
+                                    user_kid: data.user_kid
+                                })
+                            }
+                            // IGNORE IF MEMBERSHIP NOT FOUND
+                        }
+                        // IGNORE IF COMMUNITY NOT FOUND
+                    }
+
                 })
+
+
+
+
                 monitor.setSuccess(sequence_number)
             }
             catch (e) {
