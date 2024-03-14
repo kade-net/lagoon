@@ -26,12 +26,12 @@ export const CommunityResolver: ResolverMap = {
 
 
             const data = await context.oracle.query.communities.findMany({
-                where(fields, { eq, and, like }) {
+                where(fields, { eq, and, like, }) {
                     if (creator) {
                         return eq(fields.creator_address, creator)
                     }
                     if (search) {
-                        return like(fields.name, `${search}`)
+                        return like(fields.name, `%${search}%`)
                     }
                 },
                 orderBy: sort === "ASC" ? asc(communities.timestamp) : desc(communities.timestamp),
