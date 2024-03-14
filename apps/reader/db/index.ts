@@ -1,5 +1,7 @@
 import _ from "lodash"
 import { Lama } from "./lama"
+import { capture_event } from "posthog";
+import { PostHogAppId, PostHogEvents } from "../posthog/events";
 const { isNumber, isNull } = _;
 
 
@@ -29,7 +31,10 @@ export class LevelDB {
     async getLatestVersion() {
         try {
             const version = await this._version_store.get("version")
-            console.log("Version", version)
+            capture_event(PostHogAppId, PostHogEvents.LEVELDB, {
+                message: "version",
+                version
+            });
             const p = version ? BigInt(version) : BigInt(0)
             return p
         }
@@ -67,7 +72,10 @@ export class LevelDB {
 
     async put(data: Record<string, any>) {
         const sequence = await this.getSequenceNumber();
-        console.log("Sequence", sequence);
+        capture_event(PostHogAppId, PostHogEvents.LEVELDB, {
+            message: "Sequence",
+            sequence
+        });
         const nextKey = this.getNextKey(sequence);
         await this._db!.put(nextKey, JSON.stringify(data));
         await this._sequence_store!.put("sequence", `${sequence + 1}`);

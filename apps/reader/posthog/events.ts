@@ -10,7 +10,8 @@ export enum PostHogEvents {
    REPLICATE_WORKER_ERROR = 'replicate-worker-error',
    START_REPLICATE_WORKER = 'start-replicate-worker', 
    REPLICATE_WORKER_WRITER = 'replicate-worker-writer',
-   REPLICATE_WORKER_WRITER_ERROR = 'replicate-worker-writer-error'
+   REPLICATE_WORKER_WRITER_ERROR = 'replicate-worker-writer-error',
+   LEVELDB = 'level-db'
 };
 
 export const PostHogAppId = 'kade-network-app';
