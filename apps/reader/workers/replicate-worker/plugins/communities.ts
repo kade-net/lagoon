@@ -1,7 +1,7 @@
 import schema from "../../../schema";
 import { EVENT_NAMES, ProcessorPlugin } from "../helpers";
 import { ProcessMonitor } from "../monitor";
-import oracle, { and, communities, eq, membership } from "oracle"
+import oracle, { and, communities, count, eq, membership } from "oracle"
 
 
 
@@ -67,12 +67,23 @@ export class MemberJoinEventPlugin implements ProcessorPlugin {
                     monitor.setFailed(sequence_number, JSON.stringify({ error: "Community not found" }))
                     return
                 }
-                await oracle.insert(membership).values({
-                    community_id: community.id,
-                    id: data.bid,
-                    type: data.type,
-                    user_kid: data.user_kid,
-                    is_active: true,
+
+                await oracle.transaction(async (txn) => {
+                    const current_count = await txn.select({
+                        membership_count: count(membership.id)
+                    }).from(membership)
+
+                    const _count = current_count?.at(0)?.membership_count || 0
+
+                    // TODO: Currently the smart contract isn't incrementing the membership id, so we have to do it here
+
+                    await txn.insert(membership).values({
+                        community_id: community.id,
+                        id: _count + 1,
+                        type: data.type,
+                        user_kid: data.user_kid,
+                        is_active: true,
+                    })
                 })
                 monitor.setSuccess(sequence_number)
             }
