@@ -12,7 +12,7 @@ export class AccountCreatePlugin extends ProcessorPlugin {
         const parsed = schema.account_create_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error)
         }
         if (parsed.success) {
             const data = parsed.data
@@ -24,11 +24,11 @@ export class AccountCreatePlugin extends ProcessorPlugin {
                     timestamp: data.timestamp,
                 })
 
-                monitor.setSuccess(sequence_number)
+                monitor.setPosthogSuccess(sequence_number)
             }
             catch (e) {
                 console.log(e)
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                monitor.setPosthogFailed(sequence_number, {error: e})
             }
         }
     }
@@ -43,7 +43,7 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
         const parsed = schema.delegate_create_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error);
         }
 
         if (parsed.success) {
@@ -61,16 +61,16 @@ export class DelegateCreatePlugin extends ProcessorPlugin {
                         owner_id: account?.id,
                         timestamp: data.timestamp
                     })
-                    monitor.setSuccess(sequence_number)
+                    monitor.setPosthogSuccess(sequence_number);
                 }
                 else {
                     console.log(`Account with address ${data.owner_address} not found`)
-                    monitor.setFailed(sequence_number, JSON.stringify({ error: `Account with address ${data.owner_address} not found` }))
+                    monitor.setPosthogFailed(sequence_number, { error: `Account with address ${data.owner_address} not found` })
                 }
             }
             catch (e) {
                 console.log(`Something went wrong while processing data: ${e}`)
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                monitor.setPosthogFailed(sequence_number, {error: e})
             }
         }
     }
@@ -84,7 +84,7 @@ export class DelegateRemovePlugin extends ProcessorPlugin {
         const parsed = schema.delegate_remove_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error);
         }
 
         if (parsed.success) {
@@ -92,11 +92,11 @@ export class DelegateRemovePlugin extends ProcessorPlugin {
 
             try {
                 await oracle.delete(delegate).where(eq(delegate.id, data.kid))
-                monitor.setSuccess(sequence_number)
+                monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
                 console.log(`Something went wrong while processing data: ${e}`)
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                monitor.setPosthogFailed(sequence_number, {error: e})
             }
         }
     }
@@ -111,7 +111,7 @@ export class AccountFollowPlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error);
         }
 
         if (parsed.success) {
@@ -125,12 +125,11 @@ export class AccountFollowPlugin extends ProcessorPlugin {
                     timestamp: data.timestamp
                 })
 
-                monitor.setSuccess(sequence_number)
+                monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
                 console.log(`Something went wrong while processing data: ${e}`)
-
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                monitor.setPosthogFailed(sequence_number, {error: e})
             }
         }
     }
@@ -145,7 +144,7 @@ export class AccountUnFollowPlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error)
         }
 
         if (parsed.success) {
@@ -156,11 +155,11 @@ export class AccountUnFollowPlugin extends ProcessorPlugin {
                     eq(follow.follower_id, data.user_kid),
                     eq(follow.following_id, data.unfollowing_kid)
                 ))
-                monitor.setSuccess(sequence_number)
+                monitor.setPosthogSuccess(sequence_number)
             }
             catch (e) {
                 console.log(`Something went wrong while processing data: ${e}`)
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                monitor.setPosthogFailed(sequence_number, {error: e})
             }
         }
     }
@@ -175,7 +174,6 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
             monitor.setPosthogFailed(sequence_number, parsed.error);
         }
 
@@ -202,12 +200,10 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
                         creator: data.user_kid
                     })
                 }
-                monitor.setSuccess(sequence_number)
                 monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
                 console.log(`Something went wrong while processing data: ${e}`)
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
                 monitor.setPosthogFailed(sequence_number, {error: e});
             }
         }

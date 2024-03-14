@@ -13,7 +13,6 @@ export class PublicationCreateEventPlugin extends ProcessorPlugin {
         const parsed = schema.publication_create_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
             monitor.setPosthogFailed(sequence_number, parsed.error);
             return
         }
@@ -64,11 +63,9 @@ export class PublicationCreateEventPlugin extends ProcessorPlugin {
                 })
 
 
-                monitor.setSuccess(sequence_number)
                 monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
                 monitor.setPosthogFailed(sequence_number, {error: e});
                 console.log(`Something went wrong while processing data: ${e}`)
             }
@@ -84,7 +81,6 @@ export class PublicationRemoveEventPlugin extends ProcessorPlugin {
         const parsed = schema.publication_remove_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
             monitor.setPosthogFailed(sequence_number, parsed.error);
         }
 
@@ -95,11 +91,9 @@ export class PublicationRemoveEventPlugin extends ProcessorPlugin {
                 await oracle.delete(publication).where(eq(publication.id, data.kid))
                 await oracle.delete(reaction).where(eq(reaction.publication_id, data.kid))
                 await oracle.delete(community_posts).where(eq(community_posts.post_id, data.kid))
-                monitor.setSuccess(sequence_number)
                 monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
                 monitor.setPosthogFailed(sequence_number, {error: e});
                 console.log(`Something went wrong while processing data: ${e}`)
             }
@@ -115,7 +109,6 @@ export class PublicationCreateWithRefEventPlugin extends ProcessorPlugin {
         const parsed = schema.publication_create_with_ref_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
             monitor.setPosthogFailed(sequence_number, parsed.error);
             return 
         }
@@ -129,7 +122,6 @@ export class PublicationCreateWithRefEventPlugin extends ProcessorPlugin {
                 })
 
                 if (!parent) {
-                    monitor.setFailed(sequence_number, JSON.stringify({ error: "Parent publication not found" }))
                     monitor.setPosthogFailed(sequence_number, { error: "Parent publication not found" });
                     return
                 }
@@ -176,14 +168,9 @@ export class PublicationCreateWithRefEventPlugin extends ProcessorPlugin {
 
                 })
 
-
-
-
-                monitor.setSuccess(sequence_number)
                 monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
                 monitor.setPosthogFailed(sequence_number, {error: e});
                 console.log(`Something went wrong while processing data: ${e}`)
             }
@@ -200,7 +187,6 @@ export class PublicationRemoveWithRefEventPlugin extends ProcessorPlugin {
         const parsed = schema.publication_remove_with_ref_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
             monitor.setPosthogFailed(sequence_number, parsed.error);
         }
 
@@ -212,17 +198,15 @@ export class PublicationRemoveWithRefEventPlugin extends ProcessorPlugin {
                     where: (fields, { eq }) => and(eq(fields.publication_ref, data.ref), eq(fields.creator_id, data.user_kid))
                 })
                 if (!chosen) {
-                    monitor.setFailed(sequence_number, JSON.stringify({ error: "Publication not found" }))
+                    monitor.setPosthogFailed(sequence_number, { error: "Publication not found" })
                     return
                 }
                 await oracle.delete(publication).where(eq(publication.id, chosen.id))
                 await oracle.delete(reaction).where(eq(reaction.publication_id, chosen.id))
                 await oracle.delete(community_posts).where(eq(community_posts.post_id, chosen.id))
-                monitor.setSuccess(sequence_number)
                 monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
                 monitor.setPosthogFailed(sequence_number, {error: e});
                 console.log(`Something went wrong while processing data: ${e}`)
             }
@@ -241,7 +225,6 @@ export class ReactionCreateEventPlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
             monitor.setPosthogFailed(sequence_number, parsed.error);
         }
 
@@ -256,11 +239,9 @@ export class ReactionCreateEventPlugin extends ProcessorPlugin {
                     timestamp: data.timestamp,
                     publication_id: data.reference_kid,
                 })
-                monitor.setSuccess(sequence_number)
                 monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
                 monitor.setPosthogFailed(sequence_number, {error: e})
                 console.log(`Something went wrong while processing data: ${e}`)
             }
@@ -277,7 +258,6 @@ export class ReactionCreateEventWithRefPlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
             monitor.setPosthogFailed(sequence_number, parsed.error);
         }
 
@@ -289,7 +269,6 @@ export class ReactionCreateEventWithRefPlugin extends ProcessorPlugin {
                     where: (fields, { eq }) => eq(fields.publication_ref, data.publication_ref)
                 })
                 if (!pub) {
-                    monitor.setFailed(sequence_number, JSON.stringify({ error: "Publication not found" }))
                     monitor.setPosthogFailed(sequence_number, { error: "Publication not found" });
                     return
                 }
@@ -300,11 +279,9 @@ export class ReactionCreateEventWithRefPlugin extends ProcessorPlugin {
                     timestamp: data.timestamp,
                     publication_id: pub?.id,
                 })
-                monitor.setSuccess(sequence_number)
                 monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
                 monitor.setPosthogFailed(sequence_number, {error: e});
                 console.log(`Something went wrong while processing data: ${e}`)
             }
@@ -322,17 +299,17 @@ export class ReactionRemoveEventPlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error);
         }
 
         if (parsed.success) {
             const data = parsed.data
             try {
                 await oracle.delete(reaction).where(eq(reaction.id, data.kid))
-                monitor.setSuccess(sequence_number)
+                monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                monitor.setPosthogFailed(sequence_number, {error: e})
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
@@ -349,7 +326,7 @@ export class ReactionRemoveEventWithRefPlugin extends ProcessorPlugin {
 
         if (!parsed.success) {
             console.log(parsed.error)
-            monitor.setFailed(sequence_number, JSON.stringify(parsed.error))
+            monitor.setPosthogFailed(sequence_number, parsed.error);
         }
 
         if (parsed.success) {
@@ -359,14 +336,14 @@ export class ReactionRemoveEventWithRefPlugin extends ProcessorPlugin {
                     where: (fields, { eq }) => eq(fields.publication_ref, data.ref)
                 })
                 if (!pub) {
-                    monitor.setFailed(sequence_number, JSON.stringify({ error: "Publication not found" }))
+                    monitor.setPosthogFailed(sequence_number, { error: "Publication not found" })
                     return
                 }
                 await oracle.delete(reaction).where(and(eq(reaction.publication_id, pub?.id), eq(reaction.creator_id, data.user_kid)))
-                monitor.setSuccess(sequence_number)
+                monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
-                monitor.setFailed(sequence_number, JSON.stringify({ error: e }))
+                monitor.setPosthogFailed(sequence_number, {error: e})
                 console.log(`Something went wrong while processing data: ${e}`)
             }
         }
