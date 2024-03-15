@@ -76,7 +76,7 @@ type Account {
   timestamp: Date!
   profile: Profile
   username: Username
-  viewer(viewer: Int, address: string): AccountViewerStats
+  viewer(viewer: Int, address: String): AccountViewerStats
 }
 
 type Delegate {
