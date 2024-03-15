@@ -5,7 +5,7 @@ import { Context, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 
 interface ResolverMap {
     Query: {
-        communities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, creator: string, search: string }, Context>,
+        communities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, creator: string, search: string, memberAddress?: string }, Context>,
         accountCommunities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, accountAddress: string }, Context>,
         community?: Resolver<any, { id: number, name: string }, Context>
         communityPublications?: Resolver<any, PaginationArg & { communityId: number, communityName: string, sort: SORT_ORDER }, Context>,
@@ -22,13 +22,28 @@ interface ResolverMap {
 export const CommunityResolver: ResolverMap = {
     Query: {
         communities: async (_, args, context) => {
-            const { creator, pagination, sort = "DESC", search } = args
+            const { creator, pagination, sort = "DESC", search, memberAddress } = args
             const { page = 0, size = 20 } = pagination ?? {}
+
+            if (memberAddress) {
+                const c_and_m = await context.oracle.select().from(communities)
+                    .innerJoin(membership, eq(communities.id, membership.community_id))
+                    .innerJoin(account, eq(membership.user_kid, account.id))
+                    .where(
+                        eq(account.address, memberAddress)
+                    )
+                    .orderBy(sort === "ASC" ? asc(communities.timestamp) : desc(communities.timestamp))
+                    .limit(size)
+                    .offset(page * size)
+
+                return c_and_m?.map(c => c.communities) ?? []
+            }
 
 
             const data = await context.oracle.query.communities.findMany({
                 where(fields, { eq, and, like, }) {
                     if (creator) {
+
                         return eq(fields.creator_address, creator)
                     }
                     if (search) {
