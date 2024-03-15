@@ -21,7 +21,7 @@ type Membership {
   id: Int!
   community_id: Int!
   community: Community!
-  user_id: Int!
+  user_kid: Int!
   user: Account!
   type: Int!
   timestamp: Date!
