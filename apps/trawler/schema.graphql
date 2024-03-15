@@ -153,7 +153,7 @@ enum SortOrder {
 
 type Query {
   account(id: Int, address: String): Account
-  accounts(pagination: Pagination, sort: SortOrder): [Account!]
+  accounts(pagination: Pagination, sort: SortOrder, search: String): [Account!]
   publication(id: Int, ref: String): Publication
   publications(
     pagination: Pagination
