@@ -1,11 +1,11 @@
-import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, membership, username } from "oracle"
+import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, membership, or, username } from "oracle"
 import { Context, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 
 
 
 interface ResolverMap {
     Query: {
-        communities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, creator: string, search: string, memberAddress?: string }, Context>,
+        communities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, creator: string, search: string, memberAddress?: string, following?: boolean }, Context>,
         accountCommunities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, accountAddress: string }, Context>,
         community?: Resolver<any, { id: number, name: string }, Context>
         communityPublications?: Resolver<any, PaginationArg & { communityId: number, communityName: string, sort: SORT_ORDER }, Context>,
@@ -22,8 +22,29 @@ interface ResolverMap {
 export const CommunityResolver: ResolverMap = {
     Query: {
         communities: async (_, args, context) => {
-            const { creator, pagination, sort = "DESC", search, memberAddress } = args
+            const { creator, pagination, sort = "DESC", search, memberAddress, following } = args
             const { page = 0, size = 20 } = pagination ?? {}
+
+            if (memberAddress && (following === true || following === false)) {
+                // outer join communities and membership
+                const c_and_m = await context.oracle.select().from(communities)
+                    .leftJoin(membership, eq(communities.id, membership.community_id))
+                    .innerJoin(account, eq(membership.user_kid, account.id))
+                    .where(
+                        and(
+                            eq(account.address, memberAddress),
+                            following ? eq(membership.is_active, true) : or(
+                                eq(membership.is_active, false),
+                                eq(membership, null)
+                            )
+                        )
+                    )
+                    .orderBy(sort === "ASC" ? asc(communities.timestamp) : desc(communities.timestamp))
+                    .limit(size)
+                    .offset(page * size)
+
+                return c_and_m?.map(c => c.communities) ?? []
+            }
 
             if (memberAddress) {
                 const c_and_m = await context.oracle.select().from(communities)

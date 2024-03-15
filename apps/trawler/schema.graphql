@@ -193,6 +193,7 @@ type Query {
     creator: String
     search: String
     memberAddress: String
+    following: Boolean
   ): [Community!]
   accountCommunities(
     accountAddress: String!
