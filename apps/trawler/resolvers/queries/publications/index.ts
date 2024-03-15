@@ -1,6 +1,7 @@
 import { PUBLICATION, and, asc, count, desc, eq, inArray, publication, reaction } from "oracle"
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
-import { isNumber } from "lodash"
+import _ from "lodash"
+const { isNumber } = _
 
 
 interface ResolverMap {
