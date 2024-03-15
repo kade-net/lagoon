@@ -1,11 +1,12 @@
-import { PUBLICATION, and, asc, count, desc, eq, publication, reaction } from "oracle"
+import { PUBLICATION, and, asc, count, desc, eq, inArray, publication, reaction } from "oracle"
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
+import { isNumber } from "lodash"
 
 
 interface ResolverMap {
     Query : {
         publication: Resolver<any, { id: number, creator: number, ref: string, creator_address: string }, Context>,
-        publications: Resolver<any, PaginationArg & { creator: number, sort: SORT_ORDER, type: number, creator_address: string, types?: Array<number> }, Context>,
+        publications: Resolver<any, PaginationArg & { creator: number, sort: SORT_ORDER, type: number, creator_address: string, types?: Array<number>, reaction?: number }, Context>,
         publicationStats: Resolver<any, { id: number, ref: string }, Context>,
         publicationInteractionsByViewer: Resolver<any, { id: number, ref: string, viewer: number, address: string }, Context>
         publicationComments: Resolver<any, PaginationArg & { id: number, ref: string, sort: SORT_ORDER }, Context>
@@ -48,7 +49,7 @@ export const PublicationResolver: ResolverMap = {
             })
         },
         publications: async (_, args, context) => {
-            const { type, creator_address, creator, types } = args
+            const { type, creator_address, creator, types, reaction: _reaction } = args
 
             const { size = 10, page = 0 } = args.pagination ?? {}
 
@@ -59,6 +60,29 @@ export const PublicationResolver: ResolverMap = {
                 })
                 if (account)
                     creator_id = account?.id
+            }
+
+            if (isNumber(_reaction) && _reaction > 0) {
+                const reactions_and_publication = await context.oracle.select()
+                    .from(publication)
+                    .innerJoin(reaction, eq(reaction.publication_id, publication.id))
+                    .where(
+                        and(
+                            eq(reaction.creator_id, creator_id),
+                            eq(reaction.reaction, _reaction),
+                            type ?
+                                eq(publication.type, type) :
+                                types ?
+                                    inArray(publication.type, types) :
+                                    undefined
+                        )
+                    ).
+                    orderBy(args?.sort == "ASC" ? asc(publication.timestamp) : desc(publication.timestamp))
+                    .limit(size)
+                    .offset(page * size)
+
+
+                return reactions_and_publication?.map((r_n_p) => r_n_p.publication)
             }
 
             return await context.oracle.query.publication.findMany({
