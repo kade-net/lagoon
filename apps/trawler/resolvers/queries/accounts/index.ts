@@ -1,5 +1,5 @@
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types";
-import _ from "lodash"
+import _, { add } from "lodash"
 import { ACCOUNT, account, and, asc, count, delegate, desc, eq, follow, like, publication, reaction, username } from "oracle";
 const { isUndefined } = _
 
@@ -19,7 +19,7 @@ interface ResolverMap {
         stats: Resolver<ACCOUNT, any, Context>,
         profile: Resolver<ACCOUNT, any, Context>,
         username: Resolver<ACCOUNT, any, Context>,
-        viewer: Resolver<ACCOUNT, { viewer: number }, Context>
+        viewer: Resolver<ACCOUNT, { viewer: number, address: string }, Context>
     }
 }
 
@@ -245,7 +245,39 @@ export const AccountsResolver: ResolverMap = {
             })
         },
         viewer: async (parent, args, context) => {
-            const { viewer } = args
+            const { viewer, address } = args
+
+            if (address) {
+                const viewerFollow = await context.oracle.selectDistinct()
+                    .from(account)
+                    .innerJoin(follow, eq(account.id, follow.follower_id))
+                    .where(
+                        and(
+                            eq(account.address, address),
+                            eq(follow.following_id, parent.id)
+                        )
+                    )
+
+                const follows = viewerFollow?.at(0)?.account ? true : false
+
+                const viewerFollowed = await context.oracle.selectDistinct()
+                    .from(account)
+                    .innerJoin(follow, eq(account.id, follow.following_id))
+                    .where(
+                        and(
+                            eq(account.address, address),
+                            eq(follow.follower_id, parent.id)
+                        )
+                    )
+
+                const followed = viewerFollowed?.at(0)?.account ? true : false
+
+                return {
+                    follows,
+                    followed
+                }
+
+            }
 
             if (!viewer) {
                 return null
