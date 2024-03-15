@@ -162,6 +162,7 @@ type Query {
     sort: SortOrder
     creator_address: String
     types: [Int!]
+    reaction: Int
   ): [Publication!]
   publicationStats(id: Int, ref: String): PublicationStats
   publicationInteractionsByViewer(
