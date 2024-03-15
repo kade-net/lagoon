@@ -192,6 +192,7 @@ type Query {
     sort: SortOrder
     creator: String
     search: String
+    memberAddress: String
   ): [Community!]
   accountCommunities(
     accountAddress: String!
