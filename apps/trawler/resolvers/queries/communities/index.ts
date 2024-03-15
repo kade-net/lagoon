@@ -1,4 +1,4 @@
-import { COMMUNITY, asc, communities, community_posts, desc } from "oracle"
+import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, membership, username } from "oracle"
 import { Context, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 
 
@@ -8,7 +8,8 @@ interface ResolverMap {
         communities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, creator: string, search: string }, Context>,
         accountCommunities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, accountAddress: string }, Context>,
         community?: Resolver<any, { id: number, name: string }, Context>
-        communityPublications?: Resolver<any, PaginationArg & { communityId: number, communityName: string, sort: SORT_ORDER }, Context>
+        communityPublications?: Resolver<any, PaginationArg & { communityId: number, communityName: string, sort: SORT_ORDER }, Context>,
+        membership?: Resolver<any, { userName: string, communityName: string, userAddress: string }, Context>,
     },
     Community?: {
         creator?: Resolver<COMMUNITY, any, Context>
@@ -123,6 +124,38 @@ export const CommunityResolver: ResolverMap = {
             const posts = data.map(d => d.post)
 
             return posts
+        },
+        membership: async (_, args, context) => {
+            const { userName, communityName, userAddress } = args
+
+            const __membership = await context.oracle.transaction(async (txn) => {
+                const __account = await txn.selectDistinct()
+                    .from(account)
+                    .innerJoin(username, eq(account.address, username.owner_address))
+                    .where(
+                        userAddress ? eq(account.address, userAddress) : eq(username.username, userName)
+                    )
+                const userAccount = __account?.at(0)?.account
+
+                if (!userAccount) return null
+
+                const _membership = await txn.selectDistinct()
+                    .from(membership)
+                    .innerJoin(account, eq(membership.user_kid, account.id))
+                    .innerJoin(communities, eq(membership.community_id, communities.id))
+                    .where(and(
+                        eq(communities.name, communityName),
+                        eq(membership.is_active, true),
+                        eq(account.id, userAccount?.id)
+                    ))
+                    .orderBy(desc(membership.timestamp))
+                    .limit(1)
+
+                return _membership?.at(0)?.membership
+
+            })
+
+            return __membership ?? null
         }
     },
     Community: {
