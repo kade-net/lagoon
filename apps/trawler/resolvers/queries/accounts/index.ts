@@ -1,12 +1,12 @@
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types";
 import _ from "lodash"
-import { ACCOUNT, account, and, asc, count, delegate, desc, eq, follow, publication, reaction } from "oracle";
+import { ACCOUNT, account, and, asc, count, delegate, desc, eq, follow, like, publication, reaction, username } from "oracle";
 const { isUndefined } = _
 
 interface ResolverMap {
     Query: {
         account: Resolver<any, {id?: number, address?: string}, Context>,
-        accounts: Resolver<any, PaginationArg & {sort: SORT_ORDER}, Context>
+        accounts: Resolver<any, PaginationArg & { sort: SORT_ORDER, search?: string }, Context>
         accountViewerStats: Resolver<any, { accountAddress: string, viewerAddress: string }, Context>
         accountPublications: Resolver<any, PaginationArg & { sort: SORT_ORDER, type: number, accountAddress: string }, Context>
     },
@@ -47,6 +47,18 @@ export const AccountsResolver: ResolverMap = {
         },
         accounts: async (_, args, context) => {
             const { size = 10, page = 0 } = args.pagination ?? {}
+
+            if (args.search) {
+                const a_n_u = await context.oracle.select()
+                    .from(account)
+                    .innerJoin(username, eq(account.address, username.owner_address))
+                    .where(like(username.username, `%${args.search}%`))
+                    .orderBy(args?.sort == "ASC" ? asc(account.timestamp) : desc(account.timestamp))
+                    .limit(size)
+                    .offset(page * size)
+
+                return a_n_u?.map((a) => a.account)
+            }
 
                 return await context.oracle.query.account.findMany({
                     offset: page * size,
