@@ -19,7 +19,8 @@ export type EVENT_NAMES = 'RegisterUsernameEvent' |
     'MemberJoinEvent' |
     'MembershipChangeEvent' |
     'MembershipDeleteEvent' |
-    'MembershipReclaimEvent';
+    'MembershipReclaimEvent' |
+    'CommunityUpdateEvent';
 
 export abstract class ProcessorPlugin {
     abstract name(): EVENT_NAMES 

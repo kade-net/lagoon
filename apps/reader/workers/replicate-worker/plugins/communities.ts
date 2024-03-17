@@ -228,3 +228,44 @@ export class MembershipReclaimEventPlugin implements ProcessorPlugin {
 
     }
 }
+
+export class CommunityUpdateEventPlugin implements ProcessorPlugin {
+    name(): EVENT_NAMES {
+        return "CommunityUpdateEvent"
+    }
+    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
+        const parsed = schema.community_update_event_schema.safeParse(event)
+
+        if (!parsed.success) {
+            console.log(parsed.error)
+            monitor.setPosthogFailed(sequence_number, parsed.error);
+            return
+        }
+
+        const data = parsed.data
+
+        try {
+            const community = await oracle.query.communities.findFirst({
+                where: (fields, { eq }) => eq(fields.name, data.name)
+            })
+
+            if (!community) {
+                monitor.setPosthogFailed(sequence_number, { error: "Community not found" });
+                return
+            }
+
+            await oracle.update(communities).set({
+                description: data.description,
+                image: data.image,
+                display_name: data.display_name
+            }).where(eq(communities.name, data.name))
+
+            monitor.setPosthogSuccess(sequence_number);
+        }
+        catch (e) {
+            console.log(e)
+            monitor.setPosthogFailed(sequence_number, { error: e });
+        }
+
+    }
+}
