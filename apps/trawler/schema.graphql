@@ -209,4 +209,11 @@ type Query {
     sort: SortOrder
   ): [Publication!]
   membership(userName: String, communityName: String!, userAddress: String): Membership
+  memberships(
+    pagination: Pagination
+    sort: SortOrder
+    communityId: Int
+    communityName: String
+    search: String
+  ): [Account!]
 }

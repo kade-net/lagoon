@@ -1,4 +1,4 @@
-import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, membership, or, username } from "oracle"
+import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, like, membership, or, username } from "oracle"
 import { Context, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 
 
@@ -10,6 +10,7 @@ interface ResolverMap {
         community?: Resolver<any, { id: number, name: string }, Context>
         communityPublications?: Resolver<any, PaginationArg & { communityId: number, communityName: string, sort: SORT_ORDER }, Context>,
         membership?: Resolver<any, { userName: string, communityName: string, userAddress: string }, Context>,
+        memberships?: Resolver<any, PaginationArg & { sort: SORT_ORDER, communityId: number, communityName: string, search: string }, Context>,
     },
     Community?: {
         creator?: Resolver<COMMUNITY, any, Context>
@@ -35,7 +36,8 @@ export const CommunityResolver: ResolverMap = {
                             eq(account.address, memberAddress),
                             following ? eq(membership.is_active, true) : or(
                                 eq(membership.is_active, false),
-                                eq(membership, null)
+                                eq(membership, null),
+                                like(communities.name, `%${search}%`)
                             )
                         )
                     )
@@ -51,7 +53,11 @@ export const CommunityResolver: ResolverMap = {
                     .innerJoin(membership, eq(communities.id, membership.community_id))
                     .innerJoin(account, eq(membership.user_kid, account.id))
                     .where(
-                        eq(account.address, memberAddress)
+                        and(
+
+                            eq(account.address, memberAddress),
+                            like(communities.name, `%${search}%`)
+                        )
                     )
                     .orderBy(sort === "ASC" ? asc(communities.timestamp) : desc(communities.timestamp))
                     .limit(size)
@@ -142,6 +148,8 @@ export const CommunityResolver: ResolverMap = {
                 })
             })
 
+            if (!community) return []
+
 
             const data = await context.oracle.query.community_posts.findMany({
                 with: {
@@ -192,6 +200,47 @@ export const CommunityResolver: ResolverMap = {
             })
 
             return __membership ?? null
+        },
+        memberships: async (_, args, context) => {
+            const { pagination, communityId, communityName, search, sort } = args
+            const { page = 0, size = 20 } = pagination ?? {}
+
+            const community = await context.oracle.transaction(async (txn) => {
+                if (communityId) {
+                    return await txn.query.communities.findFirst({
+                        where(fields, { eq }) {
+                            return eq(fields.id, communityId)
+                        }
+                    })
+                }
+
+                return await txn.query.communities.findFirst({
+                    where(fields, { eq }) {
+                        return eq(fields.name, communityName)
+                    }
+                })
+            })
+
+            const results = await context.oracle.selectDistinct()
+                .from(membership)
+                .innerJoin(account, eq(membership.user_kid, account.id))
+                .innerJoin(username, eq(account.address, username.owner_address))
+                .innerJoin(communities, eq(membership.community_id, communities.id))
+                .where(
+                    and(
+                        community ? and(
+                            eq(communities.id, community.id),
+                            like(username.username, `%${search}%`),
+                        ) :
+                            like(username.username, `%${search}%`)
+                    )
+                )
+                .orderBy(sort === "ASC" ? asc(membership.timestamp) : desc(membership.timestamp))
+                .limit(size)
+                .offset(page * size)
+
+            return results?.map(r => r.account) ?? []
+
         }
     },
     Community: {
