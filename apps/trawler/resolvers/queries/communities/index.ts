@@ -143,6 +143,8 @@ export const CommunityResolver: ResolverMap = {
                 })
             })
 
+            if (!community) return []
+
 
             const data = await context.oracle.query.community_posts.findMany({
                 with: {
