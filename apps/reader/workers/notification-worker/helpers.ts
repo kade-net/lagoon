@@ -14,16 +14,18 @@ interface PUBLICATION_EVENT {
   publication_id: number
 }
 
-export function sendNotificationToPostHog(event_type: string, data: ACCOUNT_EVENT | PUBLICATION_EVENT) {
-  try {
-    capture_event(PostHogAppID, "notification", data);
-  } catch(e) {
-    console.log("I could not send notification for some reason");
-    console.log(e);
+export class PostHogNotifications {
+  send(event_type: string, data: ACCOUNT_EVENT | PUBLICATION_EVENT) {
+    try {
+      capture_event(PostHogAppID, "notification", data);
+    } catch(e) {
+      console.log("I could not send notification");
+      console.log(e);
+    }
   }
 }
 
 export abstract class NotificationProcessorPlugin {
     abstract name(): EVENT_NAMES 
-    abstract process(event: Record<string, any>, monitor: NotificationProcessMonitor, sequence_number: string, signature: string): Promise<void>
+    abstract process(event: Record<string, any>, monitor: NotificationProcessMonitor, sequence_number: string, signature: string, postHogNotifier: PostHogNotifications): Promise<void>
 }

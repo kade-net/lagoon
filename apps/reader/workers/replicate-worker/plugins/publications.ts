@@ -106,7 +106,6 @@ export class PublicationCreateWithRefEventPlugin extends ProcessorPlugin {
         return "PublicationCreateWithRef"
     }
     async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
-      console.log("Creating Some Publications");
         const parsed = schema.publication_create_with_ref_event_schema.safeParse(event)
         if (!parsed.success) {
             console.log(parsed.error)
