@@ -16,9 +16,11 @@ export class PublicationCreateNotification extends NotificationProcessorPlugin {
     const parsed = schema.publication_create_with_ref_event_schema.safeParse(event);
 
     if (!parsed.success) {
+      console.log("Parsing Failed");
       monitor.setPosthogFailed(sequence_number, parsed.error);
     } else {
       const data = parsed.data;
+      console.log(data);
 
       function getTypeOfPublication(identifier: number): PublicationType | void{
         if (identifier === 2) {
@@ -39,6 +41,8 @@ export class PublicationCreateNotification extends NotificationProcessorPlugin {
           publication_ref: data.parent_ref,
           publication_id: data.kid
         }
+
+        console.log(notificationData);
 
         sendNotificationToPostHog(getTypeOfPublication(data.type)!, notificationData);
        } 

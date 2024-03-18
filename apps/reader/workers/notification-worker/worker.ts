@@ -1,6 +1,7 @@
 import lmdb from "node-lmdb";
 import {sleep} from "../replicate-worker/helpers";
-import {isNull} from "lodash";
+import _ from "lodash";
+const { isNull} = _;
 import {capture_event} from "posthog";
 import {PostHogAppID, PosthogEvents} from "../../posthog/events";
 import {NotificationProcessMonitor} from "./monitor";
@@ -25,6 +26,7 @@ export class NotificationProcessor {
 
 
   async process(_last_read?: number) {
+    console.log("Processing some notifications");
 
     let last_read = "000000000";
 
@@ -66,6 +68,7 @@ export class NotificationProcessor {
 
         if (chosenPlugin) {
           try {
+            console.log("A plugin has been chosen");
             await chosenPlugin.process(event_data, this.monitor, key, signature);
           } catch(e) {
             capture_event(PostHogAppID, PosthogEvents.FAILED, {error: e});
