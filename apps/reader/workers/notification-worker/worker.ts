@@ -5,7 +5,7 @@ const { isNull} = _;
 import {capture_event} from "posthog";
 import {PostHogAppID, PosthogEvents} from "../../posthog/events";
 import {NotificationProcessMonitor} from "./monitor";
-import {NotificationProcessorPlugin} from "./helpers";
+import {NotificationProcessorPlugin, PostHogNotifications} from "./helpers";
 
 export class NotificationProcessor {
   // Store environment
@@ -13,11 +13,13 @@ export class NotificationProcessor {
   private dbi: lmdb.Dbi;
   private registeredPlugins: NotificationProcessorPlugin[] = [];
   private monitor: NotificationProcessMonitor
+  private postHogNotifier: PostHogNotifications
   
-  constructor(env: lmdb.Env, dbi: lmdb.Dbi, monitor: NotificationProcessMonitor) {
+  constructor(env: lmdb.Env, dbi: lmdb.Dbi, monitor: NotificationProcessMonitor, postHogNotifier: PostHogNotifications) {
     this.env = env;
     this.dbi = dbi;
     this.monitor = monitor
+    this.postHogNotifier = postHogNotifier;
   }
 
   addRegisterPlugin(plugin: NotificationProcessorPlugin) {
@@ -69,7 +71,7 @@ export class NotificationProcessor {
         if (chosenPlugin) {
           try {
             console.log("A plugin has been chosen");
-            await chosenPlugin.process(event_data, this.monitor, key, signature);
+            await chosenPlugin.process(event_data, this.monitor, key, signature, this.postHogNotifier);
           } catch(e) {
             capture_event(PostHogAppID, PosthogEvents.FAILED, {error: e});
           }
