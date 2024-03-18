@@ -1,5 +1,7 @@
 import {capture_event} from "posthog"
 import {PostHogAppID} from "../../posthog/events"
+import {EVENT_NAMES} from "../replicate-worker/helpers";
+import {NotificationProcessMonitor} from "./monitor";
 
 interface ACCOUNT_EVENT {
   user_address: number,
@@ -19,4 +21,9 @@ export function sendNotificationToPostHog(event_type: string, data: ACCOUNT_EVEN
     console.log("I could not send notification for some reason");
     console.log(e);
   }
+}
+
+export abstract class NotificationProcessorPlugin {
+    abstract name(): EVENT_NAMES 
+    abstract process(event: Record<string, any>, monitor: NotificationProcessMonitor, sequence_number: string, signature: string): Promise<void>
 }

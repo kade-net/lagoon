@@ -1,24 +1,25 @@
 import lmdb from "node-lmdb";
-import {ProcessorPlugin, sleep} from "../replicate-worker/helpers";
+import {sleep} from "../replicate-worker/helpers";
 import {isNull} from "lodash";
 import {capture_event} from "posthog";
 import {PostHogAppID, PosthogEvents} from "../../posthog/events";
-import {ProcessMonitor} from "../replicate-worker/monitor";
+import {NotificationProcessMonitor} from "./monitor";
+import {NotificationProcessorPlugin} from "./helpers";
 
 export class NotificationProcessor {
   // Store environment
   private env: lmdb.Env;
   private dbi: lmdb.Dbi;
-  private registeredPlugins: ProcessorPlugin[] = [];
-  private monitor: ProcessMonitor
+  private registeredPlugins: NotificationProcessorPlugin[] = [];
+  private monitor: NotificationProcessMonitor
   
-  constructor(env: lmdb.Env, dbi: lmdb.Dbi, monitor: ProcessMonitor) {
+  constructor(env: lmdb.Env, dbi: lmdb.Dbi, monitor: NotificationProcessMonitor) {
     this.env = env;
     this.dbi = dbi;
     this.monitor = monitor
   }
 
-  addRegisterPlugin(plugin: ProcessorPlugin) {
+  addRegisterPlugin(plugin: NotificationProcessorPlugin) {
     this.registeredPlugins.push(plugin);
   }
 
@@ -70,9 +71,17 @@ export class NotificationProcessor {
             capture_event(PostHogAppID, PosthogEvents.FAILED, {error: e});
           }
       }
+
+      last_read = key;
   
     }
     
   }
+
+  cursor.close();
+  txn.commit();
+  await this.monitor.updateLastNotified(last_read);
+  await sleep(60_000);
+  await this.process(parseInt(last_read));
   }
 }
