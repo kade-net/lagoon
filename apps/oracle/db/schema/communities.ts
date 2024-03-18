@@ -12,6 +12,7 @@ export const communities = pgTable("communities", {
     creator_address: text("creator_address").notNull(),
     user_kid: integer("user_kid").notNull().references(() => account.id),
     timestamp: timestamp("timestamp").notNull().defaultNow(),
+    display_name: text('display_name')
 })
 
 export const community_relations = relations(communities, ({ one, many }) => {

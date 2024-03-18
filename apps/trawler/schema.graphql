@@ -15,6 +15,7 @@ type Community {
   creator: Account!
   hosts: [Account!]
   stats: CommunityStats!
+  display_name: String
 }
 
 type Membership {

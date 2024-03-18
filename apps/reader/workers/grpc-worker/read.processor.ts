@@ -32,6 +32,7 @@ const SUPPORTED_EVENT_TYPES = [
     `${PUBLICATION_MODULE}::ReactionRemoveEvent`,
     // COMMUNITY
     `${COMMUNITY_MODULE}::CommunityRegisteredEvent`,
+    `${COMMUNITY_MODULE}::CommunityUpdateEvent`,
     `${COMMUNITY_MODULE}::MemberJoinEvent`,
     `${COMMUNITY_MODULE}::MembershipChangeEvent`,
     `${COMMUNITY_MODULE}::MembershipDeleteEvent`,
