@@ -36,7 +36,8 @@ export const CommunityResolver: ResolverMap = {
                             eq(account.address, memberAddress),
                             following ? eq(membership.is_active, true) : or(
                                 eq(membership.is_active, false),
-                                eq(membership, null)
+                                eq(membership, null),
+                                like(communities.name, `%${search}%`)
                             )
                         )
                     )
@@ -52,7 +53,11 @@ export const CommunityResolver: ResolverMap = {
                     .innerJoin(membership, eq(communities.id, membership.community_id))
                     .innerJoin(account, eq(membership.user_kid, account.id))
                     .where(
-                        eq(account.address, memberAddress)
+                        and(
+
+                            eq(account.address, memberAddress),
+                            eq(communities.name, search)
+                        )
                     )
                     .orderBy(sort === "ASC" ? asc(communities.timestamp) : desc(communities.timestamp))
                     .limit(size)
