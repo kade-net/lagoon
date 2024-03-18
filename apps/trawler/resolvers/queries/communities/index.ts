@@ -56,7 +56,7 @@ export const CommunityResolver: ResolverMap = {
                         and(
 
                             eq(account.address, memberAddress),
-                            eq(communities.name, `%${search}%`)
+                            like(communities.name, `%${search}%`)
                         )
                     )
                     .orderBy(sort === "ASC" ? asc(communities.timestamp) : desc(communities.timestamp))
