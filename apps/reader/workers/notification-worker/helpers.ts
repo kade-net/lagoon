@@ -8,7 +8,7 @@ interface ACCOUNT_EVENT {
 }
 
 interface PUBLICATION_EVENT {
-  user_address: string,
+  user_address: number,
   publication_ref: string,
   publication_id: number
 }
