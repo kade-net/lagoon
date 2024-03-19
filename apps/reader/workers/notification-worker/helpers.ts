@@ -1,23 +1,24 @@
 import {capture_event} from "posthog"
-import {PostHogAppID} from "../../posthog/events"
 import {EVENT_NAMES} from "../replicate-worker/helpers";
 import {NotificationProcessMonitor} from "./monitor";
 
 interface ACCOUNT_EVENT {
-  user_address: number,
-  following_address: number
+  user_address: string,
+  following_address: string
 }
 
 interface PUBLICATION_EVENT {
-  user_address: number,
+  user_address: string,
   publication_ref: string,
   publication_id: number
 }
 
+const PostHogNotificationAppID = 'kade-notifications';
+
 export class PostHogNotifications {
   send(event_type: string, data: ACCOUNT_EVENT | PUBLICATION_EVENT) {
     try {
-      capture_event(PostHogAppID, "notification", data);
+      capture_event(PostHogNotificationAppID, "notification", data);
     } catch(e) {
       console.log("I could not send notification");
       console.log(e);

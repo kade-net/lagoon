@@ -8,18 +8,22 @@ export class FollowNotificationPlugin extends NotificationProcessorPlugin {
     return "AccountFollowEvent"
   }
   async process(event: Record<string, any>, monitor: NotificationProcessMonitor, sequence_number: string, signature: string, postHogNotifier: PostHogNotifications): Promise<void> {
+    console.log("Processing A Follow Notification");
     const parsed = schema.account_follow_event_schema.safeParse(event);
 
     if (!parsed.success) {
       monitor.setPosthogFailed(sequence_number, parsed.error);
     } else {
       const data = parsed.data;
+      console.log("FOLLOW DATA");
+      console.log(data);
 
       try {
         let notificationData = {
-          user_address: data.user_kid,
-          following_address: data.follower_kid
+          user_address: data.follower,
+          following_address: data.following
         };
+        console.log("Sending Event to posthog");
 
         postHogNotifier.send("follow", notificationData);
         monitor.setPosthogSuccess(sequence_number);

@@ -48,6 +48,7 @@ export class NotificationProcessor {
 
     // Seeing if there is anything
     if (!atRange) {
+      console.log("Nothing To Read");
       cursor.close();
       txn.commit();
       await sleep(60_000);
@@ -66,7 +67,9 @@ export class NotificationProcessor {
         const event_data = JSON.parse(data.event);
         const signature = data.signature;
 
-        const chosenPlugin = this.registeredPlugins.find(p => p.name === event_type)
+        console.log("Data Gotten is", data);
+        console.log("Event type is", event_type);
+        const chosenPlugin = this.registeredPlugins.find(p => p.name() === event_type)
 
         if (chosenPlugin) {
           try {
