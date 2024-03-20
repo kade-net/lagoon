@@ -1,0 +1,218 @@
+syntax = "proto3";
+
+package events;
+
+message AccountCreateEvent {
+    string username = 1;
+    string creator_address = 2;
+    string account_object_address = 3;
+    int32 kid = 4;
+    int64 timestamp = 5;
+}
+
+message DelegateCreateEvent {
+    string owner_address = 1;
+    string object_address = 2;
+    string delegate_address = 3;
+    int32 kid = 4;
+    int64 timestamp = 5;
+}
+
+message DelegateRemoveEvent {
+    string owner_address = 1;
+    string object_address = 2;
+    string delegate_address = 3;
+    int32 kid = 4;
+    int64 timestamp = 5;
+}
+
+message ReactionCreateEvent {
+    int32 kid = 1;
+    int32 user_kid = 2;
+    string delegate = 3;
+    int32 reaction = 4;
+    int32 reference_kid = 5;
+    int64 timestamp = 6;
+}
+
+message ReactionRemoveEvent {
+    int32 kid = 1;
+    int32 user_kid = 2;
+    string delegate = 3;
+    int64 timestamp = 4;
+}
+
+message ReactionCreateEventWithRef {
+    int32 kid = 1;
+    int32 user_kid = 2;
+    string delegate = 3;
+    int32 reaction = 4;
+    string publication_ref = 5;
+    int64 timestamp = 6;
+}
+
+message ReactionRemoveEventWithRef {
+    int32 user_kid = 1;
+    string delegate = 2;
+    int64 timestamp = 3;
+    string ref = 4;
+}
+
+
+message PublicationCreateEvent {
+    int32 kid = 1;
+    string payload = 2;
+    int32 user_kid = 3;
+    string delegate = 4;
+    int64 timestamp = 5;
+    int32 type = 6;
+    int32 reference_kid = 7;
+    string publication_ref = 8;
+}
+
+message PublicationRemoveEvent {
+    int32 kid = 1;
+    int32 user_kid = 2;
+    string delegate = 3;
+    int64 timestamp = 4;
+}
+
+message PublicationCreateWithRefEvent {
+    int32 kid = 1;
+    string payload = 2;
+    int32 user_kid = 3;
+    string delegate = 4;
+    int64 timestamp = 5;
+    int32 type = 6;
+    string publication_ref = 7;
+    string parent_ref = 8;
+}
+
+message PublicationRemoveWithRefEvent {
+    int32 user_kid = 1;
+    string delegate = 2;
+    int64 timestamp = 3;
+    string ref = 4;
+}
+
+message AccountFollowEvent {
+    int32 follower_kid = 1;
+    int32 following_kid = 2;
+    string follower = 3;
+    string following = 4;
+    int32 kid = 5;
+    string delegate = 6;
+    int32 user_kid = 7;
+    int64 timestamp = 8;
+}
+
+message AccountUnfollowEvent {
+    int32 user_kid = 1;
+    int32 unfollowing_kid = 2;
+    string delegate = 3;
+    int64 timestamp = 4;
+}
+
+message UsernameRegistrationEvent {
+    string username = 1;
+    string owner_address = 2;
+    string token_address = 3;
+    int64 timestamp = 4;
+}
+
+message ProfileUpdateEvent {
+    int32 user_kid = 1;
+    string delegate = 2;
+    int64 timestamp = 3;
+    string pfp = 4;
+    string bio = 5;
+    string display_name = 6;
+}
+
+message CommunityRegisteredEvent {
+    string name = 1;
+    string description = 2;
+    string image = 3;
+    string creator = 4;
+    int32 bid = 5;
+    int32 user_kid = 6;
+    int64 timestamp = 7;
+}
+
+message MemberJoinEvent {
+    string owner = 1;
+    string community_name = 2;
+    int64 timestamp = 3;
+    int32 bid = 4;
+    int32 type = 5;
+    int32 user_kid = 6;
+}
+
+message MembershipChangeEvent {
+    int32 type = 1;
+    string made_by = 2;
+    string membership_owner = 3;
+    string community_name = 4;
+    int32 community_id = 5;
+    int32 membership_id = 6;
+    int64 timestamp = 7;
+    int32 user_kid = 8;
+}
+
+message MembershipDeleteEvent {
+    string community_name = 1;
+    int32 community_id = 2;
+    int32 membership_id = 3;
+    int32 user_kid = 4;
+    int64 timestamp = 5;
+}
+
+message MembershipReclaimEvent {
+    int32 community_id = 1;
+    int32 membership_id = 2;
+    int32 user_kid = 3;
+    int64 timestamp = 4;
+}
+
+message CommunityUpdateEvent {
+    string name = 1;
+    string description = 2;
+    string image = 3;
+    string display_name = 4;
+    int32 bid = 5;
+    int32 user_kid = 6;
+    int64 timestamp = 7;
+}
+
+message EventsRequest {
+    int64 sequence_number = 1;
+    string event_type = 2;
+}
+
+message Event {
+    string event_type = 1;
+    int64 sequence_number = 2;
+    oneof event {
+        AccountCreateEvent account_create_event = 3;
+        DelegateCreateEvent delegate_create_event = 4;
+        DelegateRemoveEvent delegate_remove_event = 5;
+        ReactionCreateEvent reaction_create_event = 6;
+        ReactionRemoveEvent reaction_remove_event = 7;
+        ReactionCreateEventWithRef reaction_create_event_with_ref = 8;
+        ReactionRemoveEventWithRef reaction_remove_event_with_ref = 9;
+        PublicationCreateEvent publication_create_event = 10;
+        PublicationRemoveEvent publication_remove_event = 11;
+        PublicationCreateWithRefEvent publication_create_with_ref_event = 12;
+        PublicationRemoveWithRefEvent publication_remove_with_ref_event = 13;
+        AccountFollowEvent account_follow_event = 14;
+        AccountUnfollowEvent account_unfollow_event = 15;
+        UsernameRegistrationEvent username_registration_event = 16;
+        ProfileUpdateEvent profile_update_event = 17;
+        CommunityRegisteredEvent community_registered_event = 18;
+        MemberJoinEvent member_join_event = 19;
+        MembershipChangeEvent membership_change_event = 20;
+        MembershipDeleteEvent membership_delete_event = 21;
+        MembershipReclaimEvent membership_reclaim_event = 22;
+        CommunityUpdateEvent community_update_event = 23;
+    }
+}
