@@ -53,6 +53,11 @@ export class DataProcessor {
             if (value && !isNull(value)) {
                 const data = JSON.parse(value.toString())
                 const event_type = data.type
+                const requestedEventType = call.request.toObject().event_type
+                if ((requestedEventType?.length ?? 0) > 3 && event_type !== requestedEventType) {
+                    console.log("Skipping event::", event_type)
+                    continue
+                }
                 const signature = data.signature
                 const event_data = JSON.parse(data.event)
                 const chosenPlugin = this.registeredPlugins.find(p => p.name() === event_type)
