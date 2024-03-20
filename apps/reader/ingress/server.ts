@@ -6,7 +6,12 @@ class TunnelServer implements UnimplementedTunnelServiceService {
     async GetTunnelEvents(call: tunnel.ServerWritableStream<events.EventsRequest, events.Event>) {
         const request = call.request.toObject();
         const starting_sequence_number = request.sequence_number
-        await dataProcessor.process(call, starting_sequence_number)
+        try {
+            await dataProcessor.process(call, starting_sequence_number)
+        }
+        catch (e) {
+            console.log("Error::", e)
+        }
         call.end()
     }
 }
