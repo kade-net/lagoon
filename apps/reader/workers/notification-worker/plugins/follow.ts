@@ -20,6 +20,7 @@ export class FollowNotificationPlugin extends NotificationProcessorPlugin {
 
       try {
         let notificationData = {
+          type: "follow",
           user_address: data.follower,
           following_address: data.following
         };

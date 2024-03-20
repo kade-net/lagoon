@@ -24,6 +24,7 @@ export class PublicationCreateNotification extends NotificationProcessorPlugin {
 
       try {
         const notificationData = {
+          type: "publication",
           user_address: data.user_kid,
           publication_ref: data.parent_ref,
           publication_id: data.kid 
