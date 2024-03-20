@@ -8,7 +8,7 @@ server.addService(UnimplementedTunnelServiceService.definition, tunnelServer)
 const PORT = process.env.GRPC_PORT! || process.env.PORT! || '8089'
 
 function main() {
-    server.bindAsync(`localhost:${PORT}`, tunnel.ServerCredentials.createInsecure(), (error, port) => {
+    server.bindAsync(`0.0.0.0:${PORT}`, tunnel.ServerCredentials.createInsecure(), (error, port) => {
         if (error) {
             console.log("Error::", error)
             return
