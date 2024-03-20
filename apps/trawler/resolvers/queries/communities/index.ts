@@ -129,7 +129,7 @@ export const CommunityResolver: ResolverMap = {
             return data
         },
         communityPublications: async (_, args, context) => {
-            const { communityId, communityName, pagination, sort = "DESC", hide = [], muted = [] } = args
+            const { communityId, communityName, pagination, sort = "DESC", hide, muted } = args
             const { page = 0, size = 20 } = pagination ?? {}
 
             const community = await context.oracle.transaction(async (txn) => {
@@ -155,8 +155,8 @@ export const CommunityResolver: ResolverMap = {
                 .where(
                     and(
                         eq(community_posts.community_id, community.id),
-                        notInArray(publication.publication_ref, hide),
-                        notInArray(publication.creator_id, muted)
+                        hide ? notInArray(publication.publication_ref, hide) : undefined,
+                        muted ? notInArray(publication.creator_id, muted) : undefined
                     )
                 )
                 .orderBy(sort === "ASC" ? asc(community_posts.timestamp) : desc(community_posts.timestamp))
