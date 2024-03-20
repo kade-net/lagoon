@@ -3,11 +3,13 @@ import {EVENT_NAMES} from "../replicate-worker/helpers";
 import {NotificationProcessMonitor} from "./monitor";
 
 interface ACCOUNT_EVENT {
+  type: string,
   user_address: string,
   following_address: string
 }
 
 interface PUBLICATION_EVENT {
+  type: string,
   user_address: number,
   publication_ref: string,
   publication_id: number
