@@ -50,7 +50,7 @@ export const PublicationResolver: ResolverMap = {
             })
         },
         publications: async (_, args, context) => {
-            const { type, creator_address, creator, types, reaction: _reaction, hide = [], muted = [] } = args
+            const { type, creator_address, creator, types, reaction: _reaction, hide, muted } = args
 
             const { size = 10, page = 0 } = args.pagination ?? {}
 
@@ -76,7 +76,10 @@ export const PublicationResolver: ResolverMap = {
                                 types ?
                                     inArray(publication.type, types) :
                                     undefined,
-                            and(notInArray(publication.publication_ref, hide), notInArray(publication.creator_id, muted))
+                            and(
+                                hide ? notInArray(publication.publication_ref, hide) : undefined,
+                                muted ? notInArray(publication.creator_id, muted) : undefined
+                            )
                         )
                     ).
                     orderBy(args?.sort == "ASC" ? asc(publication.timestamp) : desc(publication.timestamp))
@@ -94,15 +97,30 @@ export const PublicationResolver: ResolverMap = {
                     (fields, { eq, and, inArray, notInArray }) => type ? and(
                         eq(fields.creator_id, creator_id),
                         eq(fields.type, type),
-                        notInArray(fields.publication_ref, hide)
+                        hide ? notInArray(fields.publication_ref, hide) : undefined,
+                        muted ? notInArray(fields.creator_id, muted) : undefined
                     ) :
                         types ? and(
                             eq(fields.creator_id, creator_id),
                             inArray(fields.type, types),
-                            notInArray(fields.publication_ref, hide)
+                            hide ? notInArray(fields.publication_ref, hide) : undefined,
+                            muted ? notInArray(fields.creator_id, muted) : undefined
                         ) :
-                            and(eq(fields.creator_id, creator_id), notInArray(fields.publication_ref, hide)) :
-                    (fields, { eq, inArray, and, notInArray }) => type ? and(eq(fields.type, type), notInArray(fields.publication_ref, hide)) : types ? and(inArray(fields.type, types), notInArray(fields.publication_ref, hide)) : undefined,
+                            and(
+                                eq(fields.creator_id, creator_id),
+                                hide ? notInArray(fields.publication_ref, hide) : undefined,
+                                muted ? notInArray(fields.creator_id, muted) : undefined
+                            ) :
+                    (fields, { eq, inArray, and, notInArray }) => type ? and(
+                        eq(fields.type, type),
+                        hide ? notInArray(fields.publication_ref, hide) : undefined,
+                        muted ? notInArray(fields.creator_id, muted) : undefined
+                    ) :
+                        types ? and(inArray(fields.type, types),
+                            hide ? notInArray(fields.publication_ref, hide) : undefined,
+                            muted ? notInArray(fields.creator_id, muted) : undefined
+
+                        ) : undefined,
 
                 orderBy: args?.sort == "ASC" ? asc(publication.timestamp) : desc(publication.timestamp)
             })
@@ -234,7 +252,7 @@ export const PublicationResolver: ResolverMap = {
             }
         },
         publicationComments: async (_, args, context) => {
-            const { id, ref, hide = [], muted = [] } = args
+            const { id, ref, hide, muted } = args
             const publication_id = id ?? (await context.oracle.query.publication.findFirst({
                 where: (fields, { eq }) => eq(fields.publication_ref, ref)
             }))?.id
@@ -250,8 +268,8 @@ export const PublicationResolver: ResolverMap = {
                 where: (fields, { eq, and }) => and(
                     eq(fields.parent_id, publication_id),
                     eq(fields.type, 3), // COMMENET TYPE
-                    notInArray(fields.publication_ref, hide),
-                    notInArray(fields.creator_id, muted)
+                    hide ? notInArray(fields.publication_ref, hide) : undefined,
+                    muted ? notInArray(fields.creator_id, muted) : undefined
                 ),
                 orderBy: args?.sort == "ASC" ? asc(publication.timestamp) : desc(publication.timestamp)
             })
