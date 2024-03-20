@@ -150,7 +150,11 @@ export const CommunityResolver: ResolverMap = {
 
             if (!community) return []
 
-            const data = await context.oracle.selectDistinct().from(community_posts)
+            try {
+
+                const data = await context.oracle.select({
+                    publication: publication
+                }).from(community_posts)
                 .innerJoin(publication, eq(publication.id, community_posts.post_id))
                 .where(
                     and(
@@ -159,13 +163,19 @@ export const CommunityResolver: ResolverMap = {
                         muted ? notInArray(publication.creator_id, muted) : undefined
                     )
                 )
-                .orderBy(sort === "ASC" ? asc(community_posts.timestamp) : desc(community_posts.timestamp))
-                .limit(size)
-                .offset(page * size)
+                    .orderBy(sort === "ASC" ? asc(community_posts.timestamp) : desc(community_posts.timestamp))
+                    .limit(size)
+                    .offset(page * size)
 
-            const posts = data.map(d => d.publication) ?? []
 
-            return posts
+                const posts = data?.map(d => d.publication) ?? []
+
+                return posts
+            }
+            catch (e) {
+                console.log(`SOmething went wrong::`, e)
+                return []
+            }
         },
         membership: async (_, args, context) => {
             const { userName, communityName, userAddress } = args
