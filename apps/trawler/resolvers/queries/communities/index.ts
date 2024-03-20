@@ -1,4 +1,4 @@
-import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, like, membership, or, username } from "oracle"
+import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, like, membership, notInArray, or, publication, username } from "oracle"
 import { Context, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 
 
@@ -8,7 +8,7 @@ interface ResolverMap {
         communities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, creator: string, search: string, memberAddress?: string, following?: boolean }, Context>,
         accountCommunities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, accountAddress: string }, Context>,
         community?: Resolver<any, { id: number, name: string }, Context>
-        communityPublications?: Resolver<any, PaginationArg & { communityId: number, communityName: string, sort: SORT_ORDER }, Context>,
+        communityPublications?: Resolver<any, PaginationArg & { communityId: number, communityName: string, sort: SORT_ORDER, hide?: string[], muted?: number[] }, Context>,
         membership?: Resolver<any, { userName: string, communityName: string, userAddress: string }, Context>,
         memberships?: Resolver<any, PaginationArg & { sort: SORT_ORDER, communityId: number, communityName: string, search: string }, Context>,
     },
@@ -129,7 +129,7 @@ export const CommunityResolver: ResolverMap = {
             return data
         },
         communityPublications: async (_, args, context) => {
-            const { communityId, communityName, pagination, sort = "DESC" } = args
+            const { communityId, communityName, pagination, sort = "DESC", hide = [], muted = [] } = args
             const { page = 0, size = 20 } = pagination ?? {}
 
             const community = await context.oracle.transaction(async (txn) => {
@@ -150,22 +150,20 @@ export const CommunityResolver: ResolverMap = {
 
             if (!community) return []
 
+            const data = await context.oracle.selectDistinct().from(community_posts)
+                .innerJoin(publication, eq(publication.id, community_posts.post_id))
+                .where(
+                    and(
+                        eq(community_posts.community_id, community.id),
+                        notInArray(publication.publication_ref, hide),
+                        notInArray(publication.creator_id, muted)
+                    )
+                )
+                .orderBy(sort === "ASC" ? asc(community_posts.timestamp) : desc(community_posts.timestamp))
+                .limit(size)
+                .offset(page * size)
 
-            const data = await context.oracle.query.community_posts.findMany({
-                with: {
-                    post: true
-                },
-                where(fields, { eq }) {
-                    if (community) {
-                        return eq(fields.community_id, community.id)
-                    }
-                },
-                orderBy: sort === "ASC" ? asc(community_posts.timestamp) : desc(community_posts.timestamp),
-                limit: size,
-                offset: page * size
-            })
-
-            const posts = data.map(d => d.post)
+            const posts = data.map(d => d.publication) ?? []
 
             return posts
         },
