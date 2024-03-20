@@ -11,7 +11,7 @@
     "ingress:dev": "ts-node --esm ./ingress/index.ts",
     "ingress:test": "ts-node --esm ./ingress/test.ts",
     "test": "ts-node --esm ./test.ts",
-    "all": "pnpm run grpc:dev & pnpm run replicate:dev & pnpm notification:dev & ingress:dev"
+    "all": "pnpm run grpc:dev & pnpm run replicate:dev & pnpm notification:dev & pnpm ingress:dev"
   },
   "dependencies": {
     "@aptos-labs/aptos-protos": "1.1.2",
