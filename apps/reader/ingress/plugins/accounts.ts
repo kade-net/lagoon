@@ -1,4 +1,4 @@
-import { ServerWritableStream, events } from "tunnel";
+import { ServerUnaryCall, ServerWritableStream, events, sendUnaryData } from "tunnel";
 import { EVENT_NAMES } from "../../workers/replicate-worker/helpers";
 import { IngressPlugin } from "./definitions";
 import schema from "../../schema";
@@ -8,11 +8,12 @@ export class AccountCreatePlugin extends IngressPlugin {
     name(): EVENT_NAMES {
         return 'AccountCreateEvent'
     }
-    async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
+
+    extract(event: Record<string, any>, sequence_number: string): events.Event | null {
         const parsed = schema.account_create_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
+            return null
         }
         if (parsed.success) {
             const data = parsed.data
@@ -28,13 +29,45 @@ export class AccountCreatePlugin extends IngressPlugin {
                 sequence_number: parseInt(sequence_number),
             })
 
-            call.write(event, (err: any) => {
+            return event
+        }
+
+        return null
+    }
+
+    async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
+
+        const event_data = this.extract(event, sequence_number)
+
+        if (event_data) {
+
+            call.write(event_data, (err: any) => {
                 if (err) {
                     console.log(err)
                 }
             })
         }
+        else {
+            console.log("Error parsing event")
+        }
+
     }
+
+    async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string) {
+
+        const event_data = this.extract(event, sequence_number)
+
+        if (event_data) {
+            callback(null, event_data)
+        }
+        else {
+            callback(new Error("Error parsing event"), null)
+        }
+
+    }
+
+
+
 
 }
 
@@ -42,11 +75,12 @@ export class AccountFollowPlugin extends IngressPlugin {
     name(): EVENT_NAMES {
         return 'AccountFollowEvent'
     }
-    async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
+
+    extract(event: Record<string, any>, sequence_number: string): events.Event | null {
         const parsed = schema.account_follow_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
+            return null
         }
         if (parsed.success) {
             const data = parsed.data
@@ -65,11 +99,39 @@ export class AccountFollowPlugin extends IngressPlugin {
                 sequence_number: parseInt(sequence_number),
             })
 
-            call.write(event, (err: any) => {
+            return event
+        }
+
+        return null
+    }
+
+    async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
+
+        const event_data = this.extract(event, sequence_number)
+
+        if (event_data) {
+
+            call.write(event_data, (err: any) => {
                 if (err) {
                     console.log(err)
                 }
             })
+        }
+        else {
+            console.log("Error parsing event")
+        }
+
+
+    }
+
+    async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string) {
+        const event_data = this.extract(event, sequence_number)
+
+        if (event_data) {
+            callback(null, event_data)
+        }
+        else {
+            callback(new Error("Error parsing event"), null)
         }
     }
 
@@ -79,11 +141,12 @@ export class AccountUnFollowPlugin extends IngressPlugin {
     name(): EVENT_NAMES {
         return 'AccountUnFollowEvent'
     }
-    async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
+
+    extract(event: Record<string, any>, sequence_number: string): events.Event | null {
         const parsed = schema.account_unfollow_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
+            return null
         }
         if (parsed.success) {
             const data = parsed.data
@@ -98,12 +161,38 @@ export class AccountUnFollowPlugin extends IngressPlugin {
                 sequence_number: parseInt(sequence_number),
             })
 
-            call.write(event, (err: any) => {
+            return event
+        }
+
+        return null
+    }
+
+    async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
+        const event_data = this.extract(event, sequence_number)
+
+        if (event_data) {
+
+            call.write(event_data, (err: any) => {
                 if (err) {
                     console.log(err)
                 }
             })
         }
+        else {
+            console.log("Error parsing event")
+        }
+    }
+
+    async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string) {
+        const event_data = this.extract(event, sequence_number)
+
+        if (event_data) {
+            callback(null, event_data)
+        }
+        else {
+            callback(new Error("Error parsing event"), null)
+        }
+
     }
 
 }
@@ -112,11 +201,12 @@ export class ProfileUpdatePlugin extends IngressPlugin {
     name(): EVENT_NAMES {
         return 'ProfileUpdateEvent'
     }
-    async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
+
+    extract(event: Record<string, any>, sequence_number: string): events.Event | null {
         const parsed = schema.profile_update_event_schema.safeParse(event)
 
         if (!parsed.success) {
-            console.log(parsed.error)
+            return null
         }
         if (parsed.success) {
             const data = parsed.data
@@ -133,11 +223,37 @@ export class ProfileUpdatePlugin extends IngressPlugin {
                 sequence_number: parseInt(sequence_number),
             })
 
-            call.write(event, (err: any) => {
+            return event
+        }
+
+        return null
+    }
+
+    async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
+
+        const event_data = this.extract(event, sequence_number)
+
+        if (event_data) {
+
+            call.write(event_data, (err: any) => {
                 if (err) {
                     console.log(err)
                 }
             })
+        }
+        else {
+            console.log("Error parsing event")
+        }
+    }
+
+    async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string) {
+        const event_data = this.extract(event, sequence_number)
+
+        if (event_data) {
+            callback(null, event_data)
+        }
+        else {
+            callback(new Error("Error parsing event"), null)
         }
     }
 }

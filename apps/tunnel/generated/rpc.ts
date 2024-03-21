@@ -39,10 +39,20 @@ export abstract class UnimplementedTunnelServiceService {
             requestDeserialize: (bytes: Buffer) => dependency_1.events.EventsRequest.deserialize(new Uint8Array(bytes)),
             responseSerialize: (message: dependency_1.events.Event) => Buffer.from(message.serialize()),
             responseDeserialize: (bytes: Buffer) => dependency_1.events.Event.deserialize(new Uint8Array(bytes))
+        },
+        GetTunnelEvent: {
+            path: "/TunnelService/GetTunnelEvent",
+            requestStream: false,
+            responseStream: false,
+            requestSerialize: (message: dependency_1.events.EventRequest) => Buffer.from(message.serialize()),
+            requestDeserialize: (bytes: Buffer) => dependency_1.events.EventRequest.deserialize(new Uint8Array(bytes)),
+            responseSerialize: (message: dependency_1.events.Event) => Buffer.from(message.serialize()),
+            responseDeserialize: (bytes: Buffer) => dependency_1.events.Event.deserialize(new Uint8Array(bytes))
         }
     };
     [method: string]: grpc_1.UntypedHandleCall;
     abstract GetTunnelEvents(call: grpc_1.ServerWritableStream<dependency_1.events.EventsRequest, dependency_1.events.Event>): void;
+    abstract GetTunnelEvent(call: grpc_1.ServerUnaryCall<dependency_1.events.EventRequest, dependency_1.events.Event>, callback: grpc_1.sendUnaryData<dependency_1.events.Event>): void;
 }
 export class TunnelServiceClient extends grpc_1.makeGenericClientConstructor(UnimplementedTunnelServiceService.definition, "TunnelService", {}) {
     constructor(address: string, credentials: grpc_1.ChannelCredentials, options?: Partial<grpc_1.ChannelOptions>) {
@@ -50,5 +60,8 @@ export class TunnelServiceClient extends grpc_1.makeGenericClientConstructor(Uni
     }
     GetTunnelEvents: GrpcStreamServiceInterface<dependency_1.events.EventsRequest, dependency_1.events.Event> = (message: dependency_1.events.EventsRequest, metadata?: grpc_1.Metadata | grpc_1.CallOptions, options?: grpc_1.CallOptions): grpc_1.ClientReadableStream<dependency_1.events.Event> => {
         return super.GetTunnelEvents(message, metadata, options);
+    };
+    GetTunnelEvent: GrpcUnaryServiceInterface<dependency_1.events.EventRequest, dependency_1.events.Event> = (message: dependency_1.events.EventRequest, metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<dependency_1.events.Event>, options?: grpc_1.CallOptions | grpc_1.requestCallback<dependency_1.events.Event>, callback?: grpc_1.requestCallback<dependency_1.events.Event>): grpc_1.ClientUnaryCall => {
+        return super.GetTunnelEvent(message, metadata, options, callback);
     };
 }

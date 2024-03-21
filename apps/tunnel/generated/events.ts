@@ -4839,4 +4839,71 @@ export namespace events {
             return Event.deserialize(bytes);
         }
     }
+    export class EventRequest extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            sequence_number?: number;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("sequence_number" in data && data.sequence_number != undefined) {
+                    this.sequence_number = data.sequence_number;
+                }
+            }
+        }
+        get sequence_number() {
+            return pb_1.Message.getFieldWithDefault(this, 1, 0) as number;
+        }
+        set sequence_number(value: number) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        static fromObject(data: {
+            sequence_number?: number;
+        }): EventRequest {
+            const message = new EventRequest({});
+            if (data.sequence_number != null) {
+                message.sequence_number = data.sequence_number;
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                sequence_number?: number;
+            } = {};
+            if (this.sequence_number != null) {
+                data.sequence_number = this.sequence_number;
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.sequence_number != 0)
+                writer.writeInt64(1, this.sequence_number);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): EventRequest {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new EventRequest();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.sequence_number = reader.readInt64();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): EventRequest {
+            return EventRequest.deserialize(bytes);
+        }
+    }
 }

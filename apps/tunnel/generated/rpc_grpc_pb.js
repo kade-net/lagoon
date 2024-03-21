@@ -15,6 +15,17 @@ function deserialize_events_Event(buffer_arg) {
   return events_pb.Event.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_events_EventRequest(arg) {
+  if (!(arg instanceof events_pb.EventRequest)) {
+    throw new Error('Expected argument of type events.EventRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_events_EventRequest(buffer_arg) {
+  return events_pb.EventRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_events_EventsRequest(arg) {
   if (!(arg instanceof events_pb.EventsRequest)) {
     throw new Error('Expected argument of type events.EventsRequest');
@@ -36,6 +47,17 @@ var TunnelServiceService = exports.TunnelServiceService = {
     responseType: events_pb.Event,
     requestSerialize: serialize_events_EventsRequest,
     requestDeserialize: deserialize_events_EventsRequest,
+    responseSerialize: serialize_events_Event,
+    responseDeserialize: deserialize_events_Event,
+  },
+  getTunnelEvent: {
+    path: '/TunnelService/GetTunnelEvent',
+    requestStream: false,
+    responseStream: false,
+    requestType: events_pb.EventRequest,
+    responseType: events_pb.Event,
+    requestSerialize: serialize_events_EventRequest,
+    requestDeserialize: deserialize_events_EventRequest,
     responseSerialize: serialize_events_Event,
     responseDeserialize: deserialize_events_Event,
   },

@@ -1,11 +1,13 @@
 {
-  "name": "tunnel",
-  "version": "1.0.0",
+  "name": "@kade-net/tunnel",
+  "version": "0.0.2",
   "description": "",
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "generate": "sh ./build.sh",
+    "generate": "rm -rf  generated/* && sh ./build.sh",
     "build": "rm -rf ./dist && tsup"
   },
   "keywords": [],
@@ -17,6 +19,12 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@grpc/grpc-js": "=1.9.2",
