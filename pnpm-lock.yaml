@@ -148,6 +148,9 @@ importers:
       '@grpc/grpc-js':
         specifier: '=1.9.2'
         version: 1.9.2
+      '@kade-net/tunnel':
+        specifier: workspace:*
+        version: link:../tunnel
       dotenv:
         specifier: ^16.4.3
         version: 16.4.3
@@ -187,9 +190,6 @@ importers:
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@18.19.21)(typescript@4.9.5)
-      tunnel:
-        specifier: workspace:*
-        version: link:../tunnel
       zod:
         specifier: ^3.22.4
         version: 3.22.4
