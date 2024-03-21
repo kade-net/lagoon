@@ -3,7 +3,7 @@ import _ from "lodash";
 import { IngressPlugin } from "../plugins/definitions";
 import { sleep } from "../../workers/replicate-worker/helpers";
 const { isNull } = _
-import tunnel, { events } from 'tunnel'
+import tunnel, { events, sendUnaryData } from 'tunnel'
 
 
 
@@ -82,6 +82,41 @@ export class DataProcessor {
         await sleep(60_000)
         console.log("resuming")
         await this.process(call, parseInt(last_read))
+    }
+
+    async singleEvent(call: tunnel.ServerUnaryCall<events.EventRequest, events.Event>, callback: sendUnaryData<events.Event>) {
+        const request = call.request.toObject()
+        const r_sequence_number = request.sequence_number ?? 0
+        const _sequence_number = `000000000${r_sequence_number}`
+        const sequence_number = _sequence_number.substring(_sequence_number.length - 9)
+
+        const txn = this.env.beginTxn()
+        const value = txn.getBinary(this.dbi, sequence_number)
+        txn.commit()
+        if (isNull(value)) {
+            return
+        }
+
+
+        const data = JSON.parse(value.toString())
+        const event_type = data.type
+
+        const event_data = JSON.parse(data.event)
+        const chosenPlugin = this.registeredPlugins.find(p => p.name() === event_type)
+
+        if (chosenPlugin) {
+            try {
+                await chosenPlugin.processSingle(callback, event_data, sequence_number)
+            }
+            catch (e) {
+                callback(new Error("Something went wrong while processing data"), null)
+            }
+        }
+        else {
+
+            callback(new Error(`No plugin found for event :: ${event_type}`), null)
+        }
+
     }
 
     registerPlugin(plugin: IngressPlugin) {
