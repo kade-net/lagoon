@@ -47,6 +47,9 @@ importers:
 
   apps/pool:
     dependencies:
+      '@kade-net/oracle':
+        specifier: workspace:*
+        version: link:../oracle
       '@koa/cors':
         specifier: ^5.0.0
         version: 5.0.0
@@ -80,9 +83,6 @@ importers:
       mongodb:
         specifier: ^6.3.0
         version: 6.3.0
-      oracle:
-        specifier: workspace:*
-        version: link:../oracle
       zod:
         specifier: ^3.22.4
         version: 3.22.4
@@ -148,6 +148,9 @@ importers:
       '@grpc/grpc-js':
         specifier: '=1.9.2'
         version: 1.9.2
+      '@kade-net/oracle':
+        specifier: workspace:*
+        version: link:../oracle
       '@kade-net/tunnel':
         specifier: workspace:*
         version: link:../tunnel
@@ -172,9 +175,6 @@ importers:
       node-lmdb:
         specifier: ^0.10.0
         version: 0.10.0
-      oracle:
-        specifier: workspace:*
-        version: link:../oracle
       posthog:
         specifier: workspace:*
         version: link:../posthog
@@ -236,6 +236,9 @@ importers:
       '@apollo/server':
         specifier: ^4.10.0
         version: 4.10.0(graphql@16.8.1)
+      '@kade-net/oracle':
+        specifier: workspace:*
+        version: link:../oracle
       cookie-parser:
         specifier: ^1.4.6
         version: 1.4.6
@@ -260,9 +263,6 @@ importers:
       morgan:
         specifier: ^1.10.0
         version: 1.10.0
-      oracle:
-        specifier: workspace:*
-        version: link:../oracle
     devDependencies:
       '@types/cookie-parser':
         specifier: ^1.4.6
