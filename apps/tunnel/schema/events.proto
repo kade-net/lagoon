@@ -216,3 +216,7 @@ message Event {
         CommunityUpdateEvent community_update_event = 23;
     }
 }
+
+message EventRequest {
+    int64 sequence_number = 1;
+}
