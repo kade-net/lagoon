@@ -3,7 +3,7 @@ import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer   } from "@apollo/server/standalone"
 import TypeDef from "./typedef";
 import { AccountsResolver, CommunityResolver, PublicationResolver } from "./resolvers/queries";
-import KadeOracle from "oracle";
+import KadeOracle from "@kade-net/oracle";
 
 import { GraphQLScalarType, Kind } from 'graphql';
 import GraphQLJSON from "graphql-type-json";

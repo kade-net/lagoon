@@ -1,4 +1,4 @@
-import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, like, membership, notInArray, or, publication, username } from "oracle"
+import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, like, membership, notInArray, or, publication, username } from "@kade-net/oracle"
 import { Context, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 
 

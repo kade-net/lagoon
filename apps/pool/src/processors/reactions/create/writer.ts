@@ -1,4 +1,4 @@
-import KadeOracle, { eq, reaction } from "oracle";
+import KadeOracle, { eq, reaction } from "@kade-net/oracle";
 import { reaction_create_events } from "../../../db";
 import { write_builder } from "../../generator";
 import dayjs from "dayjs";

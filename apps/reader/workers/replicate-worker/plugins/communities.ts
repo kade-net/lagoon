@@ -1,7 +1,7 @@
 import schema from "../../../schema";
 import { EVENT_NAMES, ProcessorPlugin } from "../helpers";
 import { ProcessMonitor } from "../monitor";
-import oracle, { and, communities, count, eq, membership } from "oracle"
+import oracle, { and, communities, count, eq, membership } from "@kade-net/oracle"
 
 
 
