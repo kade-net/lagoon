@@ -94,6 +94,7 @@ export class DataProcessor {
         const value = txn.getBinary(this.dbi, sequence_number)
         txn.commit()
         if (isNull(value)) {
+            callback(new Error("No data found"), null)
             return
         }
 
