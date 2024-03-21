@@ -4,13 +4,14 @@ import {NotificationProcessMonitor} from "./monitor";
 
 interface ACCOUNT_EVENT {
   type: string,
-  user_address: string,
-  following_address: string
+  user_kid: number,
+  following_kid: number
 }
 
 interface PUBLICATION_EVENT {
   type: string,
-  user_address: number,
+  publication_type: number,
+  user_kid: number,
   publication_ref: string,
   publication_id: number
 }
@@ -21,6 +22,7 @@ export class PostHogNotifications {
   send(event_type: string, data: ACCOUNT_EVENT | PUBLICATION_EVENT) {
     try {
       capture_event(PostHogNotificationAppID, "notification", data);
+      console.log("Notification Sent");
     } catch(e) {
       console.log("I could not send notification");
       console.log(e);
