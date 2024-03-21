@@ -1,4 +1,4 @@
-import { ServerUnaryCall, ServerWritableStream, events, sendUnaryData } from "tunnel";
+import { ServerUnaryCall, ServerWritableStream, events, sendUnaryData } from "@kade-net/tunnel";
 import { EVENT_NAMES } from "../../workers/replicate-worker/helpers";
 import { IngressPlugin } from "./definitions";
 import schema from "../../schema";

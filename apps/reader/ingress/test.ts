@@ -1,4 +1,4 @@
-import { TunnelServiceClient, credentials, events } from 'tunnel'
+import { TunnelServiceClient, credentials, events } from '@kade-net/tunnel'
 
 
 const client = new TunnelServiceClient('localhost:8080', credentials.createInsecure())

@@ -1,4 +1,4 @@
-import tunnel, { events } from 'tunnel'
+import tunnel, { events } from '@kade-net/tunnel'
 import { EVENT_NAMES } from "../../workers/replicate-worker/helpers";
 
 

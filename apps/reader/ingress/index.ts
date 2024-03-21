@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import tunnel, { UnimplementedTunnelServiceService } from 'tunnel'
+import tunnel, { UnimplementedTunnelServiceService } from '@kade-net/tunnel'
 import tunnelServer from './server'
 
 const server = new tunnel.Server()

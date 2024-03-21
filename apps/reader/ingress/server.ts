@@ -1,4 +1,4 @@
-import tunnel, { events, UnimplementedTunnelServiceService } from 'tunnel'
+import tunnel, { events, UnimplementedTunnelServiceService } from '@kade-net/tunnel'
 import dataProcessor from './setup';
 import { LevelDB } from '../db';
 

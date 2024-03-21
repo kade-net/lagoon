@@ -3,7 +3,7 @@ import _ from "lodash";
 import { IngressPlugin } from "../plugins/definitions";
 import { sleep } from "../../workers/replicate-worker/helpers";
 const { isNull } = _
-import tunnel, { events, sendUnaryData } from 'tunnel'
+import tunnel, { events, sendUnaryData } from '@kade-net/tunnel'
 
 
 

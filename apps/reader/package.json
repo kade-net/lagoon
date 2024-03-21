@@ -30,7 +30,7 @@
     "zod": "^3.22.4",
     "oracle": "workspace:*",
     "posthog": "workspace:*",
-    "tunnel": "workspace:*"
+    "@kade-net/tunnel": "workspace:*"
   },
   "devDependencies": {
     "@types/google-protobuf": "^3.15.6",
