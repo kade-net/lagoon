@@ -1,4 +1,4 @@
-import KadeOracle, { comment } from "oracle";
+import KadeOracle, { comment } from "@kade-net/oracle";
 import { KADE_EVENTS } from "../../../actions";
 import { comment_create_events } from "../../../db";
 import { write_builder } from "../../generator";

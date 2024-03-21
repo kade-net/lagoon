@@ -1,4 +1,4 @@
-import { PUBLICATION, and, asc, count, desc, eq, inArray, publication, reaction, notInArray, not } from "oracle"
+import { PUBLICATION, and, asc, count, desc, eq, inArray, publication, reaction, notInArray, not } from "@kade-net/oracle"
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 import _ from "lodash"
 const { isNumber } = _

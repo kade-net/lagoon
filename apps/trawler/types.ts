@@ -1,4 +1,4 @@
-import KadeOracle from "oracle"
+import KadeOracle from "@kade-net/oracle"
 
 
 export type Context = {

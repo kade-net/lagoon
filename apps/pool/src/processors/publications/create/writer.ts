@@ -1,4 +1,4 @@
-import KadeOracle, { eq, publication } from "oracle";
+import KadeOracle, { eq, publication } from "@kade-net/oracle";
 import { publication_create_events } from "../../../db";
 import { write_builder } from "../../generator";
 import dayjs from "dayjs";

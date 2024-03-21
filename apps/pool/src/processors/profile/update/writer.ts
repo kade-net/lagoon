@@ -1,4 +1,4 @@
-import KadeOracle, { eq, profile } from "oracle";
+import KadeOracle, { eq, profile } from "@kade-net/oracle";
 import { profile_update_events } from "../../../db";
 import { write_builder } from "../../generator";
 

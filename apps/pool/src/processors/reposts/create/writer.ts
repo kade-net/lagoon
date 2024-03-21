@@ -2,7 +2,7 @@ import _ from 'lodash'
 const { isNumber } = _
 import { repost_create_events } from "../../../db";
 import { write_builder } from "../../generator";
-import KadeOracle, { eq, repost } from "oracle";
+import KadeOracle, { eq, repost } from "@kade-net/oracle";
 import dayjs from "dayjs";
 
 

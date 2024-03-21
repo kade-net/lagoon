@@ -1,4 +1,4 @@
-import KadeOracle, { and, eq, quote } from "oracle";
+import KadeOracle, { and, eq, quote } from "@kade-net/oracle";
 import { quote_remove_events } from "../../../db";
 import schema from "../../../schema";
 import { read_builder, write_builder } from "../../generator";

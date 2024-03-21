@@ -1,6 +1,6 @@
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types";
 import _, { add } from "lodash"
-import { ACCOUNT, account, and, asc, count, delegate, desc, eq, follow, like, publication, reaction, username } from "oracle";
+import { ACCOUNT, account, and, asc, count, delegate, desc, eq, follow, like, publication, reaction, username } from "@kade-net/oracle";
 const { isUndefined } = _
 
 interface ResolverMap {

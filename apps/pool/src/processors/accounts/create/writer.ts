@@ -1,4 +1,4 @@
-import KadeOracle, { account, eq } from "oracle"
+import KadeOracle, { account, eq } from "@kade-net/oracle"
 import { account_events } from "../../../db"
 import { WithId } from "mongodb"
 import { KADE_EVENTS } from "../../../actions"

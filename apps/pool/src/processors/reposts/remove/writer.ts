@@ -2,7 +2,7 @@ import _ from "lodash";
 const { isNumber } = _
 import { repost_remove_events } from "../../../db";
 import { write_builder } from "../../generator";
-import KadeOracle, { and, eq, repost } from "oracle";
+import KadeOracle, { and, eq, repost } from "@kade-net/oracle";
 
 
 

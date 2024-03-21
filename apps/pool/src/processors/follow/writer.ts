@@ -1,5 +1,5 @@
 import { WithId } from "mongodb"
-import KadeOracle, { eq, follow } from "oracle"
+import KadeOracle, { eq, follow } from "@kade-net/oracle"
 import { KADE_EVENTS } from "../../actions"
 import { account_follow_events } from "../../db"
 import { sleep } from "../../utils"

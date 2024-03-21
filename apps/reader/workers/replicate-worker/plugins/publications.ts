@@ -1,4 +1,4 @@
-import oracle, { and, community_posts, eq, publication, reaction } from "oracle"
+import oracle, { and, community_posts, eq, publication, reaction } from "@kade-net/oracle"
 import schema from "../../../schema"
 import { EVENT_NAMES, ProcessorPlugin } from "../helpers"
 import { ProcessMonitor } from "../monitor"
