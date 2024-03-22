@@ -20,8 +20,9 @@ export class FollowNotificationPlugin extends NotificationProcessorPlugin {
 
       try {
         let notificationData = {
-          user_address: data.follower,
-          following_address: data.following
+          type: "follow",
+          user_kid: data.user_kid,
+          following_kid: data.following_kid
         };
         console.log("Sending Event to posthog");
 
