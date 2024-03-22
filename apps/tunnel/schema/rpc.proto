@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+import "events.proto";
+
+service TunnelService {
+    
+    rpc GetTunnelEvents(events.EventsRequest) returns (stream events.Event);
+    rpc GetTunnelEvent(events.EventRequest) returns (events.Event);
+}

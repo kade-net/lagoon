@@ -1,4 +1,4 @@
-import KadeOracle, { username } from "oracle";
+import KadeOracle, { username } from "@kade-net/oracle";
 import { KADE_EVENTS } from "../../../actions";
 import { username_registration_events } from "../../../db";
 import { write_builder } from "../../generator";

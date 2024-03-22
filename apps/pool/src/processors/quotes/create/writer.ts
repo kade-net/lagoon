@@ -1,4 +1,4 @@
-import KadeOracle, { and, eq, quote } from "oracle";
+import KadeOracle, { and, eq, quote } from "@kade-net/oracle";
 import { quote_create_events } from "../../../db";
 import { write_builder } from "../../generator";
 import dayjs from "dayjs";

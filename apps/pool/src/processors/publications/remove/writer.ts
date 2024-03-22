@@ -1,4 +1,4 @@
-import KadeOracle, { eq, publication } from "oracle";
+import KadeOracle, { eq, publication } from "@kade-net/oracle";
 import { write_builder } from "../../generator";
 import { publication_remove_events } from "../../../db";
 import { KADE_EVENTS } from "../../../actions";

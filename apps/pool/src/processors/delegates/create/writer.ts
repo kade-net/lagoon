@@ -2,7 +2,7 @@ import { WithId } from "mongodb"
 import { delegate_create_events } from "../../../db"
 import _ from "lodash"
 const { isNumber } = _
-import KadeOracle, { delegate, eq } from "oracle"
+import KadeOracle, { delegate, eq } from "@kade-net/oracle"
 import dayjs from "dayjs"
 import { KADE_EVENTS } from "../../../actions"
 import { sleep } from "../../../utils"
