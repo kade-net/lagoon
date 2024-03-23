@@ -1,4 +1,4 @@
-import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, like, membership, notInArray, or, publication, username } from "@kade-net/oracle"
+import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, ilike, like, membership, notInArray, or, publication, username } from "@kade-net/oracle"
 import { Context, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 
 
@@ -37,7 +37,7 @@ export const CommunityResolver: ResolverMap = {
                             following ? eq(membership.is_active, true) : or(
                                 eq(membership.is_active, false),
                                 eq(membership, null),
-                                like(communities.name, `%${search}%`)
+                                ilike(communities.name, `%${search}%`)
                             )
                         )
                     )
@@ -56,7 +56,7 @@ export const CommunityResolver: ResolverMap = {
                         and(
 
                             eq(account.address, memberAddress),
-                            like(communities.name, `%${search}%`)
+                            ilike(communities.name, `%${search}%`)
                         )
                     )
                     .orderBy(sort === "ASC" ? asc(communities.timestamp) : desc(communities.timestamp))
@@ -74,7 +74,7 @@ export const CommunityResolver: ResolverMap = {
                         return eq(fields.creator_address, creator)
                     }
                     if (search) {
-                        return like(fields.name, `%${search}%`)
+                        return ilike(fields.name, `%${search}%`)
                     }
                 },
                 orderBy: sort === "ASC" ? asc(communities.timestamp) : desc(communities.timestamp),
@@ -238,9 +238,9 @@ export const CommunityResolver: ResolverMap = {
                     and(
                         community ? and(
                             eq(communities.id, community.id),
-                            like(username.username, `%${search}%`),
+                            ilike(username.username, `%${search}%`),
                         ) :
-                            like(username.username, `%${search}%`)
+                            ilike(username.username, `%${search}%`)
                     )
                 )
                 .orderBy(sort === "ASC" ? asc(membership.timestamp) : desc(membership.timestamp))

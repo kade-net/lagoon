@@ -1,6 +1,6 @@
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types";
 import _, { add } from "lodash"
-import { ACCOUNT, account, and, asc, count, delegate, desc, eq, follow, like, publication, reaction, username } from "@kade-net/oracle";
+import { ACCOUNT, account, and, asc, count, delegate, desc, eq, follow, ilike, like, publication, reaction, username } from "@kade-net/oracle";
 const { isUndefined } = _
 
 interface ResolverMap {
@@ -54,7 +54,7 @@ export const AccountsResolver: ResolverMap = {
                 const a_n_u = await context.oracle.select()
                     .from(account)
                     .innerJoin(username, eq(account.address, username.owner_address))
-                    .where(like(username.username, `%${args.search}%`))
+                    .where(ilike(username.username, `%${args.search}%`))
                     .orderBy(args?.sort == "ASC" ? asc(account.timestamp) : desc(account.timestamp))
                     .limit(size)
                     .offset(page * size)
@@ -124,7 +124,7 @@ export const AccountsResolver: ResolverMap = {
             })
         },
         followers: async (_, args, context) => {
-            const { size = 10, page = 0 } = args.pagination ?? {}
+            const { size = 20, page = 0 } = args.pagination ?? {}
             const { accountAddress } = args
 
             const account = await context.oracle.query.account.findFirst({
