@@ -155,6 +155,7 @@ enum SortOrder {
 type Query {
   account(id: Int, address: String): Account
   accounts(pagination: Pagination, sort: SortOrder, search: String): [Account!]
+  accountsSearch(search: String!, userAddress: String!): [Account!]
   publication(id: Int, ref: String): Publication
   publications(
     pagination: Pagination
@@ -200,6 +201,7 @@ type Query {
     memberAddress: String
     following: Boolean
   ): [Community!]
+  communitiesSearch(search: String!, memberAddress: String!): [Community!]
   accountCommunities(
     accountAddress: String!
     pagination: Pagination

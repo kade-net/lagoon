@@ -1,12 +1,13 @@
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types";
 import _, { add } from "lodash"
-import { ACCOUNT, account, and, asc, count, delegate, desc, eq, follow, ilike, like, publication, reaction, username } from "@kade-net/oracle";
+import { ACCOUNT, account, and, asc, count, delegate, desc, eq, follow, ilike, like, ne, publication, reaction, username } from "@kade-net/oracle";
 const { isUndefined } = _
 
 interface ResolverMap {
     Query: {
         account: Resolver<any, {id?: number, address?: string}, Context>,
         accounts: Resolver<any, PaginationArg & { sort: SORT_ORDER, search?: string }, Context>
+        accountsSearch: Resolver<any, { search: string, userAddress: string }, Context>
         accountViewerStats: Resolver<any, { accountAddress: string, viewerAddress: string }, Context>
         accountPublications: Resolver<any, PaginationArg & { sort: SORT_ORDER, type: number, accountAddress: string }, Context>,
         followers: Resolver<any, PaginationArg & { accountAddress: string }, Context>,
@@ -67,6 +68,20 @@ export const AccountsResolver: ResolverMap = {
                     limit: size,
                     orderBy: args?.sort == "ASC" ? asc(account.timestamp) : desc(account.timestamp)
                 })
+        },
+        accountsSearch: async (_, args, context) => {
+            const a_n_u = await context.oracle.select()
+                .from(account)
+                .innerJoin(username, eq(account.address, username.owner_address))
+                .where(and(
+                    ilike(username.username, `%${args.search}%`),
+                    ne(account.address, args.userAddress)
+                ))
+                .orderBy(desc(account.timestamp))
+                .limit(5)
+                .offset(0)
+
+            return a_n_u?.map((a) => a.account)
         },
         accountViewerStats: async (_, args, context) => {
             const { accountAddress, viewerAddress } = args
