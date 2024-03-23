@@ -91,6 +91,7 @@ export class PublicationRemoveEventPlugin extends ProcessorPlugin {
                 await oracle.delete(publication).where(eq(publication.id, data.kid))
                 await oracle.delete(reaction).where(eq(reaction.publication_id, data.kid))
                 await oracle.delete(community_posts).where(eq(community_posts.post_id, data.kid))
+                await oracle.delete(publication).where(eq(publication.parent_id, data.kid))
                 monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
@@ -204,6 +205,7 @@ export class PublicationRemoveWithRefEventPlugin extends ProcessorPlugin {
                 await oracle.delete(publication).where(eq(publication.id, chosen.id))
                 await oracle.delete(reaction).where(eq(reaction.publication_id, chosen.id))
                 await oracle.delete(community_posts).where(eq(community_posts.post_id, chosen.id))
+                await oracle.delete(publication).where(eq(publication.parent_id, chosen.id))
                 monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
