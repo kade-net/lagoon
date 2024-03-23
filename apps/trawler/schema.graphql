@@ -64,8 +64,8 @@ type Account {
   bio: String
   address: String!
   object_address: String!
-  followers: [Follow!]
-  following: [Follow!]
+  followers(pagination: Pagination): [Follow!]
+  following(pagination: Pagination): [Follow!]
   publications(
     pagination: Pagination
     type: Int
