@@ -8,7 +8,9 @@ interface ResolverMap {
         account: Resolver<any, {id?: number, address?: string}, Context>,
         accounts: Resolver<any, PaginationArg & { sort: SORT_ORDER, search?: string }, Context>
         accountViewerStats: Resolver<any, { accountAddress: string, viewerAddress: string }, Context>
-        accountPublications: Resolver<any, PaginationArg & { sort: SORT_ORDER, type: number, accountAddress: string }, Context>
+        accountPublications: Resolver<any, PaginationArg & { sort: SORT_ORDER, type: number, accountAddress: string }, Context>,
+        followers: Resolver<any, PaginationArg & { accountAddress: string }, Context>,
+        following: Resolver<any, PaginationArg & { accountAddress: string }, Context>,
     },
     Account: {
         followers: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
@@ -120,6 +122,54 @@ export const AccountsResolver: ResolverMap = {
                 limit: size,
                 orderBy: args?.sort == "ASC" ? asc(publication.timestamp) : desc(publication.timestamp)
             })
+        },
+        followers: async (_, args, context) => {
+            const { size = 10, page = 0 } = args.pagination ?? {}
+            const { accountAddress } = args
+
+            const account = await context.oracle.query.account.findFirst({
+                where: (fields, { eq }) => eq(fields.address, accountAddress)
+            })
+
+            if (!account) {
+                return null
+            }
+
+            const results = await context.oracle.query.follow.findMany({
+                where: (fields, { eq }) => eq(fields.following_id, account.id),
+                offset: page * size,
+                limit: size,
+                orderBy: desc(follow.timestamp),
+                with: {
+                    follower: true
+                }
+            })
+
+            return results?.map((r) => r.follower)
+        },
+        following: async (_, args, context) => {
+            const { size = 10, page = 0 } = args.pagination ?? {}
+            const { accountAddress } = args
+
+            const account = await context.oracle.query.account.findFirst({
+                where: (fields, { eq }) => eq(fields.address, accountAddress)
+            })
+
+            if (!account) {
+                return null
+            }
+
+            const results = await context.oracle.query.follow.findMany({
+                where: (fields, { eq }) => eq(fields.follower_id, account.id),
+                offset: page * size,
+                limit: size,
+                orderBy: desc(follow.timestamp),
+                with: {
+                    following: true
+                }
+            })
+
+            return results?.map((r) => r.following)
         }
     },
     Account: {

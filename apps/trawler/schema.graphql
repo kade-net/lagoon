@@ -222,4 +222,6 @@ type Query {
     communityName: String
     search: String
   ): [Account!]
+  followers(accountAddress: String!, pagination: Pagination): [Account!]
+  following(accountAddress: String!, pagination: Pagination): [Account!]
 }
