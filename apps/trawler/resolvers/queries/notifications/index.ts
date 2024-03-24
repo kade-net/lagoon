@@ -39,7 +39,7 @@ export const NotificationsResolver: ResolverMap = {
 
             const followQuery = context.oracle.select({
                 referenceUserId: follow.follower_id,
-                type: sql<number>`1`.mapWith(Number),
+                type: sql<number>`1`.mapWith(Number).as('type'),
                 timestamp: follow.timestamp,
                 referenceDataId: follow.id,
             })
@@ -51,7 +51,7 @@ export const NotificationsResolver: ResolverMap = {
 
             const publicationQuery = context.oracle.select({
                 referenceUserId: publication.creator_id,
-                type: sql<number>`'2'`.mapWith(Number),
+                type: sql<number>`'2'`.mapWith(Number).as('type'),
                 timestamp: publication.timestamp,
                 referenceDataId: publication.id
             })
