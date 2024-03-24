@@ -1,6 +1,6 @@
-import { PUBLICATION, and, asc, count, desc, eq, inArray, publication, reaction, notInArray, not } from "@kade-net/oracle"
+import { PUBLICATION, and, asc, count, desc, eq, inArray, publication, reaction, notInArray, not, REACTION } from "@kade-net/oracle"
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
-import _ from "lodash"
+import _, { isNull } from "lodash"
 const { isNumber } = _
 
 
@@ -20,6 +20,10 @@ interface ResolverMap {
         children: Resolver<PUBLICATION, PaginationArg & { sort: SORT_ORDER, type: number }, Context>,
         parent: Resolver<PUBLICATION, any, Context>
         community: Resolver<PUBLICATION, any, Context>
+    },
+    Reaction: {
+        creator: Resolver<REACTION, any, Context>
+        publication: Resolver<REACTION, any, Context>
     }
 }
 
@@ -428,6 +432,20 @@ export const PublicationResolver: ResolverMap = {
             })
 
             return community
+        }
+    },
+    Reaction: {
+        creator: async (parent, _, context) => {
+            return await context.oracle.query.account.findFirst({
+                where: (fields, { eq }) => eq(fields.id, parent.creator_id)
+            })
+        },
+        publication: async (parent, _, context) => {
+            const { publication_id } = parent
+            if (isNull(publication_id)) return null
+            return await context.oracle.query.publication.findFirst({
+                where: (fields, { eq }) => eq(fields.id, publication_id)
+            })
         }
     }
 }
