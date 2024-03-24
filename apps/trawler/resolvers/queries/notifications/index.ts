@@ -1,4 +1,4 @@
-import { account, aliasedTable, desc, eq, follow, publication, sql } from "@kade-net/oracle"
+import { account, aliasedTable, desc, eq, follow, publication, reaction, sql } from "@kade-net/oracle"
 import { union, unionAll } from "@kade-net/oracle/pg-core"
 import { Context, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 
@@ -17,7 +17,8 @@ interface ResolverMap {
     Notification: {
         referenceUser: Resolver<NotificationType, any, Context>,
         publication: Resolver<NotificationType, any, Context>,
-        follow: Resolver<NotificationType, any, Context>
+        follow: Resolver<NotificationType, any, Context>,
+        reaction: Resolver<NotificationType, any, Context>
     }
 }
 
@@ -59,7 +60,18 @@ export const NotificationsResolver: ResolverMap = {
                 .innerJoin(parentPublication, eq(parentPublication.id, publication.parent_id))
                 .where(eq(parentPublication.creator_id, _account.id))
 
-            const allDataSubQuery = unionAll(followQuery, publicationQuery)
+            const reactionsQuery = context.oracle.select({
+                referenceUserId: reaction.creator_id,
+                type: sql<number>`'3'`.mapWith(Number).as('type'),
+                timestamp: reaction.timestamp,
+                referenceDataId: reaction.id
+            })
+                .from(reaction)
+                .innerJoin(publication, eq(reaction.publication_id, publication.id))
+                .where(eq(publication.creator_id, _account.id))
+
+
+            const allDataSubQuery = unionAll(followQuery, publicationQuery, reactionsQuery)
 
             const sub = allDataSubQuery.as("allDataSubQuery")
 
@@ -87,6 +99,12 @@ export const NotificationsResolver: ResolverMap = {
         referenceUser: async (parent, _, context) => {
             return await context.oracle.query.account.findFirst({
                 where: (fields, { eq }) => eq(fields.id, parent.referenceUserId)
+            })
+        },
+        reaction: async (parent, _, context) => {
+            if (parent.type !== 3) return null
+            return await context.oracle.query.reaction.findFirst({
+                where: (fields, { eq }) => eq(fields.id, parent.referenceDataId)
             })
         }
     }
