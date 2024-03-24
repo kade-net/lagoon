@@ -1,6 +1,6 @@
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types";
 import _, { add } from "lodash"
-import { ACCOUNT, account, and, asc, count, delegate, desc, eq, follow, ilike, like, ne, publication, reaction, username } from "@kade-net/oracle";
+import { ACCOUNT, FOLLOW, account, and, asc, count, delegate, desc, eq, follow, ilike, like, ne, publication, reaction, username } from "@kade-net/oracle";
 const { isUndefined } = _
 
 interface ResolverMap {
@@ -23,6 +23,10 @@ interface ResolverMap {
         profile: Resolver<ACCOUNT, any, Context>,
         username: Resolver<ACCOUNT, any, Context>,
         viewer: Resolver<ACCOUNT, { viewer: number, address: string }, Context>
+    },
+    Follow: {
+        follower: Resolver<FOLLOW, any, Context>,
+        following: Resolver<FOLLOW, any, Context>
     }
 }
 
@@ -366,6 +370,18 @@ export const AccountsResolver: ResolverMap = {
                 follows: follows ? true : false,
                 followed: followed ? true : false
             }
+        }
+    },
+    Follow: {
+        follower: async (parent, _, context) => {
+            return await context.oracle.query.account.findFirst({
+                where: (fields, { eq }) => eq(fields.id, parent.follower_id)
+            })
+        },
+        following: async (parent, _, context) => {
+            return await context.oracle.query.account.findFirst({
+                where: (fields, { eq }) => eq(fields.id, parent.following_id)
+            })
         }
     }
 }
