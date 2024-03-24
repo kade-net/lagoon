@@ -150,6 +150,7 @@ type Notification {
   referenceDataId: Int!
   publication: Publication
   follow: Follow
+  reaction: Reaction
 }
 
 input Pagination {
