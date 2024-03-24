@@ -142,6 +142,16 @@ type Reaction {
   publication: Publication
 }
 
+type Notification {
+  referenceUserId: Int!
+  referenceUser: Account!
+  type: Int!
+  timestamp: Date!
+  referenceDataId: Int!
+  publication: Publication
+  follow: Follow
+}
+
 input Pagination {
   page: Int!
   size: Int!
@@ -216,7 +226,11 @@ type Query {
     hide: [String!]
     muted: [Int!]
   ): [Publication!]
-  membership(userName: String, communityName: String!, userAddress: String): Membership
+  membership(
+    userName: String
+    communityName: String!
+    userAddress: String
+  ): Membership
   memberships(
     pagination: Pagination
     sort: SortOrder
@@ -226,4 +240,9 @@ type Query {
   ): [Account!]
   followers(accountAddress: String!, pagination: Pagination): [Account!]
   following(accountAddress: String!, pagination: Pagination): [Account!]
+  userNotifications(
+    accountAddress: String!
+    pagination: Pagination
+    sort: SortOrder
+  ): [Notification!]
 }
