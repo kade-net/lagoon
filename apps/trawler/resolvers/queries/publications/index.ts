@@ -1,7 +1,7 @@
 import { PUBLICATION, and, asc, count, desc, eq, inArray, publication, reaction, notInArray, not, REACTION } from "@kade-net/oracle"
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
-import _, { isNull } from "lodash"
-const { isNumber } = _
+import _ from "lodash"
+const { isNumber, isNull } = _
 
 
 interface ResolverMap {
