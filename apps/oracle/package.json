@@ -1,6 +1,6 @@
 {
   "name": "@kade-net/oracle",
-  "version": "0.0.1",
+  "version": "0.0.7",
   "description": "",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -15,16 +15,46 @@
   "author": "",
   "license": "MIT",
   "files": [
-    "dist"
+    "dist",
+    "postgres",
+    "pg-core",
+    "postgres-js"
   ],
   "publishConfig": {
     "access": "public"
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./pg-core": {
+      "import": {
+        "types": "./pg-core/index.d.ts",
+        "default": "./pg-core/index.js"
+      },
+      "default": "./pg-core/index.js",
+      "types": "./pg-core/index.d.ts"
+    },
+    "./postgres-js": {
+      "import": {
+        "types": "./postgres-js/index.d.ts",
+        "default": "./postgres-js/index.js"
+      },
+      "types": "./postgres-js/index.d.ts",
+      "default": "./postgres-js/index.js"
+    },
+    "./postgres": {
+      "import": {
+        "types": "./postgres/index.d.ts",
+        "default": "./postgres/index.js"
+      },
+      "types": "./postgres/index.d.ts",
+      "default": "./postgres/index.js"
     }
   },
   "devDependencies": {
