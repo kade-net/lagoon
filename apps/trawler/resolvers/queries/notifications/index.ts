@@ -1,4 +1,4 @@
-import { account, aliasedTable, desc, eq, follow, publication, reaction, sql } from "@kade-net/oracle"
+import { account, aliasedTable, and, desc, eq, follow, ne, publication, reaction, sql } from "@kade-net/oracle"
 import { union, unionAll } from "@kade-net/oracle/pg-core"
 import { Context, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 
@@ -58,7 +58,10 @@ export const NotificationsResolver: ResolverMap = {
             })
                 .from(publication)
                 .innerJoin(parentPublication, eq(parentPublication.id, publication.parent_id))
-                .where(eq(parentPublication.creator_id, _account.id))
+                .where(and(
+                    eq(parentPublication.creator_id, _account.id),
+                    ne(publication.creator_id, _account.id)
+                ))
 
             const reactionsQuery = context.oracle.select({
                 referenceUserId: reaction.creator_id,
@@ -68,7 +71,10 @@ export const NotificationsResolver: ResolverMap = {
             })
                 .from(reaction)
                 .innerJoin(publication, eq(reaction.publication_id, publication.id))
-                .where(eq(publication.creator_id, _account.id))
+                .where(and(
+                    eq(publication.creator_id, _account.id),
+                    ne(reaction.creator_id, _account.id)
+                ))
 
 
             const allDataSubQuery = unionAll(followQuery, publicationQuery, reactionsQuery)
