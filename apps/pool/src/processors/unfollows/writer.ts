@@ -1,6 +1,6 @@
 import { WithId } from "mongodb"
 import { account_unfollow_events } from "../../db"
-import KadeOracle, { and, eq, follow } from "oracle"
+import KadeOracle, { and, eq, follow } from "@kade-net/oracle"
 import { KADE_EVENTS } from "../../actions"
 
 const getEvents = async () => {

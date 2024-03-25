@@ -1,6 +1,6 @@
 import schema from "../../../schema";
 import { EVENT_NAMES, ProcessorPlugin } from "../helpers";
-import oracle, { username } from "oracle"
+import oracle, { username } from "@kade-net/oracle"
 import { ProcessMonitor } from "../monitor";
 
 

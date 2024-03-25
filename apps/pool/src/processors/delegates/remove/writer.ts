@@ -1,7 +1,7 @@
 import { WithId } from "mongodb"
 import { delegate_remove_events } from "../../../db"
 
-import KadeOracle, { delegate, eq } from "oracle"
+import KadeOracle, { delegate, eq } from "@kade-net/oracle"
 import dayjs from "dayjs"
 import { KADE_EVENTS } from "../../../actions"
 import { sleep } from "../../../utils"

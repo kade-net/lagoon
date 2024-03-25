@@ -1,4 +1,4 @@
-import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, like, membership, or, username } from "oracle"
+import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, ilike, like, membership, notInArray, or, publication, username } from "@kade-net/oracle"
 import { Context, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 
 
@@ -6,9 +6,10 @@ import { Context, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 interface ResolverMap {
     Query: {
         communities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, creator: string, search: string, memberAddress?: string, following?: boolean }, Context>,
+        communitiesSearch?: Resolver<any, { search: string, memberAddress: string }, Context>,
         accountCommunities?: Resolver<any, PaginationArg & { sort: SORT_ORDER, accountAddress: string }, Context>,
         community?: Resolver<any, { id: number, name: string }, Context>
-        communityPublications?: Resolver<any, PaginationArg & { communityId: number, communityName: string, sort: SORT_ORDER }, Context>,
+        communityPublications?: Resolver<any, PaginationArg & { communityId: number, communityName: string, sort: SORT_ORDER, hide?: string[], muted?: number[] }, Context>,
         membership?: Resolver<any, { userName: string, communityName: string, userAddress: string }, Context>,
         memberships?: Resolver<any, PaginationArg & { sort: SORT_ORDER, communityId: number, communityName: string, search: string }, Context>,
     },
@@ -37,7 +38,7 @@ export const CommunityResolver: ResolverMap = {
                             following ? eq(membership.is_active, true) : or(
                                 eq(membership.is_active, false),
                                 eq(membership, null),
-                                like(communities.name, `%${search}%`)
+                                ilike(communities.name, `%${search}%`)
                             )
                         )
                     )
@@ -56,7 +57,7 @@ export const CommunityResolver: ResolverMap = {
                         and(
 
                             eq(account.address, memberAddress),
-                            like(communities.name, `%${search}%`)
+                            ilike(communities.name, `%${search}%`)
                         )
                     )
                     .orderBy(sort === "ASC" ? asc(communities.timestamp) : desc(communities.timestamp))
@@ -74,7 +75,7 @@ export const CommunityResolver: ResolverMap = {
                         return eq(fields.creator_address, creator)
                     }
                     if (search) {
-                        return like(fields.name, `%${search}%`)
+                        return ilike(fields.name, `%${search}%`)
                     }
                 },
                 orderBy: sort === "ASC" ? asc(communities.timestamp) : desc(communities.timestamp),
@@ -83,6 +84,25 @@ export const CommunityResolver: ResolverMap = {
             })
 
             return data
+        },
+        communitiesSearch: async (_, args, context) => {
+            const { search, memberAddress } = args
+
+            const c_and_m = await context.oracle.select().from(communities)
+                .innerJoin(membership, eq(communities.id, membership.community_id))
+                .innerJoin(account, eq(membership.user_kid, account.id))
+                .where(
+                    and(
+                        eq(account.address, memberAddress),
+                        ilike(communities.name, `%${search}%`)
+                    )
+                )
+                .orderBy(desc(communities.timestamp))
+                .limit(5)
+                .offset(0)
+
+            return c_and_m?.map(c => c.communities) ?? []
+
         },
         accountCommunities: async (_, args, context) => {
             const { accountAddress, pagination, sort = "DESC" } = args
@@ -129,7 +149,7 @@ export const CommunityResolver: ResolverMap = {
             return data
         },
         communityPublications: async (_, args, context) => {
-            const { communityId, communityName, pagination, sort = "DESC" } = args
+            const { communityId, communityName, pagination, sort = "DESC", hide, muted } = args
             const { page = 0, size = 20 } = pagination ?? {}
 
             const community = await context.oracle.transaction(async (txn) => {
@@ -150,24 +170,32 @@ export const CommunityResolver: ResolverMap = {
 
             if (!community) return []
 
+            try {
 
-            const data = await context.oracle.query.community_posts.findMany({
-                with: {
-                    post: true
-                },
-                where(fields, { eq }) {
-                    if (community) {
-                        return eq(fields.community_id, community.id)
-                    }
-                },
-                orderBy: sort === "ASC" ? asc(community_posts.timestamp) : desc(community_posts.timestamp),
-                limit: size,
-                offset: page * size
-            })
+                const data = await context.oracle.select({
+                    publication: publication
+                }).from(community_posts)
+                .innerJoin(publication, eq(publication.id, community_posts.post_id))
+                .where(
+                    and(
+                        eq(community_posts.community_id, community.id),
+                        hide ? notInArray(publication.publication_ref, hide) : undefined,
+                        muted ? notInArray(publication.creator_id, muted) : undefined
+                    )
+                )
+                    .orderBy(sort === "ASC" ? asc(community_posts.timestamp) : desc(community_posts.timestamp))
+                    .limit(size)
+                    .offset(page * size)
 
-            const posts = data.map(d => d.post)
 
-            return posts
+                const posts = data?.map(d => d.publication) ?? []
+
+                return posts
+            }
+            catch (e) {
+                console.log(`SOmething went wrong::`, e)
+                return []
+            }
         },
         membership: async (_, args, context) => {
             const { userName, communityName, userAddress } = args
@@ -230,9 +258,9 @@ export const CommunityResolver: ResolverMap = {
                     and(
                         community ? and(
                             eq(communities.id, community.id),
-                            like(username.username, `%${search}%`),
+                            ilike(username.username, `%${search}%`),
                         ) :
-                            like(username.username, `%${search}%`)
+                            ilike(username.username, `%${search}%`)
                     )
                 )
                 .orderBy(sort === "ASC" ? asc(membership.timestamp) : desc(membership.timestamp))

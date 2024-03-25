@@ -1,14 +1,17 @@
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types";
 import _, { add } from "lodash"
-import { ACCOUNT, account, and, asc, count, delegate, desc, eq, follow, like, publication, reaction, username } from "oracle";
+import { ACCOUNT, FOLLOW, account, and, asc, count, delegate, desc, eq, follow, ilike, like, ne, publication, reaction, username } from "@kade-net/oracle";
 const { isUndefined } = _
 
 interface ResolverMap {
     Query: {
         account: Resolver<any, {id?: number, address?: string}, Context>,
         accounts: Resolver<any, PaginationArg & { sort: SORT_ORDER, search?: string }, Context>
+        accountsSearch: Resolver<any, { search: string, userAddress: string }, Context>
         accountViewerStats: Resolver<any, { accountAddress: string, viewerAddress: string }, Context>
-        accountPublications: Resolver<any, PaginationArg & { sort: SORT_ORDER, type: number, accountAddress: string }, Context>
+        accountPublications: Resolver<any, PaginationArg & { sort: SORT_ORDER, type: number, accountAddress: string }, Context>,
+        followers: Resolver<any, PaginationArg & { accountAddress: string }, Context>,
+        following: Resolver<any, PaginationArg & { accountAddress: string }, Context>,
     },
     Account: {
         followers: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
@@ -20,6 +23,10 @@ interface ResolverMap {
         profile: Resolver<ACCOUNT, any, Context>,
         username: Resolver<ACCOUNT, any, Context>,
         viewer: Resolver<ACCOUNT, { viewer: number, address: string }, Context>
+    },
+    Follow: {
+        follower: Resolver<FOLLOW, any, Context>,
+        following: Resolver<FOLLOW, any, Context>
     }
 }
 
@@ -52,7 +59,7 @@ export const AccountsResolver: ResolverMap = {
                 const a_n_u = await context.oracle.select()
                     .from(account)
                     .innerJoin(username, eq(account.address, username.owner_address))
-                    .where(like(username.username, `%${args.search}%`))
+                    .where(ilike(username.username, `%${args.search}%`))
                     .orderBy(args?.sort == "ASC" ? asc(account.timestamp) : desc(account.timestamp))
                     .limit(size)
                     .offset(page * size)
@@ -65,6 +72,20 @@ export const AccountsResolver: ResolverMap = {
                     limit: size,
                     orderBy: args?.sort == "ASC" ? asc(account.timestamp) : desc(account.timestamp)
                 })
+        },
+        accountsSearch: async (_, args, context) => {
+            const a_n_u = await context.oracle.select()
+                .from(account)
+                .innerJoin(username, eq(account.address, username.owner_address))
+                .where(and(
+                    ilike(username.username, `%${args.search}%`),
+                    ne(account.address, args.userAddress)
+                ))
+                .orderBy(desc(account.timestamp))
+                .limit(5)
+                .offset(0)
+
+            return a_n_u?.map((a) => a.account)
         },
         accountViewerStats: async (_, args, context) => {
             const { accountAddress, viewerAddress } = args
@@ -120,6 +141,54 @@ export const AccountsResolver: ResolverMap = {
                 limit: size,
                 orderBy: args?.sort == "ASC" ? asc(publication.timestamp) : desc(publication.timestamp)
             })
+        },
+        followers: async (_, args, context) => {
+            const { size = 20, page = 0 } = args.pagination ?? {}
+            const { accountAddress } = args
+
+            const account = await context.oracle.query.account.findFirst({
+                where: (fields, { eq }) => eq(fields.address, accountAddress)
+            })
+
+            if (!account) {
+                return null
+            }
+
+            const results = await context.oracle.query.follow.findMany({
+                where: (fields, { eq }) => eq(fields.following_id, account.id),
+                offset: page * size,
+                limit: size,
+                orderBy: desc(follow.timestamp),
+                with: {
+                    follower: true
+                }
+            })
+
+            return results?.map((r) => r.follower)
+        },
+        following: async (_, args, context) => {
+            const { size = 10, page = 0 } = args.pagination ?? {}
+            const { accountAddress } = args
+
+            const account = await context.oracle.query.account.findFirst({
+                where: (fields, { eq }) => eq(fields.address, accountAddress)
+            })
+
+            if (!account) {
+                return null
+            }
+
+            const results = await context.oracle.query.follow.findMany({
+                where: (fields, { eq }) => eq(fields.follower_id, account.id),
+                offset: page * size,
+                limit: size,
+                orderBy: desc(follow.timestamp),
+                with: {
+                    following: true
+                }
+            })
+
+            return results?.map((r) => r.following)
         }
     },
     Account: {
@@ -301,6 +370,18 @@ export const AccountsResolver: ResolverMap = {
                 follows: follows ? true : false,
                 followed: followed ? true : false
             }
+        }
+    },
+    Follow: {
+        follower: async (parent, _, context) => {
+            return await context.oracle.query.account.findFirst({
+                where: (fields, { eq }) => eq(fields.id, parent.follower_id)
+            })
+        },
+        following: async (parent, _, context) => {
+            return await context.oracle.query.account.findFirst({
+                where: (fields, { eq }) => eq(fields.id, parent.following_id)
+            })
         }
     }
 }

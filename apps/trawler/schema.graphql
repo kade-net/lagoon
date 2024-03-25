@@ -64,8 +64,8 @@ type Account {
   bio: String
   address: String!
   object_address: String!
-  followers: [Follow!]
-  following: [Follow!]
+  followers(pagination: Pagination): [Follow!]
+  following(pagination: Pagination): [Follow!]
   publications(
     pagination: Pagination
     type: Int
@@ -142,6 +142,17 @@ type Reaction {
   publication: Publication
 }
 
+type Notification {
+  referenceUserId: Int!
+  referenceUser: Account!
+  type: Int!
+  timestamp: Date!
+  referenceDataId: Int!
+  publication: Publication
+  follow: Follow
+  reaction: Reaction
+}
+
 input Pagination {
   page: Int!
   size: Int!
@@ -155,6 +166,7 @@ enum SortOrder {
 type Query {
   account(id: Int, address: String): Account
   accounts(pagination: Pagination, sort: SortOrder, search: String): [Account!]
+  accountsSearch(search: String!, userAddress: String!): [Account!]
   publication(id: Int, ref: String): Publication
   publications(
     pagination: Pagination
@@ -164,6 +176,8 @@ type Query {
     creator_address: String
     types: [Int!]
     reaction: Int
+    hide: [String!]
+    muted: [Int!]
   ): [Publication!]
   publicationStats(id: Int, ref: String): PublicationStats
   publicationInteractionsByViewer(
@@ -177,6 +191,8 @@ type Query {
     ref: String
     pagination: Pagination
     sort: SortOrder
+    hide: [String!]
+    muted: [Int!]
   ): [Publication!]
   accountViewerStats(
     accountAddress: String!
@@ -196,6 +212,7 @@ type Query {
     memberAddress: String
     following: Boolean
   ): [Community!]
+  communitiesSearch(search: String!, memberAddress: String!): [Community!]
   accountCommunities(
     accountAddress: String!
     pagination: Pagination
@@ -207,8 +224,14 @@ type Query {
     communityName: String
     pagination: Pagination
     sort: SortOrder
+    hide: [String!]
+    muted: [Int!]
   ): [Publication!]
-  membership(userName: String, communityName: String!, userAddress: String): Membership
+  membership(
+    userName: String
+    communityName: String!
+    userAddress: String
+  ): Membership
   memberships(
     pagination: Pagination
     sort: SortOrder
@@ -216,4 +239,11 @@ type Query {
     communityName: String
     search: String
   ): [Account!]
+  followers(accountAddress: String!, pagination: Pagination): [Account!]
+  following(accountAddress: String!, pagination: Pagination): [Account!]
+  userNotifications(
+    accountAddress: String!
+    pagination: Pagination
+    sort: SortOrder
+  ): [Notification!]
 }

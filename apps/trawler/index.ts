@@ -2,8 +2,8 @@ import 'dotenv/config';
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer   } from "@apollo/server/standalone"
 import TypeDef from "./typedef";
-import { AccountsResolver, CommunityResolver, PublicationResolver } from "./resolvers/queries";
-import KadeOracle from "oracle";
+import { AccountsResolver, CommunityResolver, NotificationsResolver, PublicationResolver } from "./resolvers/queries";
+import KadeOracle from "@kade-net/oracle";
 
 import { GraphQLScalarType, Kind } from 'graphql';
 import GraphQLJSON from "graphql-type-json";
@@ -35,7 +35,7 @@ const dateScalar = new GraphQLScalarType({
 
 const server = new ApolloServer({
     typeDefs: TypeDef,
-  resolvers: [AccountsResolver, PublicationResolver, CommunityResolver, {
+  resolvers: [AccountsResolver, PublicationResolver, CommunityResolver, NotificationsResolver, {
         Date: dateScalar,
         JSON: GraphQLJSON
   }] as any,
