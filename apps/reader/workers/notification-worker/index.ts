@@ -4,6 +4,7 @@ import {FollowNotificationPlugin} from "./plugins/follow";
 import {PublicationCreateNotification} from "./plugins/publications";
 import {NotificationProcessMonitor} from "./monitor";
 import {PostHogNotifications} from "./helpers";
+import {ReactionCreateNotificationPlugin} from "./plugins/reaction";
 
 const db = await LevelDB.init();
 export const monitor = await NotificationProcessMonitor.init();
@@ -13,5 +14,6 @@ const notificationDataProcessor = new NotificationProcessor(db._db.env ,db._db.d
 
 notificationDataProcessor.addRegisterPlugin(new FollowNotificationPlugin());
 notificationDataProcessor.addRegisterPlugin(new PublicationCreateNotification());
+notificationDataProcessor.addRegisterPlugin(new ReactionCreateNotificationPlugin());
 
 export default notificationDataProcessor;
