@@ -1,7 +1,7 @@
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types";
-import _, { add } from "lodash"
+import _ from "lodash"
 import { ACCOUNT, FOLLOW, account, and, asc, count, delegate, desc, eq, follow, ilike, like, ne, publication, reaction, username } from "@kade-net/oracle";
-const { isUndefined } = _
+const { isUndefined, isEmpty } = _
 
 interface ResolverMap {
     Query: {
@@ -12,6 +12,7 @@ interface ResolverMap {
         accountPublications: Resolver<any, PaginationArg & { sort: SORT_ORDER, type: number, accountAddress: string }, Context>,
         followers: Resolver<any, PaginationArg & { accountAddress: string }, Context>,
         following: Resolver<any, PaginationArg & { accountAddress: string }, Context>,
+        accountUserName: Resolver<any, { accountAddress: string }, Context>
     },
     Account: {
         followers: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
@@ -189,6 +190,15 @@ export const AccountsResolver: ResolverMap = {
             })
 
             return results?.map((r) => r.following)
+        },
+        accountUserName: async (_, { accountAddress }, context) => {
+            if (isEmpty(accountAddress)) return null
+
+            const username = await context.oracle.query.username.findFirst({
+                where: (fields, { eq }) => eq(fields.owner_address, accountAddress)
+            })
+
+            return username ?? null
         }
     },
     Account: {

@@ -246,4 +246,5 @@ type Query {
     pagination: Pagination
     sort: SortOrder
   ): [Notification!]
+  accountUserName(accountAddress: String!): Username
 }
