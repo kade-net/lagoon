@@ -215,26 +215,38 @@ export const AccountsResolver: ResolverMap = {
         accountRelationship: async (_, { accountAddress, viewerAddress }, context) => {
 
             const response = await context.oracle.transaction(async (txn) => {
-                const _account = await txn.query.account.findFirst({
-                    where: (fields, { eq }) => eq(fields.address, accountAddress)
+                const _mainAccount = await txn.query.account.findFirst({
+                    where(fields, operators) {
+                        return operators.eq(fields.address, accountAddress)
+                    }
                 })
-
-                if (!_account) return null
-
-                const _follow = await context.oracle.select().from(account)
-                    .innerJoin(follow, eq(follow.follower_id, account.id))
+                if (!_mainAccount) return null
+                const _follow = await txn.select()
+                    .from(follow)
+                    .innerJoin(account, eq(account.id, follow.follower_id))
                     .where(and(
                         eq(account.address, viewerAddress),
-                        eq(follow.following_id, _account.id)
-                    ))
-                    .limit(1)
+                    eq(follow.following_id, _mainAccount.id)
+                ))
 
+                const _following = await txn.select()
+                    .from(follow)
+                    .innerJoin(account, eq(account.id, follow.following_id))
+                    .where(
+                        and(
+                            eq(account.address, viewerAddress),
+                            eq(follow.follower_id, _mainAccount.id)
+                        )
+                    )
 
-                const data = _follow?.at(0)
+                const viewer_follow = _follow?.at(0)?.follow
+                const account_follow = _following?.at(0)?.follow
 
-                if (!data?.follow) return null
-
-                return data.follow
+                return {
+                    id: _mainAccount.id,
+                    follows: viewer_follow ? true : false,
+                    followed: account_follow ? true : false
+                }
             })
 
 
