@@ -249,4 +249,5 @@ type Query {
     sort: SortOrder
   ): [Notification!]
   accountUserName(accountAddress: String!): Username
+  accountRelationship(viewerAddress: String!, accountAddress: String!): AccountViewerStats
 }
