@@ -310,7 +310,8 @@ export const AccountsResolver: ResolverMap = {
                 reposts: reposts_count.at(0)?.value ?? 0,
                 quotes: quotes_count.at(0)?.value ?? 0,
                 comments: comments_count.at(0)?.value ?? 0,
-                reactions: reactions_count.at(0)?.value ?? 0
+                reactions: reactions_count.at(0)?.value ?? 0,
+                id: parent.id
             }
         },
         profile: async (parent, _, context) => {
@@ -353,7 +354,8 @@ export const AccountsResolver: ResolverMap = {
 
                 return {
                     follows,
-                    followed
+                    followed,
+                    id: parent.id
                 }
 
             }

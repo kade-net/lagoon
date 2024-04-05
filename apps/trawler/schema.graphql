@@ -30,6 +30,7 @@ type Membership {
 }
 
 type AccountStats {
+  id: Int!
   followers: Int!
   following: Int!
   posts: Int!
@@ -55,6 +56,7 @@ type Username {
 }
 
 type AccountViewerStats {
+  id: Int!
   follows: Boolean!
   followed: Boolean!
 }
