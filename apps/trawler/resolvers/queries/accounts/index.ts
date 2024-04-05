@@ -6,7 +6,7 @@ const { isUndefined, isEmpty } = _
 
 interface ResolverMap {
     Query: {
-        account: Resolver<any, {id?: number, address?: string}, Context>,
+        account: Resolver<any, { id?: number, address?: string, username?: string }, Context>,
         accounts: Resolver<any, PaginationArg & { sort: SORT_ORDER, search?: string }, Context>
         accountsSearch: Resolver<any, { search: string, userAddress: string }, Context>
         accountViewerStats: Resolver<any, { accountAddress: string, viewerAddress: string }, Context>
@@ -15,6 +15,7 @@ interface ResolverMap {
         following: Resolver<any, PaginationArg & { accountAddress: string }, Context>,
         accountUserName: Resolver<any, { accountAddress: string }, Context>
         accountRelationship: Resolver<any, { viewerAddress: string, accountAddress: string }, Context>,
+        accountStats: Resolver<any, { accountAddress: string }, Context>
     },
     Account: {
         followers: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
@@ -36,6 +37,15 @@ interface ResolverMap {
 export const AccountsResolver: ResolverMap = {
     Query: {
         account: async (_, args, context: Context) => {
+            if (args.username) {
+                const response = await context.oracle.select()
+                    .from(username)
+                    .innerJoin(account, eq(account.address, username.owner_address))
+                    .where(eq(username.username, args.username))
+                    .limit(1)
+
+                return response.at(0)?.account ?? null
+            }
             if (isUndefined(args.id) && isUndefined(args.address)){
                 return null
             }
@@ -230,6 +240,78 @@ export const AccountsResolver: ResolverMap = {
 
             return response
 
+        },
+        accountStats: async (_, { accountAddress }, context) => {
+            if (!accountAddress) return null
+            const parent = await context.oracle.query.account.findFirst({
+                where(fields, operators) {
+                    return operators.eq(fields.address, accountAddress)
+                }
+            })
+
+            if (!parent) return null
+
+            const followers_count = await context.oracle.select({
+                value: count()
+            }).from(follow).where(eq(follow.following_id, parent.id))
+
+            const following_count = await context.oracle.select({
+                value: count()
+            }).from(follow).where(eq(follow.follower_id, parent.id))
+
+            const post_count = await context.oracle.select({
+                value: count()
+            }).from(publication).where(and(
+                eq(publication.creator_id, parent.id),
+                eq(publication.type, 1)
+            ))
+
+            const delegates_count = await context.oracle.select({
+                value: count()
+            }).from(delegate).where(eq(delegate.owner_id, parent.id))
+
+            const reposts_count = await context.oracle.select({
+                value: count()
+            }).from(publication).where(
+                and(
+                    eq(publication.parent_id, parent.id),
+                    eq(publication.type, 4)
+                )
+            )
+
+            const quotes_count = await context.oracle.select({
+                value: count()
+            }).from(publication).where(
+                and(
+                    eq(publication.parent_id, parent.id),
+                    eq(publication.type, 2)
+                )
+            )
+
+            const comments_count = await context.oracle.select({
+                value: count()
+            }).from(publication).where(
+                and(
+                    eq(publication.parent_id, parent.id),
+                    eq(publication.type, 3)
+                )
+            )
+
+            const reactions_count = await context.oracle.select({
+                value: count()
+            }).from(publication).where(eq(publication.creator_id, parent.id))
+
+            return {
+                followers: followers_count.at(0)?.value ?? 0,
+                following: following_count.at(0)?.value ?? 0,
+                posts: post_count.at(0)?.value ?? 0,
+                delegates: delegates_count.at(0)?.value ?? 0,
+                reposts: reposts_count.at(0)?.value ?? 0,
+                quotes: quotes_count.at(0)?.value ?? 0,
+                comments: comments_count.at(0)?.value ?? 0,
+                reactions: reactions_count.at(0)?.value ?? 0,
+                id: parent.id
+            }
         }
     },
     Account: {
