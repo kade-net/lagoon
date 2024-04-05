@@ -128,6 +128,10 @@ export class AccountFollowPlugin extends ProcessorPlugin {
                 if (existing) {
                     return
                 }
+
+                if (data.follower_kid == data.following_kid) {
+                    return
+                }
                 await oracle.insert(follow).values({
                     id: data.kid,
                     follower_id: data.follower_kid,
