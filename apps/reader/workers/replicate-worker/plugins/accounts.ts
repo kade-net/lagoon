@@ -118,6 +118,16 @@ export class AccountFollowPlugin extends ProcessorPlugin {
             const data = parsed.data
 
             try {
+                const existing = await oracle.query.follow.findFirst({
+                    where: (fields, { eq, and }) => and(
+                        eq(fields.follower_id, data.follower_kid),
+                        eq(fields.following_id, data.following_kid)
+                    )
+                })
+
+                if (existing) {
+                    return
+                }
                 await oracle.insert(follow).values({
                     id: data.kid,
                     follower_id: data.follower_kid,
