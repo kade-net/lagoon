@@ -1,6 +1,7 @@
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types";
 import _ from "lodash"
 import { ACCOUNT, FOLLOW, account, and, asc, count, delegate, desc, eq, follow, ilike, like, ne, publication, reaction, username } from "@kade-net/oracle";
+import { intersect, union } from "@kade-net/oracle/pg-core";
 const { isUndefined, isEmpty } = _
 
 interface ResolverMap {
@@ -13,6 +14,7 @@ interface ResolverMap {
         followers: Resolver<any, PaginationArg & { accountAddress: string }, Context>,
         following: Resolver<any, PaginationArg & { accountAddress: string }, Context>,
         accountUserName: Resolver<any, { accountAddress: string }, Context>
+        accountRelationship: Resolver<any, { viewerAddress: string, accountAddress: string }, Context>,
     },
     Account: {
         followers: Resolver<ACCOUNT, PaginationArg & {sort: SORT_ORDER}, Context>
@@ -199,6 +201,35 @@ export const AccountsResolver: ResolverMap = {
             })
 
             return username ?? null
+        },
+        accountRelationship: async (_, { accountAddress, viewerAddress }, context) => {
+
+            const response = await context.oracle.transaction(async (txn) => {
+                const _account = await txn.query.account.findFirst({
+                    where: (fields, { eq }) => eq(fields.address, accountAddress)
+                })
+
+                if (!_account) return null
+
+                const _follow = await context.oracle.select().from(account)
+                    .innerJoin(follow, eq(follow.follower_id, account.id))
+                    .where(and(
+                        eq(account.address, viewerAddress),
+                        eq(follow.following_id, _account.id)
+                    ))
+                    .limit(1)
+
+
+                const data = _follow?.at(0)
+
+                if (!data?.follow) return null
+
+                return data.follow
+            })
+
+
+            return response
+
         }
     },
     Account: {
