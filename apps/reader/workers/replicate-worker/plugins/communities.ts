@@ -172,8 +172,9 @@ export class MembershipDeleteEventPlugin implements ProcessorPlugin {
             await oracle.update(membership).set({
                 is_active: false
             }).where(and(
-                eq(membership.id, data.membership_id),
-                eq(membership.community_id, community.id)
+                eq(membership.community_id, community.id),
+                eq(membership.user_kid, data.user_kid),
+                eq(membership.is_active, true)
             ))
 
             monitor.setPosthogSuccess(sequence_number);
