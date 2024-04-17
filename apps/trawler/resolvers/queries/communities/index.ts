@@ -57,7 +57,8 @@ export const CommunityResolver: ResolverMap = {
                         and(
 
                             eq(account.address, memberAddress),
-                            ilike(communities.name, `%${search}%`)
+                            ilike(communities.name, `%${search}%`),
+                            eq(membership.is_active, true)
                         )
                     )
                     .orderBy(sort === "ASC" ? asc(communities.timestamp) : desc(communities.timestamp))
@@ -116,8 +117,11 @@ export const CommunityResolver: ResolverMap = {
             if (!account) return null
 
             const memberships = await context.oracle.query.membership.findMany({
-                where(fields, { eq }) {
-                    return eq(fields.user_kid, account.id)
+                where(fields, { eq, and }) {
+                    return and(
+                        eq(fields.user_kid, account.id),
+                        eq(fields.is_active, true)
+                    )
                 }
             })
 
