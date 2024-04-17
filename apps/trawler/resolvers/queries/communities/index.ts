@@ -1,6 +1,7 @@
 import { COMMUNITY, account, and, asc, communities, community_posts, desc, eq, ilike, like, membership, notInArray, or, publication, username } from "@kade-net/oracle"
 import { Context, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
-
+import _ from "lodash"
+const { isEmpty } = _ 
 
 
 interface ResolverMap {
@@ -126,6 +127,8 @@ export const CommunityResolver: ResolverMap = {
             })
 
             const communityIds = memberships.map(m => m.community_id)
+
+            if (isEmpty(communityIds)) return []
 
             const data = await context.oracle.query.communities.findMany({
                 where: (fields, { inArray }) => {
