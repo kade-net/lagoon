@@ -216,8 +216,9 @@ export class MembershipReclaimEventPlugin implements ProcessorPlugin {
             await oracle.update(membership).set({
                 is_active: true
             }).where(and(
-                eq(membership.id, data.membership_id),
-                eq(membership.community_id, community.id)
+                eq(membership.user_kid, data.user_kid),
+                eq(membership.community_id, community.id),
+                eq(membership.is_active, false)
             ))
 
             monitor.setPosthogSuccess(sequence_number);
