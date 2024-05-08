@@ -42,6 +42,7 @@ type AccountStats {
 }
 
 type Profile {
+  address: String!
   creator: Int!
   pfp: String
   bio: String
