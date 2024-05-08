@@ -440,9 +440,14 @@ export const AccountsResolver: ResolverMap = {
             }
         },
         profile: async (parent, _, context) => {
-            return await context.oracle.query.profile.findFirst({
+            const profile = context.oracle.query.profile.findFirst({
                 where: (fields, { eq }) => eq(fields.creator, parent.id)
             })
+
+            return profile ? {
+                ...profile,
+                address: parent.address
+            } : null
         },
         username: async (parent, _, context) => {
             return await context.oracle.query.username.findFirst({

@@ -88,10 +88,13 @@ export class PublicationRemoveEventPlugin extends ProcessorPlugin {
             const data = parsed.data
 
             try {
-                await oracle.delete(publication).where(eq(publication.id, data.kid))
-                await oracle.delete(reaction).where(eq(reaction.publication_id, data.kid))
-                await oracle.delete(community_posts).where(eq(community_posts.post_id, data.kid))
-                await oracle.delete(publication).where(eq(publication.parent_id, data.kid))
+                await oracle.transaction(async (txn) => {
+                    await txn.delete(reaction).where(eq(reaction.publication_id, data.kid))
+                    await txn.delete(community_posts).where(eq(community_posts.post_id, data.kid))
+                    await txn.delete(publication).where(eq(publication.parent_id, data.kid))
+                    await txn.delete(publication).where(eq(publication.id, data.kid))
+
+                })
                 monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
@@ -202,10 +205,13 @@ export class PublicationRemoveWithRefEventPlugin extends ProcessorPlugin {
                     monitor.setPosthogFailed(sequence_number, { error: "Publication not found" })
                     return
                 }
-                await oracle.delete(publication).where(eq(publication.id, chosen.id))
-                await oracle.delete(reaction).where(eq(reaction.publication_id, chosen.id))
-                await oracle.delete(community_posts).where(eq(community_posts.post_id, chosen.id))
-                await oracle.delete(publication).where(eq(publication.parent_id, chosen.id))
+                await oracle.transaction(async (txn) => {
+                    await txn.delete(reaction).where(eq(reaction.publication_id, chosen.id))
+                    await txn.delete(community_posts).where(eq(community_posts.post_id, chosen.id))
+                    await txn.delete(publication).where(eq(publication.parent_id, chosen.id))
+                    await txn.delete(publication).where(eq(publication.id, chosen.id))
+
+                })
                 monitor.setPosthogSuccess(sequence_number);
             }
             catch (e) {
