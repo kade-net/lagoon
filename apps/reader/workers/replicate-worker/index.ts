@@ -1,9 +1,9 @@
 import { LevelDB } from "../../db";
 import { ProcessMonitor } from "./monitor";
-import { AccountCreatePlugin, AccountFollowPlugin, AccountUnFollowPlugin, DelegateCreatePlugin, DelegateRemovePlugin, ProfileUpdatePlugin } from "./plugins/accounts";
+import { AccountCreatePlugin, AccountDeleteEventPlugin, AccountFollowPlugin, AccountUnFollowPlugin, DelegateCreatePlugin, DelegateRemovePlugin, ProfileUpdatePlugin } from "./plugins/accounts";
 import { CommunityRegisteredEventPlugin, CommunityUpdateEventPlugin, MemberJoinEventPlugin, MembershipChangeEventPlugin, MembershipDeleteEventPlugin, MembershipReclaimEventPlugin } from "./plugins/communities";
 import { PublicationCreateEventPlugin, PublicationCreateWithRefEventPlugin, PublicationRemoveEventPlugin, PublicationRemoveWithRefEventPlugin, ReactionCreateEventPlugin, ReactionCreateEventWithRefPlugin, ReactionRemoveEventPlugin, ReactionRemoveEventWithRefPlugin } from "./plugins/publications";
-import { RegisterUsernamePlugin } from "./plugins/usernames";
+import { RegisterUsernamePlugin, UserNameReclaimedPlugin } from "./plugins/usernames";
 import { DataProcessor } from "./writer";
 
 
@@ -12,6 +12,7 @@ export const monitor = await ProcessMonitor.init()
 const dataProcessor = new DataProcessor(db._db.dbi, db._db.env, monitor)
 
 dataProcessor.registerPlugin(new RegisterUsernamePlugin())
+dataProcessor.registerPlugin(new UserNameReclaimedPlugin())
 // ACCOUNT PLUGINS
 dataProcessor.registerPlugin(new AccountCreatePlugin())
 dataProcessor.registerPlugin(new DelegateCreatePlugin())
@@ -19,6 +20,7 @@ dataProcessor.registerPlugin(new DelegateRemovePlugin())
 dataProcessor.registerPlugin(new AccountFollowPlugin())
 dataProcessor.registerPlugin(new AccountUnFollowPlugin())
 dataProcessor.registerPlugin(new ProfileUpdatePlugin())
+dataProcessor.registerPlugin(new AccountDeleteEventPlugin())
 // PUBLICATION PLUGINS
 dataProcessor.registerPlugin(new PublicationCreateEventPlugin())
 dataProcessor.registerPlugin(new PublicationRemoveEventPlugin())
