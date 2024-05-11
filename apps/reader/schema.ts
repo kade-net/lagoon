@@ -239,6 +239,32 @@ const community_update_event_schema = z.object({
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p))
 })
 
+/**
+ * #[event]
+    struct UserNameReclaimed has store, drop {
+        username: string::String,
+        old_owner_address: address,
+        timestamp: u64
+    }
+ */
+const username_reclaimed_event_schema = z.object({
+    username: z.string(),
+    old_owner_address: z.string(),
+    timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p))
+})
+
+/**
+ * struct AccountDeleteEvent has store, drop {
+        user_kid: u64,
+        user_address: address,
+        timestamp: u64,
+    }
+ */
+const account_delete_event_schema = z.object({
+    user_kid: z.string().transform((p) => parseInt(p)),
+    user_address: z.string(),
+    timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p))
+})
 
 const schema = {
     account_create_event_schema,
@@ -261,7 +287,9 @@ const schema = {
     membership_change_event_schema,
     membership_delete_event_schema,
     membership_reclaim_event_schema,
-    community_update_event_schema
+    community_update_event_schema,
+    account_delete_event_schema,
+    username_reclaimed_event_schema
 }
 
 

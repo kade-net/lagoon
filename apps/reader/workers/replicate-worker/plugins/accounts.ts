@@ -1,6 +1,6 @@
 import schema from "../../../schema";
 import { EVENT_NAMES, ProcessorPlugin } from "../helpers";
-import oracle, { account, and, delegate, eq, follow, profile } from "@kade-net/oracle"
+import oracle, { account, and, communities, community_posts, delegate, eq, follow, membership, or, profile, publication, reaction } from "@kade-net/oracle"
 import { ProcessMonitor } from "../monitor";
 
 
@@ -222,4 +222,72 @@ export class ProfileUpdatePlugin extends ProcessorPlugin {
             }
         }
     }
+}
+
+export class AccountDeleteEventPlugin extends ProcessorPlugin {
+    name(): EVENT_NAMES {
+        return "AccountDeleteEvent"
+    }
+    async process(event: Record<string, any>, monitor: ProcessMonitor, sequence_number: string, signature: string): Promise<void> {
+
+        const parsed = schema.account_delete_event_schema.safeParse(event)
+
+        if (!parsed.success) {
+            console.log(parsed.error)
+            monitor.setPosthogFailed(sequence_number, parsed.error)
+        }
+
+        if (parsed.success) {
+            const data = parsed.data
+
+            try {
+                await oracle.transaction(async (txn) => {
+                    // TODO: delete community memberships
+                    await txn.delete(follow).where(or(
+                        eq(follow.follower_id, data.user_kid),
+                        eq(follow.following_id, data.user_kid)
+                    ))
+
+                    await txn.delete(profile).where(
+                        eq(profile.creator, data.user_kid)
+                    )
+
+                    await txn.delete(membership).where(
+                        eq(membership.user_kid, data.user_kid)
+                    )
+
+                    await txn.delete(community_posts).where(
+                        eq(community_posts.user_kid, data.user_kid)
+                    )
+
+                    await txn.delete(reaction).where(
+                        eq(reaction.creator_id, data.user_kid)
+                    )
+
+                    const posts = await txn.query.publication.findMany({
+                        where: (fields, { eq }) => eq(fields.creator_id, data.user_kid)
+                    })
+
+                    for (const post of posts) {
+                        await txn.delete(reaction).where(eq(reaction.publication_id, post.id))
+                        await txn.delete(community_posts).where(eq(community_posts.post_id, post.id))
+                        await txn.delete(publication).where(eq(publication.parent_id, post.id))
+                        await txn.delete(publication).where(eq(publication.id, post.id))
+
+                    }
+
+                    await txn.delete(account).where(
+                        eq(account.id, data.user_kid)
+                    )
+
+                })
+                monitor.setPosthogSuccess(sequence_number)
+            }
+            catch (e) {
+                console.log(`Something went wrong while processing data: ${e}`)
+                monitor.setPosthogFailed(sequence_number, { error: e })
+            }
+        }
+    }
+
 }

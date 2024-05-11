@@ -14,6 +14,7 @@ const COMMUNITY_MODULE = `${COMMUNITY_MODULE_ADDRESS}::community`
 const SUPPORTED_EVENT_TYPES = [
     // USERNAME
     `${USERNAME_MODULE}::RegisterUsernameEvent`,
+    `${USERNAME_MODULE}::UserNameReclaimed`,
     // ACCOUNT
     `${ACCOUNT_MODULE}::AccountCreateEvent`,
     `${ACCOUNT_MODULE}::DelegateCreateEvent`,
@@ -21,6 +22,7 @@ const SUPPORTED_EVENT_TYPES = [
     `${ACCOUNT_MODULE}::AccountFollowEvent`,
     `${ACCOUNT_MODULE}::AccountUnFollowEvent`,
     `${ACCOUNT_MODULE}::ProfileUpdateEvent`,
+    `${ACCOUNT_MODULE}::AccountDeleteEvent`,
     // PUBLICATIONS
     `${PUBLICATION_MODULE}::PublicationCreate`,
     `${PUBLICATION_MODULE}::PublicationRemove`,
