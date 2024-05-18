@@ -2,10 +2,10 @@ import { z } from "zod";
 
 const addressTransfomer = (p: string) => {
     const address = p
-    if (typeof p == 'string' && p.length == 65) {
-        const newAddress = p.replace("0x", "0x0")
-        return newAddress
-    }
+    // if (typeof p == 'string' && p.length == 65) {
+    //     const newAddress = p.replace("0x", "0x0")
+    //     return newAddress
+    // }
     return address
 }
 
