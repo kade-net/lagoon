@@ -78,7 +78,7 @@ export class DataProcessor {
         cursor.close()
         txn.commit()
         await this.monitor.updateLastRead(last_read)
-        await sleep(60_000)
+        await sleep(10_000)
         console.log("resuming")
         await this.process(parseInt(last_read))
     }

@@ -22,6 +22,16 @@ export class RegisterUsernamePlugin extends ProcessorPlugin {
             const data = parsed.data
 
             try {
+                const previous = await oracle.query.username.findFirst({
+                    where(fields, ops) {
+                        return ops.eq(fields.owner_address, data.owner_address)
+                    }
+                })
+
+                if (previous) {
+                    console.log("Username already exists")
+                    return
+                }
                 await oracle.insert(username).values({
                     owner_address: data.owner_address,
                     token_address: data.token_address,

@@ -8,6 +8,7 @@
     "grpc:dev": "ts-node --esm ./workers/grpc-worker/main.ts",
     "replicate:dev": "ts-node --esm ./workers/replicate-worker/main.ts",
     "notification:dev": "ts-node --esm ./workers/notification-worker/main.ts",
+    "index:dev": "pnpm run grpc:dev & pnpm run replicate:dev",
     "ingress:dev": "ts-node --esm ./ingress/index.ts",
     "ingress:test": "ts-node --esm ./ingress/test.ts",
     "test": "ts-node --esm ./test.ts",
