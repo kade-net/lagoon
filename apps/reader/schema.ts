@@ -1,9 +1,18 @@
 import { z } from "zod";
 
+const addressTransfomer = (p: string) => {
+    const address = p
+    if (typeof p == 'string' && p.length == 65) {
+        const newAddress = p.replace("0x", "0x0")
+        return newAddress
+    }
+    return address
+}
+
 const account_create_event_schema = z.object({
     username: z.string(),
-    creator_address: z.string(),
-    account_object_address: z.string(),
+    creator_address: z.string().transform(addressTransfomer),
+    account_object_address: z.string().transform(addressTransfomer),
     kid: z.string().transform((p) => parseInt(p)),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => {
         return parseInt(p)
@@ -11,17 +20,17 @@ const account_create_event_schema = z.object({
 })
 
 const delegate_create_event_schema = z.object({
-    owner_address: z.string(),
-    object_address: z.string(),
-    delegate_address: z.string(),
+    owner_address: z.string().transform(addressTransfomer),
+    object_address: z.string().transform(addressTransfomer),
+    delegate_address: z.string().transform(addressTransfomer),
     kid: z.string().transform((p) => parseInt(p)),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p))
 })
 
 const delegate_remove_event_schema = z.object({
-    owner_address: z.string(),
-    object_address: z.string(),
-    delegate_address: z.string(),
+    owner_address: z.string().transform(addressTransfomer),
+    object_address: z.string().transform(addressTransfomer),
+    delegate_address: z.string().transform(addressTransfomer),
     kid: z.string().transform((p) => parseInt(p)),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p))
 })
@@ -29,7 +38,7 @@ const delegate_remove_event_schema = z.object({
 const reaction_create_event_schema = z.object({
     kid: z.string().transform((p) => parseInt(p)),
     user_kid: z.string().transform((p) => parseInt(p)),
-    delegate: z.string(),
+    delegate: z.string().transform(addressTransfomer),
     reaction: z.string().transform((p) => parseInt(p)),
     reference_kid: z.string().transform((p) => parseInt(p)),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p)),
@@ -38,14 +47,14 @@ const reaction_create_event_schema = z.object({
 const reaction_remove_event_schema = z.object({
     kid: z.string().transform((p) => parseInt(p)),
     user_kid: z.string().transform((p) => parseInt(p)),
-    delegate: z.string(),
+    delegate: z.string().transform(addressTransfomer),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p)),
 })
 
 const reaction_create_event_with_ref = z.object({
     kid: z.string().transform((p) => parseInt(p)),
     user_kid: z.string().transform((p) => parseInt(p)),
-    delegate: z.string(),
+    delegate: z.string().transform(addressTransfomer),
     reaction: z.string().transform((p) => parseInt(p)),
     publication_ref: z.string(),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p)),
@@ -53,7 +62,7 @@ const reaction_create_event_with_ref = z.object({
 
 const reaction_remove_event_with_ref = z.object({
     user_kid: z.string().transform((p) => parseInt(p)),
-    delegate: z.string(),
+    delegate: z.string().transform(addressTransfomer),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p)),
     ref: z.string(),
 })
@@ -62,7 +71,7 @@ const publication_create_event_schema = z.object({
     kid: z.string().transform((p) => parseInt(p)),
     payload: z.string(),
     user_kid: z.string().transform((p) => parseInt(p)),
-    delegate: z.string(),
+    delegate: z.string().transform(addressTransfomer),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p)),
     type: z.string().transform((p) => parseInt(p)),
     reference_kid: z.string().transform((p) => parseInt(p)),
@@ -72,7 +81,7 @@ const publication_create_event_schema = z.object({
 const publication_remove_event_schema = z.object({
     kid: z.string().transform((p) => parseInt(p)),
     user_kid: z.string().transform((p) => parseInt(p)),
-    delegate: z.string(),
+    delegate: z.string().transform(addressTransfomer),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p)),
 })
 
@@ -80,7 +89,7 @@ const publication_create_with_ref_event_schema = z.object({
     kid: z.string().transform((p) => parseInt(p)),
     payload: z.string(),
     user_kid: z.string().transform((p) => parseInt(p)),
-    delegate: z.string(),
+    delegate: z.string().transform(addressTransfomer),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p)),
     type: z.string().transform((p) => parseInt(p)),
     publication_ref: z.string(),
@@ -89,7 +98,7 @@ const publication_create_with_ref_event_schema = z.object({
 
 const publication_remove_with_ref_event_schema = z.object({
     user_kid: z.string().transform((p) => parseInt(p)),
-    delegate: z.string(),
+    delegate: z.string().transform(addressTransfomer),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p)),
     ref: z.string(),
 })
@@ -97,10 +106,10 @@ const publication_remove_with_ref_event_schema = z.object({
 const account_follow_event_schema = z.object({
     follower_kid: z.string().transform((p) => parseInt(p)),
     following_kid: z.string().transform((p) => parseInt(p)),
-    follower: z.string(),
-    following: z.string(),
+    follower: z.string().transform(addressTransfomer),
+    following: z.string().transform(addressTransfomer),
     kid: z.string().transform((p) => parseInt(p)),
-    delegate: z.string(),
+    delegate: z.string().transform(addressTransfomer),
     user_kid: z.string().transform((p) => parseInt(p)),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p)),
 })
@@ -108,21 +117,21 @@ const account_follow_event_schema = z.object({
 const account_unfollow_event_schema = z.object({
     user_kid: z.string().transform((p) => parseInt(p)),
     unfollowing_kid: z.string().transform((p) => parseInt(p)),
-    delegate: z.string(),
+    delegate: z.string().transform(addressTransfomer),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p)),
 })
 
 const username_registration_event_schema = z.object({
     username: z.string(),
-    owner_address: z.string(),
-    token_address: z.string(),
+    owner_address: z.string().transform(addressTransfomer),
+    token_address: z.string().transform(addressTransfomer),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p))
 })
 
 
 const profile_update_event_schema = z.object({
     user_kid: z.string().transform((p) => parseInt(p)),
-    delegate: z.string(),
+    delegate: z.string().transform(addressTransfomer),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p)),
     pfp: z.string(),
     bio: z.string(),
@@ -145,7 +154,7 @@ const community_registered_event_schema = z.object({
     name: z.string(),
     description: z.string(),
     image: z.string(),
-    creator: z.string(),
+    creator: z.string().transform(addressTransfomer),
     bid: z.string().transform((p) => parseInt(p)),
     user_kid: z.string().transform((p) => parseInt(p)),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p))
@@ -175,8 +184,8 @@ const member_join_event_schema = z.object({
  */
 const membership_change_event_schema = z.object({
     type: z.string().transform((p) => parseInt(p)),
-    made_by: z.string(),
-    membership_owner: z.string(),
+    made_by: z.string().transform(addressTransfomer),
+    membership_owner: z.string().transform(addressTransfomer),
     community_name: z.string(),
     community_id: z.string().transform((p) => parseInt(p)),
     membership_id: z.string().transform((p) => parseInt(p)),
@@ -249,7 +258,7 @@ const community_update_event_schema = z.object({
  */
 const username_reclaimed_event_schema = z.object({
     username: z.string(),
-    old_owner_address: z.string(),
+    old_owner_address: z.string().transform(addressTransfomer),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p))
 })
 
@@ -262,7 +271,7 @@ const username_reclaimed_event_schema = z.object({
  */
 const account_delete_event_schema = z.object({
     user_kid: z.string().transform((p) => parseInt(p)),
-    user_address: z.string(),
+    user_address: z.string().transform(addressTransfomer),
     timestamp: z.string().transform(p => `${p}000`).transform((p) => parseInt(p)).transform((p) => new Date(p))
 })
 
