@@ -6,17 +6,24 @@
   "type": "module",
   "scripts": {
     "grpc:dev": "ts-node --esm ./workers/grpc-worker/main.ts",
+    "grpc": "node ./dist/workers/grpc-worker/main.js",
     "replicate:dev": "ts-node --esm ./workers/replicate-worker/main.ts",
+    "replicate": "node ./dist/workers/replicate-worker/main.js",
     "notification:dev": "ts-node --esm ./workers/notification-worker/main.ts",
     "index:dev": "pnpm run grpc:dev & pnpm run replicate:dev",
     "ingress:dev": "ts-node --esm ./ingress/index.ts",
+    "ingress": "node ./dist/ingress/index.js",
     "ingress:test": "ts-node --esm ./ingress/test.ts",
     "test": "ts-node --esm ./test.ts",
-    "all": "pnpm run grpc:dev & pnpm run replicate:dev & pnpm notification:dev & pnpm ingress:dev"
+    "all": "pnpm run grpc:dev & pnpm run replicate:dev & pnpm notification:dev & pnpm ingress:dev",
+    "build": "tsup",
+    "start": "npm run grpc & npm run replicate & npm run ingress"
   },
   "dependencies": {
     "@aptos-labs/aptos-protos": "1.1.2",
     "@grpc/grpc-js": "=1.9.2",
+    "@kade-net/oracle": "workspace:*",
+    "@kade-net/tunnel": "workspace:*",
     "dotenv": "^16.4.3",
     "google-protobuf": "^3.21.2",
     "level": "^8.0.1",
@@ -24,14 +31,13 @@
     "level-rocksdb": "^5.0.0",
     "lodash": "^4.17.21",
     "node-lmdb": "^0.10.0",
+    "posthog": "workspace:*",
     "readable-stream": "^4.5.2",
     "rocksdb": "^5.2.1",
     "timer-node": "^5.0.7",
     "ts-node": "^10.9.2",
-    "zod": "^3.22.4",
-    "@kade-net/oracle": "workspace:*",
-    "posthog": "workspace:*",
-    "@kade-net/tunnel": "workspace:*"
+    "tsup": "^8.0.2",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/google-protobuf": "^3.15.6",
