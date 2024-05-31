@@ -4,6 +4,11 @@ import { startStandaloneServer   } from "@apollo/server/standalone"
 import TypeDef from "./typedef";
 import { AccountsResolver, CommunityResolver, NotificationsResolver, PublicationResolver } from "./resolvers/queries";
 import KadeOracle from "@kade-net/oracle";
+import express from "express";
+import http from "http";
+import bodyParser from 'body-parser'
+import { expressMiddleware } from '@apollo/server/express4'
+
 
 import { GraphQLScalarType, Kind } from 'graphql';
 import GraphQLJSON from "graphql-type-json";
@@ -33,6 +38,9 @@ const dateScalar = new GraphQLScalarType({
   },
 });
 
+const expressApp = express()
+const httpServer = http.createServer(expressApp)
+
 const server = new ApolloServer({
     typeDefs: TypeDef,
   resolvers: [AccountsResolver, PublicationResolver, CommunityResolver, NotificationsResolver, {
@@ -42,20 +50,32 @@ const server = new ApolloServer({
   introspection: true
 })
 
+await server.start()
 
-const app = await startStandaloneServer(server, {
-    context: async ({req, res}) => {
-        return {
-            req,
-            res,
-            oracle: KadeOracle
-        }
-    },
-    listen: {
-      port: (process.env.PORT! || 4000) as any
-    },
-    
+expressApp.use(bodyParser.json({
+  limit: '10mb'
+}))
+expressApp.use(bodyParser.urlencoded({
+  limit: '10mb',
+  extended: true
+}))
+
+expressApp.use((req, res, next) => {
+  console.log(`Request received at ${new Date().toISOString()}`);
+  next();
+});
+
+
+expressApp.use(expressMiddleware(server, {
+  context: async ({ req, res }) => ({
+    req,
+    res,
+    oracle: KadeOracle 
+  })
+}))
+
+httpServer.listen({
+  port: process.env.PORT || 4000
+}, () => {
+  console.log(`🚀 Server ready at http://localhost:${process.env.PORT || 4000}`)
 })
-
-
-console.log(`SERVER LIVE AT: ${app.url}`)

@@ -242,6 +242,9 @@ importers:
       '@kade-net/oracle':
         specifier: workspace:*
         version: link:../oracle
+      body-parser:
+        specifier: ^1.20.2
+        version: 1.20.2
       cookie-parser:
         specifier: ^1.4.6
         version: 1.4.6
@@ -267,6 +270,9 @@ importers:
         specifier: ^1.10.0
         version: 1.10.0
     devDependencies:
+      '@types/body-parser':
+        specifier: ^1.19.5
+        version: 1.19.5
       '@types/cookie-parser':
         specifier: ^1.4.6
         version: 1.4.6
@@ -1979,6 +1985,26 @@ packages:
       on-finished: 2.4.1
       qs: 6.11.0
       raw-body: 2.5.1
+      type-is: 1.6.18
+      unpipe: 1.0.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /body-parser@1.20.2:
+    resolution: {integrity: sha512-ml9pReCu3M61kGlqoTm2umSXTlRTuGTx0bfYj+uIUKKYycG5NtSbeetV3faSU6R7ajOPw0g/J1PvK4qNy7s5bA==}
+    engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
+    dependencies:
+      bytes: 3.1.2
+      content-type: 1.0.5
+      debug: 2.6.9
+      depd: 2.0.0
+      destroy: 1.2.0
+      http-errors: 2.0.0
+      iconv-lite: 0.4.24
+      on-finished: 2.4.1
+      qs: 6.11.0
+      raw-body: 2.5.2
       type-is: 1.6.18
       unpipe: 1.0.0
     transitivePeerDependencies:
@@ -4637,7 +4663,7 @@ packages:
         optional: true
     dependencies:
       lilconfig: 3.1.0
-      ts-node: 10.9.2(@types/node@18.19.21)(typescript@4.9.5)
+      ts-node: 10.9.2(@types/node@20.11.17)(typescript@5.4.2)
       yaml: 2.3.4
 
   /postgres@3.4.3:
@@ -5289,6 +5315,7 @@ packages:
       typescript: 4.9.5
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
+    dev: false
 
   /ts-node@10.9.2(@types/node@20.11.17)(typescript@5.3.3):
     resolution: {integrity: sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==}
@@ -5350,7 +5377,6 @@ packages:
       typescript: 5.4.2
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
-    dev: true
 
   /ts-node@10.9.2(@types/node@20.11.27)(typescript@5.4.2):
     resolution: {integrity: sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==}
