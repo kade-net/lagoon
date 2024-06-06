@@ -1,7 +1,42 @@
-import { PUBLICATION, and, asc, count, desc, eq, inArray, publication, reaction, notInArray, not, REACTION } from "@kade-net/oracle"
+import KadeOracle, { PUBLICATION, and, asc, count, desc, eq, inArray, publication, reaction, notInArray, not, REACTION, } from "@kade-net/oracle"
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types"
 import _ from "lodash"
 const { isNumber, isNull } = _
+
+async function threadPublication(oracle: typeof KadeOracle, current: PUBLICATION, parents: Array<PUBLICATION>) {
+    // 1. get children of a publication
+    // 2. from the publication's children get all that were made by the user / repeat downstreaam until a publication has no children
+    // 3. 
+    const children = await oracle.query.publication.findMany({
+        where(fields, operators) {
+            return operators.and(
+                operators.eq(fields.parent_id, current.id),
+                operators.eq(fields.creator_id, current.creator_id)
+            )
+        },
+        orderBy(fields, operators) {
+            return operators.desc(fields.timestamp)
+        }
+    })
+
+    if ((children?.length ?? 0) == 0) {
+        return parents
+    }
+
+    const first_child = children.at(0)
+
+    if (!first_child) return parents
+
+
+    const data = [
+        ...parents,
+        first_child
+    ]
+
+    return await threadPublication(oracle, first_child, data)
+
+
+}
 
 
 interface ResolverMap {
@@ -11,6 +46,7 @@ interface ResolverMap {
         publicationStats: Resolver<any, { id: number, ref: string }, Context>,
         publicationInteractionsByViewer: Resolver<any, { id: number, ref: string, viewer: number, address: string }, Context>
         publicationComments: Resolver<any, PaginationArg & { id: number, ref: string, sort: SORT_ORDER, hide?: string[], muted?: number[] }, Context>
+        publicationThreads: Resolver<any, PaginationArg & { id: number, ref: string, sort: SORT_ORDER, hide?: string[], muted?: number[] }, Context>
     },
     Publication: {
         reactions: Resolver<PUBLICATION, PaginationArg & { sort: SORT_ORDER }, Context>
@@ -277,6 +313,24 @@ export const PublicationResolver: ResolverMap = {
                 ),
                 orderBy: args?.sort == "ASC" ? asc(publication.timestamp) : desc(publication.timestamp)
             })
+        },
+        publicationThreads: async (_, args, context) => {
+            const { id, ref } = args
+
+            const publication = await context.oracle.query.publication.findFirst({
+                where(fields, operators) {
+                    return operators.or(
+                        operators.eq(fields.id, id),
+                        operators.eq(fields.publication_ref, ref)
+                    )
+                },
+            })
+
+            if (!publication) return []
+
+            const thread = await threadPublication(context.oracle, publication, [publication])
+
+            return thread
         }
     },
     Publication: {

@@ -171,6 +171,7 @@ type Query {
   accounts(pagination: Pagination, sort: SortOrder, search: String): [Account!]
   accountsSearch(search: String!, userAddress: String!): [Account!]
   publication(id: Int, ref: String): Publication
+  publicationThreads(id: Int, ref: String): [Publication!]
   publications(
     pagination: Pagination
     type: Int
