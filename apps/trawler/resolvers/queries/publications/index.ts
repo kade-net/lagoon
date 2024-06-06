@@ -319,12 +319,18 @@ export const PublicationResolver: ResolverMap = {
 
             const publication = await context.oracle.query.publication.findFirst({
                 where(fields, operators) {
-                    return operators.or(
-                        operators.eq(fields.id, id),
-                        operators.eq(fields.publication_ref, ref)
-                    )
+                    if (id) {
+                        return operators.eq(fields.id, id)
+                    }
+
+                    if (ref) {
+                        return operators.eq(fields.publication_ref, ref)
+                    }
+
                 },
             })
+
+            console.log(publication)
 
             if (!publication) return []
 
