@@ -8,110 +8,36 @@ import { EVENT_NAMES } from "../../workers/replicate-worker/helpers";
 import { IngressPlugin } from "./definitions";
 import schema from "../../schema";
 
-export class AccountCreatePlugin extends IngressPlugin {
+export class MemberJoinPlugin extends IngressPlugin {
   name(): EVENT_NAMES {
-    return "AccountCreateEvent";
+    return "MemberJoinEvent";
   }
-
   extract(
     event: Record<string, any>,
     sequence_number: string
   ): events.Event | null {
-    const parsed = schema.account_create_event_schema.safeParse(event);
-
+    const parsed = schema.member_join_event_schema.safeParse(event);
     if (!parsed.success) {
       return null;
     }
     if (parsed.success) {
       const data = parsed.data;
       const event = new events.Event({
-        account_create_event: new events.AccountCreateEvent({
-          account_object_address: data.account_object_address,
-          creator_address: data.creator_address,
-          kid: data.kid,
+        member_join_event: new events.MemberJoinEvent({
+          owner: data.owner,
+          community_name: data.community_name,
           timestamp: data.timestamp.getTime(),
-          username: data.username,
-        }),
-        event_type: "AccountCreateEvent",
-        sequence_number: parseInt(sequence_number),
-      });
-
-      return event;
-    }
-
-    return null;
-  }
-
-  async process(
-    call: ServerWritableStream<events.EventsRequest, events.Event>,
-    event: Record<string, any>,
-    sequence_number: string
-  ) {
-    const event_data = this.extract(event, sequence_number);
-
-    if (event_data) {
-      call.write(event_data, (err: any) => {
-        if (err) {
-          console.log(err);
-        }
-      });
-    } else {
-      console.log("Error parsing event");
-    }
-  }
-
-  async processSingle(
-    callback: sendUnaryData<events.Event>,
-    event: Record<string, any>,
-    sequence_number: string
-  ) {
-    const event_data = this.extract(event, sequence_number);
-
-    if (event_data) {
-      callback(null, event_data);
-    } else {
-      callback(new Error("Error parsing event"), null);
-    }
-  }
-}
-
-export class AccountFollowPlugin extends IngressPlugin {
-  name(): EVENT_NAMES {
-    return "AccountFollowEvent";
-  }
-
-  extract(
-    event: Record<string, any>,
-    sequence_number: string
-  ): events.Event | null {
-    const parsed = schema.account_follow_event_schema.safeParse(event);
-
-    if (!parsed.success) {
-      return null;
-    }
-    if (parsed.success) {
-      const data = parsed.data;
-      const event = new events.Event({
-        account_follow_event: new events.AccountFollowEvent({
-          timestamp: data.timestamp.getTime(),
-          follower: data.follower,
-          following: data.following,
-          delegate: data.delegate,
-          follower_kid: data.follower_kid,
-          following_kid: data.following_kid,
-          kid: data.kid,
+          bid: data.bid,
+          type: data.type,
           user_kid: data.user_kid,
         }),
-        event_type: "AccountFollowEvent",
+        event_type: "MemberJoinEvent",
         sequence_number: parseInt(sequence_number),
       });
-
       return event;
     }
-
     return null;
   }
-
   async process(
     call: ServerWritableStream<events.EventsRequest, events.Event>,
     event: Record<string, any>,
@@ -129,7 +55,6 @@ export class AccountFollowPlugin extends IngressPlugin {
       console.log("Error parsing event");
     }
   }
-
   async processSingle(
     callback: sendUnaryData<events.Event>,
     event: Record<string, any>,
@@ -145,46 +70,104 @@ export class AccountFollowPlugin extends IngressPlugin {
   }
 }
 
-export class AccountUnFollowPlugin extends IngressPlugin {
+export class MembershipDeletePlugin extends IngressPlugin {
   name(): EVENT_NAMES {
-    return "AccountUnFollowEvent";
+    return "MembershipDeleteEvent";
   }
-
   extract(
     event: Record<string, any>,
     sequence_number: string
   ): events.Event | null {
-    const parsed = schema.account_unfollow_event_schema.safeParse(event);
-
+    const parsed = schema.membership_delete_event_schema.safeParse(event);
     if (!parsed.success) {
       return null;
     }
     if (parsed.success) {
       const data = parsed.data;
       const event = new events.Event({
-        account_unfollow_event: new events.AccountUnfollowEvent({
+        membership_delete_event: new events.MembershipDeleteEvent({
+          community_name: data.community_name,
+          community_id: data.community_id,
+          membership_id: data.membership_id,
+          user_kid: data.user_kid,
           timestamp: data.timestamp.getTime(),
-          delegate: data.delegate,
-          unfollowing_kid: data.unfollowing_kid,
+        }),
+        event_type: "MembershipDeleteEvent",
+        sequence_number: parseInt(sequence_number),
+      });
+      return event;
+    }
+    return null;
+  }
+  async process(
+    call: ServerWritableStream<events.EventsRequest, events.Event>,
+    event: Record<string, any>,
+    sequence_number: string
+  ) {
+    const event_data = this.extract(event, sequence_number);
+
+    if (event_data) {
+      call.write(event_data, (err: any) => {
+        if (err) {
+          console.log(err);
+        }
+      });
+    } else {
+      console.log("Error parsing event");
+    }
+  }
+  async processSingle(
+    callback: sendUnaryData<events.Event>,
+    event: Record<string, any>,
+    sequence_number: string
+  ) {
+    const event_data = this.extract(event, sequence_number);
+
+    if (event_data) {
+      callback(null, event_data);
+    } else {
+      callback(new Error("Error parsing event"), null);
+    }
+  }
+}
+
+export class CommunityRegisteredPlugin extends IngressPlugin {
+  name(): EVENT_NAMES {
+    return "CommunityRegisteredEvent";
+  }
+  extract(
+    event: Record<string, any>,
+    sequence_number: string
+  ): events.Event | null {
+    const parsed = schema.community_registered_event_schema.safeParse(event);
+    if (!parsed.success) {
+      return null;
+    }
+    if (parsed.success) {
+      const data = parsed.data;
+      const event = new events.Event({
+        community_registered_event: new events.CommunityRegisteredEvent({
+          name: data.name,
+          timestamp: data.timestamp.getTime(),
+          creator: data.creator,
+          bid: data.bid,
+          image: data.image,
+          description: data.description,
           user_kid: data.user_kid,
         }),
-        event_type: "AccountUnFollowEvent",
+        event_type: "CommunityRegisteredEvent",
         sequence_number: parseInt(sequence_number),
       });
-
       return event;
     }
-
     return null;
   }
-
   async process(
     call: ServerWritableStream<events.EventsRequest, events.Event>,
     event: Record<string, any>,
     sequence_number: string
   ) {
     const event_data = this.extract(event, sequence_number);
-
     if (event_data) {
       call.write(event_data, (err: any) => {
         if (err) {
@@ -195,14 +178,12 @@ export class AccountUnFollowPlugin extends IngressPlugin {
       console.log("Error parsing event");
     }
   }
-
   async processSingle(
     callback: sendUnaryData<events.Event>,
     event: Record<string, any>,
     sequence_number: string
   ) {
     const event_data = this.extract(event, sequence_number);
-
     if (event_data) {
       callback(null, event_data);
     } else {
@@ -211,48 +192,40 @@ export class AccountUnFollowPlugin extends IngressPlugin {
   }
 }
 
-export class ProfileUpdatePlugin extends IngressPlugin {
+export class MembershipReclaimPlugin extends IngressPlugin {
   name(): EVENT_NAMES {
-    return "ProfileUpdateEvent";
+    return "MembershipReclaimEvent";
   }
-
   extract(
     event: Record<string, any>,
     sequence_number: string
   ): events.Event | null {
-    const parsed = schema.profile_update_event_schema.safeParse(event);
-
+    const parsed = schema.membership_reclaim_event_schema.safeParse(event);
     if (!parsed.success) {
       return null;
     }
     if (parsed.success) {
       const data = parsed.data;
       const event = new events.Event({
-        profile_update_event: new events.ProfileUpdateEvent({
-          bio: data.bio,
-          delegate: data.delegate,
-          display_name: data.display_name,
-          pfp: data.pfp,
-          timestamp: data.timestamp.getTime(),
+        membership_reclaim_event: new events.MembershipReclaimEvent({
+          membership_id: data.membership_id,
+          community_id: data.community_id,
           user_kid: data.user_kid,
+          timestamp: data.timestamp.getTime(),
         }),
-        event_type: "ProfileUpdateEvent",
+        event_type: "MembershipReclaimEvent",
         sequence_number: parseInt(sequence_number),
       });
-
       return event;
     }
-
     return null;
   }
-
   async process(
     call: ServerWritableStream<events.EventsRequest, events.Event>,
     event: Record<string, any>,
     sequence_number: string
   ) {
     const event_data = this.extract(event, sequence_number);
-
     if (event_data) {
       call.write(event_data, (err: any) => {
         if (err) {
@@ -263,14 +236,12 @@ export class ProfileUpdatePlugin extends IngressPlugin {
       console.log("Error parsing event");
     }
   }
-
   async processSingle(
     callback: sendUnaryData<events.Event>,
     event: Record<string, any>,
     sequence_number: string
   ) {
     const event_data = this.extract(event, sequence_number);
-
     if (event_data) {
       callback(null, event_data);
     } else {
@@ -278,38 +249,40 @@ export class ProfileUpdatePlugin extends IngressPlugin {
     }
   }
 }
-// Delegate Events
-export class DelegateCreatePlugin extends IngressPlugin {
+
+export class MembershipChangePlugin extends IngressPlugin {
   name(): EVENT_NAMES {
-    return "DelegateCreateEvent";
+    return "MembershipChangeEvent";
   }
   extract(
     event: Record<string, any>,
     sequence_number: string
   ): events.Event | null {
-    const parsed = schema.delegate_create_event_schema.safeParse(event);
-
+    const parsed = schema.membership_change_event_schema.safeParse(event);
     if (!parsed.success) {
       return null;
     }
     if (parsed.success) {
       const data = parsed.data;
       const event = new events.Event({
-        delegate_create_event: new events.DelegateCreateEvent({
-          owner_address: data.owner_address,
-          object_address: data.object_address,
-          delegate_address: data.delegate_address,
-          kid: data.kid,
+        membership_change_event: new events.MembershipChangeEvent({
+          membership_id: data.membership_id,
+          community_id: data.community_id,
+          user_kid: data.user_kid,
           timestamp: data.timestamp.getTime(),
-        }),
-        event_type: "DelegateCreateEvent",
+          type: data.type,
+          made_by: data.made_by,
+          community_name: data.community_name,
+          membership_owner: data.membership_owner,
+
+       }),
+        event_type: "MembershipChangeEvent",
         sequence_number: parseInt(sequence_number),
       });
       return event;
     }
     return null;
   }
-
   async process(
     call: ServerWritableStream<events.EventsRequest, events.Event>,
     event: Record<string, any>,
@@ -326,67 +299,65 @@ export class DelegateCreatePlugin extends IngressPlugin {
       console.log("Error parsing event");
     }
   }
-  async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string){
-      const event_data = this.extract(event, sequence_number);
+  async processSingle(
+    callback: sendUnaryData<events.Event>,
+    event: Record<string, any>,
+    sequence_number: string
+  ) {
+    const event_data = this.extract(event, sequence_number);
+    if (event_data) {
+      callback(null, event_data);
+    } else {
+      callback(new Error("Error parsing event"), null);
+    }
+  }
+}
+export class CommunityUpdatePlugin extends IngressPlugin{
+    name(): EVENT_NAMES {
+        return "CommunityUpdateEvent";
+    }
+    extract(event: Record<string, any>, sequence_number: string): events.Event | null {
+        const parsed = schema.community_update_event_schema.safeParse(event);
+        if (!parsed.success) {
+            return null;
+        }
+        if (parsed.success) {
+            const data = parsed.data;
+            const event = new events.Event({
+                community_update_event: new events.CommunityUpdateEvent({
+                    name: data.name,
+                    timestamp: data.timestamp.getTime(),
+                    display_name: data.display_name,
+                    bid: data.bid,
+                    image: data.image,
+                    description: data.description,
+                    user_kid: data.user_kid,
+                }),
+                event_type: "CommunityUpdateEvent",
+                sequence_number: parseInt(sequence_number),
+            });
+            return event;
+        }
+        return null;
+    }
+    async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
+        const event_data = this.extract(event, sequence_number);
+        if (event_data) {
+            call.write(event_data, (err: any) => {
+                if (err) {
+                    console.log(err);
+                }
+            });
+        } else {
+            console.log("Error parsing event");
+        }
+    }
+    async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string) {
+        const event_data = this.extract(event, sequence_number);
         if (event_data) {
             callback(null, event_data);
         } else {
             callback(new Error("Error parsing event"), null);
         }
-  }
-}
-
-export class DelegateRemovePlugin extends IngressPlugin {
-  name(): EVENT_NAMES {
-    return "DelegateRemoveEvent";
-  }
-  extract(
-    event: Record<string, any>,
-    sequence_number: string
-  ): events.Event | null {
-    const parsed = schema.delegate_remove_event_schema.safeParse(event);
-    if (!parsed.success) {
-      return null;
     }
-    if (parsed.success) {
-      const data = parsed.data;
-      const event = new events.Event({
-        delegate_remove_event: new events.DelegateRemoveEvent({
-          owner_address: data.owner_address,
-          object_address: data.object_address,
-          delegate_address: data.delegate_address,
-          kid: data.kid,
-          timestamp: data.timestamp.getTime(),
-        }),
-        event_type: "DelegateRemoveEvent",
-        sequence_number: parseInt(sequence_number),
-      });
-      return event;
-    }
-    return null;
-  }
-  async process(
-    call: ServerWritableStream<events.EventsRequest, events.Event>,
-    event: Record<string, any>,
-    sequence_number: string
-  ) {
-    const event_data = this.extract(event, sequence_number);
-    if (event_data) {
-      call.write(event_data, (err: any) => {
-        if (err) {
-          console.log(err);
-        }
-      });
-    } else {
-      console.log("Error parsing event");
-    }
-  }
-  async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string){
-      const event_data = this.extract(event, sequence_number);
-        if (event_data) {
-            callback(null, event_data);
-        } else {
-            callback(new Error("Error parsing event"), null);
-        }
-  }
 }
