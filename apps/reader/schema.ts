@@ -1,11 +1,18 @@
 import { z } from "zod";
 
+const addressSize = 66;
 const addressTransfomer = (p: string) => {
     const address = p
-    // if (typeof p == 'string' && p.length == 65) {
-    //     const newAddress = p.replace("0x", "0x0")
-    //     return newAddress
-    // }
+    // Check if address is less than 66 char long
+    if (typeof p == 'string' && p.length < addressSize) {
+        // Add the necessary padding
+        let paddingAmount = addressSize - p.length;
+
+        // Add padding
+        let padding = "0".repeat(paddingAmount);
+        const newAddress = p.replace("0x", "0x" + padding);
+        return newAddress;
+    }
     return address
 }
 
