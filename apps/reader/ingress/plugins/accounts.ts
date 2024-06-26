@@ -34,8 +34,7 @@ export class AccountCreatePlugin extends IngressPlugin {
     return null;
   }
 
-  async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string
-  ) {
+  async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
     const event_data = this.extract(event, sequence_number);
 
     if (event_data) {
