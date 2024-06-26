@@ -3,4 +3,9 @@
 **/.env
 **/.env.*
 setup
+display-store.ts
+fill-test-values.ts
+update-events.ts
+get-event.ts
+
 
