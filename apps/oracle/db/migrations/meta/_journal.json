@@ -29,6 +29,20 @@
       "when": 1710680640026,
       "tag": "0003_fuzzy_celestials",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1719298860254,
+      "tag": "0004_wealthy_squadron_sinister",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1719298909188,
+      "tag": "0005_classy_clint_barton",
+      "breakpoints": true
     }
   ]
 }
