@@ -1,9 +1,4 @@
-import {
-  ServerUnaryCall,
-  ServerWritableStream,
-  events,
-  sendUnaryData,
-} from "@kade-net/tunnel";
+import { ServerWritableStream, events, sendUnaryData } from "@kade-net/tunnel";
 import { EVENT_NAMES } from "../../workers/replicate-worker/helpers";
 import { IngressPlugin } from "./definitions";
 import schema from "../../schema";
@@ -13,10 +8,7 @@ export class AccountCreatePlugin extends IngressPlugin {
     return "AccountCreateEvent";
   }
 
-  extract(
-    event: Record<string, any>,
-    sequence_number: string
-  ): events.Event | null {
+  extract(event: Record<string, any>, sequence_number: string): events.Event | null {
     const parsed = schema.account_create_event_schema.safeParse(event);
 
     if (!parsed.success) {
@@ -42,10 +34,7 @@ export class AccountCreatePlugin extends IngressPlugin {
     return null;
   }
 
-  async process(
-    call: ServerWritableStream<events.EventsRequest, events.Event>,
-    event: Record<string, any>,
-    sequence_number: string
+  async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string
   ) {
     const event_data = this.extract(event, sequence_number);
 
@@ -60,11 +49,7 @@ export class AccountCreatePlugin extends IngressPlugin {
     }
   }
 
-  async processSingle(
-    callback: sendUnaryData<events.Event>,
-    event: Record<string, any>,
-    sequence_number: string
-  ) {
+  async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string) {
     const event_data = this.extract(event, sequence_number);
 
     if (event_data) {
@@ -80,10 +65,7 @@ export class AccountFollowPlugin extends IngressPlugin {
     return "AccountFollowEvent";
   }
 
-  extract(
-    event: Record<string, any>,
-    sequence_number: string
-  ): events.Event | null {
+  extract(event: Record<string, any>, sequence_number: string): events.Event | null {
     const parsed = schema.account_follow_event_schema.safeParse(event);
 
     if (!parsed.success) {
@@ -112,14 +94,11 @@ export class AccountFollowPlugin extends IngressPlugin {
     return null;
   }
 
-  async process(
-    call: ServerWritableStream<events.EventsRequest, events.Event>,
-    event: Record<string, any>,
-    sequence_number: string
-  ) {
+  async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
     const event_data = this.extract(event, sequence_number);
 
     if (event_data) {
+
       call.write(event_data, (err: any) => {
         if (err) {
           console.log(err);
@@ -130,11 +109,7 @@ export class AccountFollowPlugin extends IngressPlugin {
     }
   }
 
-  async processSingle(
-    callback: sendUnaryData<events.Event>,
-    event: Record<string, any>,
-    sequence_number: string
-  ) {
+  async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string) {
     const event_data = this.extract(event, sequence_number);
 
     if (event_data) {
@@ -150,17 +125,16 @@ export class AccountUnFollowPlugin extends IngressPlugin {
     return "AccountUnFollowEvent";
   }
 
-  extract(
-    event: Record<string, any>,
-    sequence_number: string
-  ): events.Event | null {
+  extract(event: Record<string, any>, sequence_number: string): events.Event | null {
     const parsed = schema.account_unfollow_event_schema.safeParse(event);
 
     if (!parsed.success) {
       return null;
     }
     if (parsed.success) {
+
       const data = parsed.data;
+
       const event = new events.Event({
         account_unfollow_event: new events.AccountUnfollowEvent({
           timestamp: data.timestamp.getTime(),
@@ -178,10 +152,7 @@ export class AccountUnFollowPlugin extends IngressPlugin {
     return null;
   }
 
-  async process(
-    call: ServerWritableStream<events.EventsRequest, events.Event>,
-    event: Record<string, any>,
-    sequence_number: string
+  async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string
   ) {
     const event_data = this.extract(event, sequence_number);
 
@@ -196,17 +167,14 @@ export class AccountUnFollowPlugin extends IngressPlugin {
     }
   }
 
-  async processSingle(
-    callback: sendUnaryData<events.Event>,
-    event: Record<string, any>,
-    sequence_number: string
-  ) {
+  async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string) {
     const event_data = this.extract(event, sequence_number);
 
     if (event_data) {
       callback(null, event_data);
     } else {
       callback(new Error("Error parsing event"), null);
+
     }
   }
 }
@@ -216,10 +184,7 @@ export class ProfileUpdatePlugin extends IngressPlugin {
     return "ProfileUpdateEvent";
   }
 
-  extract(
-    event: Record<string, any>,
-    sequence_number: string
-  ): events.Event | null {
+  extract(event: Record<string, any>, sequence_number: string): events.Event | null {
     const parsed = schema.profile_update_event_schema.safeParse(event);
 
     if (!parsed.success) {
@@ -246,11 +211,7 @@ export class ProfileUpdatePlugin extends IngressPlugin {
     return null;
   }
 
-  async process(
-    call: ServerWritableStream<events.EventsRequest, events.Event>,
-    event: Record<string, any>,
-    sequence_number: string
-  ) {
+  async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
     const event_data = this.extract(event, sequence_number);
 
     if (event_data) {
@@ -264,36 +225,32 @@ export class ProfileUpdatePlugin extends IngressPlugin {
     }
   }
 
-  async processSingle(
-    callback: sendUnaryData<events.Event>,
-    event: Record<string, any>,
-    sequence_number: string
-  ) {
+  async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string) {
     const event_data = this.extract(event, sequence_number);
 
     if (event_data) {
       callback(null, event_data);
     } else {
       callback(new Error("Error parsing event"), null);
+
     }
   }
 }
-// Delegate Events
 export class DelegateCreatePlugin extends IngressPlugin {
   name(): EVENT_NAMES {
     return "DelegateCreateEvent";
   }
-  extract(
-    event: Record<string, any>,
-    sequence_number: string
-  ): events.Event | null {
+  extract(event: Record<string, any>, sequence_number: string): events.Event | null {
+
     const parsed = schema.delegate_create_event_schema.safeParse(event);
 
     if (!parsed.success) {
       return null;
     }
     if (parsed.success) {
+
       const data = parsed.data;
+
       const event = new events.Event({
         delegate_create_event: new events.DelegateCreateEvent({
           owner_address: data.owner_address,
@@ -310,12 +267,9 @@ export class DelegateCreatePlugin extends IngressPlugin {
     return null;
   }
 
-  async process(
-    call: ServerWritableStream<events.EventsRequest, events.Event>,
-    event: Record<string, any>,
-    sequence_number: string
-  ) {
+  async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
     const event_data = this.extract(event, sequence_number);
+
     if (event_data) {
       call.write(event_data, (err: any) => {
         if (err) {
@@ -326,13 +280,16 @@ export class DelegateCreatePlugin extends IngressPlugin {
       console.log("Error parsing event");
     }
   }
-  async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string){
-      const event_data = this.extract(event, sequence_number);
-        if (event_data) {
-            callback(null, event_data);
-        } else {
-            callback(new Error("Error parsing event"), null);
-        }
+
+  async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string) {
+    const event_data = this.extract(event, sequence_number);
+
+    if (event_data) {
+      callback(null, event_data);
+    } else {
+      callback(new Error("Error parsing event"), null);
+
+    }
   }
 }
 
@@ -340,16 +297,18 @@ export class DelegateRemovePlugin extends IngressPlugin {
   name(): EVENT_NAMES {
     return "DelegateRemoveEvent";
   }
-  extract(
-    event: Record<string, any>,
-    sequence_number: string
-  ): events.Event | null {
+
+  extract(event: Record<string, any>, sequence_number: string): events.Event | null {
+
     const parsed = schema.delegate_remove_event_schema.safeParse(event);
+
     if (!parsed.success) {
       return null;
     }
+
     if (parsed.success) {
       const data = parsed.data;
+
       const event = new events.Event({
         delegate_remove_event: new events.DelegateRemoveEvent({
           owner_address: data.owner_address,
@@ -362,31 +321,36 @@ export class DelegateRemovePlugin extends IngressPlugin {
         sequence_number: parseInt(sequence_number),
       });
       return event;
+
     }
     return null;
+
   }
-  async process(
-    call: ServerWritableStream<events.EventsRequest, events.Event>,
-    event: Record<string, any>,
-    sequence_number: string
-  ) {
+
+  async process(call: ServerWritableStream<events.EventsRequest, events.Event>, event: Record<string, any>, sequence_number: string) {
     const event_data = this.extract(event, sequence_number);
+
     if (event_data) {
       call.write(event_data, (err: any) => {
         if (err) {
           console.log(err);
         }
       });
+
     } else {
       console.log("Error parsing event");
     }
   }
-  async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string){
-      const event_data = this.extract(event, sequence_number);
-        if (event_data) {
-            callback(null, event_data);
-        } else {
-            callback(new Error("Error parsing event"), null);
-        }
+
+  async processSingle(callback: sendUnaryData<events.Event>, event: Record<string, any>, sequence_number: string) {
+    const event_data = this.extract(event, sequence_number);
+
+    if (event_data) {
+      callback(null, event_data);
+
+    } else {
+      callback(new Error("Error parsing event"), null);
+    }
   }
+
 }

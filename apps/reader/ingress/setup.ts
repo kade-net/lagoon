@@ -15,10 +15,10 @@ dataProcessor.registerPlugin(new AccountFollowPlugin())
 dataProcessor.registerPlugin(new AccountUnFollowPlugin())
 dataProcessor.registerPlugin(new ProfileUpdatePlugin())
 
-
 //Delegate Accounts
 dataProcessor.registerPlugin(new DelegateCreatePlugin())
 dataProcessor.registerPlugin(new DelegateRemovePlugin())
+
 // USERNAMES
 dataProcessor.registerPlugin(new RegisterUsernamePlugin())
 
@@ -31,6 +31,7 @@ dataProcessor.registerPlugin(new ReactionCreateEventPlugin())
 dataProcessor.registerPlugin(new ReactionCreateEventWithRefPlugin())
 dataProcessor.registerPlugin(new ReactionRemoveEventPlugin())
 dataProcessor.registerPlugin(new ReactionRemoveEventWithRefPlugin())
+
 //Communities
 dataProcessor.registerPlugin(new MemberJoinPlugin())
 dataProcessor.registerPlugin(new MembershipDeletePlugin())
