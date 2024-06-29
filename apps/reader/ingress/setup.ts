@@ -1,6 +1,6 @@
 import { LevelDB } from "../db";
 import { AccountCreatePlugin, AccountFollowPlugin, AccountUnFollowPlugin, ProfileUpdatePlugin, DelegateCreatePlugin, DelegateRemovePlugin } from "./plugins/accounts";
-import { MemberJoinPlugin, MembershipDeletePlugin, CommunityRegisteredPlugin,  MembershipChangePlugin, MembershipReclaimPlugin, CommunityUpdatePlugin } from "./plugins/communities";
+import { MemberJoinPlugin, MembershipDeletePlugin, CommunityRegisteredPlugin, MembershipChangePlugin, MembershipReclaimPlugin, CommunityUpdatePlugin } from "./plugins/communities";
 import { PublicationCreateEventPlugin, PublicationCreateWithRef, PublicationRemoveEventPlugin, PublicationRemoveWithRef, ReactionCreateEventPlugin, ReactionCreateEventWithRefPlugin, ReactionRemoveEventPlugin, ReactionRemoveEventWithRefPlugin } from "./plugins/publications";
 import { RegisterUsernamePlugin } from "./plugins/usernames";
 import { DataProcessor } from "./processor";
