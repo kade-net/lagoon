@@ -2,5 +2,6 @@ store
 display-store-output.txt
 display-store.ts
 fill-test-values.ts
+get-event.ts
 update-events.ts
 
