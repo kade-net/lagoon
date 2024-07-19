@@ -385,6 +385,7 @@ export const PublicationResolver: ResolverMap = {
             )
 
             return {
+                ref: parent.publication_ref ?? "",
                 reactions: reactions_count.at(0)?.value ?? 0,
                 comments: comments_count.at(0)?.value ?? 0,
                 quotes: quotes_count.at(0)?.value ?? 0,
