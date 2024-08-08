@@ -40,22 +40,12 @@ export class PublicationCreateEventPlugin extends ProcessorPlugin {
                             where: (fields, { eq }) => eq(fields.name, payload.community)
                         })
                         if (community) {
-                            const membership = await txn.query.membership.findFirst({
-                                where: (fields, { eq, and }) => and(
-                                    eq(fields.community_id, community.id),
-                                    eq(fields.user_kid, data.user_kid),
-                                    eq(fields.is_active, true)
-                                )
-                            })
-
-                            if (membership) {
                                 await txn.insert(community_posts).values({
                                     community_id: community.id,
                                     id: randomBytes(32).toString('hex'),
                                     post_id: data.kid,
                                     user_kid: data.user_kid
                                 })
-                            }
                             // IGNORE IF MEMBERSHIP NOT FOUND
                         }
                         // IGNORE IF COMMUNITY NOT FOUND
@@ -149,22 +139,14 @@ export class PublicationCreateWithRefEventPlugin extends ProcessorPlugin {
                             where: (fields, { eq }) => eq(fields.name, payload.community)
                         })
                         if (community) {
-                            const membership = await txn.query.membership.findFirst({
-                                where: (fields, { eq, and }) => and(
-                                    eq(fields.community_id, community.id),
-                                    eq(fields.user_kid, data.user_kid),
-                                    eq(fields.is_active, true)
-                                )
-                            })
 
-                            if (membership) {
                                 await txn.insert(community_posts).values({
                                     community_id: community.id,
                                     id: randomBytes(32).toString('hex'),
                                     post_id: data.kid,
                                     user_kid: data.user_kid
                                 })
-                            }
+
                             // IGNORE IF MEMBERSHIP NOT FOUND
                         }
                         // IGNORE IF COMMUNITY NOT FOUND
