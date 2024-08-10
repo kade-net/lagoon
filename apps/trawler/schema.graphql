@@ -67,6 +67,7 @@ type Account {
   bio: String
   address: String!
   object_address: String!
+  follow_count: Int
   followers(pagination: Pagination): [Follow!]
   following(pagination: Pagination): [Follow!]
   publications(
@@ -168,7 +169,12 @@ enum SortOrder {
 
 type Query {
   account(id: Int, address: String, username: String): Account
-  accounts(pagination: Pagination, sort: SortOrder, search: String): [Account!]
+  accounts(
+    pagination: Pagination
+    sort: SortOrder
+    search: String
+    byFollowing: Boolean
+  ): [Account!]
   accountsSearch(search: String!, userAddress: String!): [Account!]
   publication(id: Int, ref: String): Publication
   publicationThreads(id: Int, ref: String): [Publication!]
@@ -251,6 +257,9 @@ type Query {
     sort: SortOrder
   ): [Notification!]
   accountUserName(accountAddress: String!): Username
-  accountRelationship(viewerAddress: String!, accountAddress: String!): AccountViewerStats
+  accountRelationship(
+    viewerAddress: String!
+    accountAddress: String!
+  ): AccountViewerStats
   accountStats(accountAddress: String!): AccountStats
 }

@@ -1,13 +1,13 @@
 import { Context, Pagination, PaginationArg, Resolver, SORT_ORDER } from "../../../types";
-import _ from "lodash"
-import { ACCOUNT, FOLLOW, account, and, asc, count, delegate, desc, eq, follow, ilike, like, ne, publication, reaction, username } from "@kade-net/oracle";
+import _, { orderBy } from "lodash"
+import { ACCOUNT, FOLLOW, account, and, asc, count, delegate, desc, eq, follow, ilike, like, ne, publication, reaction, sql, username } from "@kade-net/oracle";
 import { intersect, union } from "@kade-net/oracle/pg-core";
 const { isUndefined, isEmpty } = _
 
 interface ResolverMap {
     Query: {
         account: Resolver<any, { id?: number, address?: string, username?: string }, Context>,
-        accounts: Resolver<any, PaginationArg & { sort: SORT_ORDER, search?: string }, Context>
+        accounts: Resolver<any, PaginationArg & { sort: SORT_ORDER, search?: string, byFollowing?: boolean }, Context>
         accountsSearch: Resolver<any, { search: string, userAddress: string }, Context>
         accountViewerStats: Resolver<any, { accountAddress: string, viewerAddress: string }, Context>
         accountPublications: Resolver<any, PaginationArg & { sort: SORT_ORDER, type: number, accountAddress: string }, Context>,
@@ -66,7 +66,38 @@ export const AccountsResolver: ResolverMap = {
 
         },
         accounts: async (_, args, context) => {
-            const { size = 10, page = 0 } = args.pagination ?? {}
+            const SORT_BY_FOLLOWING = args.byFollowing ?? false
+            const { size = 10, page = 0, } = args.pagination ?? {}
+
+
+            if (SORT_BY_FOLLOWING) {
+                const result = await context.oracle.execute<ACCOUNT>(sql`
+                    SELECT 
+                        account.*,
+                        COUNT(follow.id) AS follow_count
+                    FROM 
+                        account
+                    LEFT JOIN 
+                        follow ON account.id = follow.following_id
+                    GROUP BY 
+                        account.id
+                    ORDER BY 
+                        follow_count DESC;
+               `)
+
+                const data = result?.map((r) => {
+                    const { timestamp, ...rest } = r
+
+                    return {
+                        ...rest,
+                        timestamp: new Date(timestamp)
+                    }
+                })
+
+                return data ?? []
+
+            }
+
 
             if (args.search) {
                 const a_n_u = await context.oracle.select()
@@ -76,7 +107,7 @@ export const AccountsResolver: ResolverMap = {
                     .orderBy(args?.sort == "ASC" ? asc(account.timestamp) : desc(account.timestamp))
                     .limit(size)
                     .offset(page * size)
-
+                const c = a_n_u?.map((a) => a.account)
                 return a_n_u?.map((a) => a.account)
             }
 
