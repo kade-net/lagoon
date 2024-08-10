@@ -82,7 +82,9 @@ export const AccountsResolver: ResolverMap = {
                     GROUP BY 
                         account.id
                     ORDER BY 
-                        follow_count DESC;
+                        follow_count DESC
+                    LIMIT ${size}
+                    OFFSET ${page * size};
                `)
 
                 const data = result?.map((r) => {
