@@ -42,7 +42,7 @@ async function threadPublication(oracle: typeof KadeOracle, current: PUBLICATION
 interface ResolverMap {
     Query : {
         publication: Resolver<any, { id: number, creator: number, ref: string, creator_address: string }, Context>,
-        publications: Resolver<any, PaginationArg & { creator: number, sort: SORT_ORDER, type: number, creator_address: string, types?: Array<number>, reaction?: number, hide?: string[], muted?: number[] }, Context>,
+        publications: Resolver<any, PaginationArg & { creator: number, sort: SORT_ORDER, type: number, creator_address: string, types?: Array<number>, reaction?: number, hide?: string[], muted?: number[], following_feed: string }, Context>,
         publicationStats: Resolver<any, { id: number, ref: string }, Context>,
         publicationInteractionsByViewer: Resolver<any, { id: number, ref: string, viewer: number, address: string }, Context>
         publicationComments: Resolver<any, PaginationArg & { id: number, ref: string, sort: SORT_ORDER, hide?: string[], muted?: number[] }, Context>
@@ -75,7 +75,7 @@ export const PublicationResolver: ResolverMap = {
                 if (account)
                     creator_id = account?.id
             }
-            return await context.oracle.query.publication.findFirst({
+            return context.oracle.query.publication.findFirst({
                 where: (fields, {eq}) => {
                     if (id){
                         return eq(fields.id, id)
@@ -90,9 +90,30 @@ export const PublicationResolver: ResolverMap = {
             })
         },
         publications: async (_, args, context) => {
-            const { type, creator_address, creator, types, reaction: _reaction, hide, muted } = args
+            const { type, creator_address, creator, types, reaction: _reaction, hide, muted, following_feed } = args
 
             const { size = 10, page = 0 } = args.pagination ?? {}
+
+            let following: Array<number> | undefined = undefined
+
+            if(following_feed){
+                const user = await context.oracle.query.account.findFirst({
+                    where(fields, ops){
+                        return ops.eq(fields.address, following_feed)
+                    }
+                })
+
+                if(!user) return []
+
+
+                const following_users = await context.oracle.query.follow.findMany({
+                    where(fields, ops){
+                        return ops.eq(fields.follower_id, user.id)
+                    }
+                })
+
+                following = following_users.map(f => f.following_id)
+            }
 
             let creator_id = creator
             if (!creator_id && creator_address) {
@@ -130,40 +151,44 @@ export const PublicationResolver: ResolverMap = {
                 return reactions_and_publication?.map((r_n_p) => r_n_p.publication)
             }
 
-            return await context.oracle.query.publication.findMany({
+            return context.oracle.query.publication.findMany({
                 offset: page * size,
                 limit: size,
                 where: creator_id ?
-                    (fields, { eq, and, inArray, notInArray }) => type ? and(
-                        eq(fields.creator_id, creator_id),
-                        eq(fields.type, type),
-                        hide ? notInArray(fields.publication_ref, hide) : undefined,
-                        muted ? notInArray(fields.creator_id, muted) : undefined
-                    ) :
-                        types ? and(
+                    (fields, {eq, and, inArray, notInArray}) => type ? and(
                             eq(fields.creator_id, creator_id),
-                            inArray(fields.type, types),
+                            eq(fields.type, type),
                             hide ? notInArray(fields.publication_ref, hide) : undefined,
-                            muted ? notInArray(fields.creator_id, muted) : undefined
+                            muted ? notInArray(fields.creator_id, muted) : undefined,
+                            following ? inArray(fields.creator_id, following) : undefined
                         ) :
+                        types ? and(
+                                eq(fields.creator_id, creator_id),
+                                inArray(fields.type, types),
+                                hide ? notInArray(fields.publication_ref, hide) : undefined,
+                                muted ? notInArray(fields.creator_id, muted) : undefined,
+                            following ? inArray(fields.creator_id, following) : undefined
+                            ) :
                             and(
                                 eq(fields.creator_id, creator_id),
                                 hide ? notInArray(fields.publication_ref, hide) : undefined,
-                                muted ? notInArray(fields.creator_id, muted) : undefined
+                                muted ? notInArray(fields.creator_id, muted) : undefined,
+                                following ? inArray(fields.creator_id, following) : undefined
                             ) :
-                    (fields, { eq, inArray, and, notInArray }) => type ? and(
-                        eq(fields.type, type),
-                        hide ? notInArray(fields.publication_ref, hide) : undefined,
-                        muted ? notInArray(fields.creator_id, muted) : undefined
-                    ) :
+                    (fields, {eq, inArray, and, notInArray}) => type ? and(
+                            eq(fields.type, type),
+                            hide ? notInArray(fields.publication_ref, hide) : undefined,
+                            muted ? notInArray(fields.creator_id, muted) : undefined,
+                        following ? inArray(fields.creator_id, following) : undefined
+                        ) :
                         types ? and(inArray(fields.type, types),
                             hide ? notInArray(fields.publication_ref, hide) : undefined,
-                            muted ? notInArray(fields.creator_id, muted) : undefined
-
+                            muted ? notInArray(fields.creator_id, muted) : undefined,
+                            following ? inArray(fields.creator_id, following) : undefined
                         ) : undefined,
 
                 orderBy: args?.sort == "ASC" ? asc(publication.timestamp) : desc(publication.timestamp)
-            })
+            });
         },
         publicationStats: async (_, args, context) => {
             const { id, ref } = args

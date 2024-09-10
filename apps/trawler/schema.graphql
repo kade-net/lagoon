@@ -188,6 +188,7 @@ type Query {
     reaction: Int
     hide: [String!]
     muted: [Int!]
+    following_feed: String
   ): [Publication!]
   publicationStats(id: Int, ref: String): PublicationStats
   publicationInteractionsByViewer(
